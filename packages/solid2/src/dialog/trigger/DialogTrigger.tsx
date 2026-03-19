@@ -18,7 +18,7 @@ export function DialogTrigger(componentProps: DialogTrigger.Props) {
     'disabled',
     'nativeButton',
   ]);
-  const disabled = () => local.disabled ?? false;
+  const disabled = () => local.disabled === true || local.disabled === '';
   const native = () => local.nativeButton ?? true;
 
   const { open, setTriggerElement, triggerProps } = useDialogRootContext();

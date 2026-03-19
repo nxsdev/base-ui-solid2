@@ -21,7 +21,7 @@ export function ProgressValue(componentProps: ProgressValue.Props) {
 
   const element = useRenderElement('span', componentProps, {
     state,
-    props: [{ 'aria-hidden': true }, elementProps],
+    props: [{ 'aria-hidden': 'true' }, elementProps],
     customStyleHookMapping: progressStyleHookMapping,
     get children() {
       return componentProps.children?.(formattedValueArg(), value()) ?? formattedValueDisplay();

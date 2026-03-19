@@ -4,7 +4,7 @@ import { useButton } from '../../use-button';
 import { triggerOpenStateMapping } from '../../utils/collapsibleOpenStateMapping';
 import type { CustomStyleHookMapping } from '../../utils/getStyleHookProps';
 import { transitionStatusMapping } from '../../utils/styleHookMapping';
-import type { BaseUIComponentProps, HTMLProps } from '../../utils/types';
+import type { BaseUIComponentProps } from '../../utils/types';
 import { useRenderElement } from '../../utils/useRenderElement';
 import { CollapsibleRoot } from '../root/CollapsibleRoot';
 import { useCollapsibleRootContext } from '../root/CollapsibleRootContext';
@@ -34,7 +34,7 @@ export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props): JS
     state,
   } = useCollapsibleRootContext();
   const nativeButton = () => local.nativeButton ?? true;
-  const disabled = () => local.disabled ?? contextDisabled();
+  const disabled = () => local.disabled === true || local.disabled === '' || contextDisabled();
 
   const button = useButton({
     disabled,
@@ -42,16 +42,15 @@ export function CollapsibleTrigger(componentProps: CollapsibleTrigger.Props): JS
     native: nativeButton,
   });
 
-  const props: HTMLProps = {
+  const props: JSX.ButtonHTMLAttributes<HTMLButtonElement> = {
     get 'aria-controls'() {
       return open() ? panelId() : undefined;
     },
     get 'aria-expanded'() {
-      return open();
+      return open() ? 'true' : 'false';
     },
-    // @ts-expect-error - disabled is not a valid attribute for a button
     get disabled() {
-      return disabled();
+      return disabled() ? true : undefined;
     },
     onClick: handleTrigger,
   };

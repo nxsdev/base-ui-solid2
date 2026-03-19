@@ -1,5 +1,5 @@
 import { onSettled } from 'solid-js';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -15,11 +15,17 @@ export function AlertDialogTitle(componentProps: AlertDialogTitle.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, ['id']);
   const { setCodependentRefs } = useAlertDialogRootContext();
 
-  const id = useBaseUiId(local.id);
+  const id = useBaseUiId(() => local.id);
   let ref: HTMLElement;
 
   onSettled(() => {
-    setCodependentRefs('title', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.title = {
+        explicitId: id,
+        ref: () => ref,
+        id: () => normalizeOptionalId(local.id),
+      };
+    });
   });
 
   const element = useRenderElement('h2', componentProps, {
@@ -36,7 +42,7 @@ export function AlertDialogTitle(componentProps: AlertDialogTitle.Props) {
     ],
   });
 
-  return <>{element}</>;
+  return <>{element()}</>;
 }
 
 export namespace AlertDialogTitle {

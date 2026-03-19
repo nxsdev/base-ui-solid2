@@ -12,7 +12,7 @@ import { useDialogClose } from './useDialogClose';
  */
 export function DialogClose(componentProps: DialogClose.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, ['disabled', 'nativeButton']);
-  const disabled = () => local.disabled ?? false;
+  const disabled = () => local.disabled === true || local.disabled === '';
   const nativeButton = () => local.nativeButton ?? true;
 
   const { open, setOpen } = useDialogRootContext();

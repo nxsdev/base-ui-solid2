@@ -47,7 +47,7 @@ export function useDialogPopup(parameters: useDialogPopup.Parameters): useDialog
       return descriptionElementId() ?? undefined;
     },
     get 'aria-modal'() {
-      return mounted() && modal() === true ? true : undefined;
+      return mounted() && modal() === true ? 'true' : undefined;
     },
     role: 'dialog',
     tabindex: -1,

@@ -1,4 +1,4 @@
-import { batch, merge as solidMergeProps } from 'solid-js';
+import { merge as solidMergeProps } from 'solid-js';
 import { PARENT_CHECKBOX } from '../checkbox/root/CheckboxRoot';
 import { useFieldControlValidation } from '../field/control/useFieldControlValidation';
 import type { FieldRoot } from '../field/root/FieldRoot';
@@ -48,10 +48,8 @@ export function CheckboxGroup(componentProps: CheckboxGroup.Props) {
   });
 
   const setValue = (v: string[], event: Event) => {
-    batch(() => {
-      setValueUnwrapped(v);
-      local.onValueChange?.(v, event);
-    });
+    setValueUnwrapped(v);
+    local.onValueChange?.(v, event);
   };
 
   const parent = useCheckboxGroupParent({

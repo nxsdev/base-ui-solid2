@@ -1,11 +1,11 @@
-import { batch, createSignal, onSettled, merge as solidMergeProps, type JSX } from 'solid-js';
+import { createSignal, onSettled, merge as solidMergeProps, type JSX } from 'solid-js';
 import { useFieldControlValidation } from '../../field/control/useFieldControlValidation';
 import type { FieldRoot } from '../../field/root/FieldRoot';
 import { useFieldRootContext } from '../../field/root/FieldRootContext';
 import { useField } from '../../field/useField';
 import { useFormContext } from '../../form/FormContext';
 import { mergeProps } from '../../merge-props';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import { useButton } from '../../use-button';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
@@ -35,7 +35,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
   const nativeButton = () => local.nativeButton ?? true;
   const readonly = () => local.readonly ?? false;
   const required = () => local.required ?? false;
-  const disabledProp = () => local.disabled ?? false;
+  const disabledProp = () => local.disabled === true || local.disabled === '';
 
   const { clearErrors } = useFormContext();
   const {
@@ -68,7 +68,13 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
   const id = useBaseUiId(() => local.id);
 
   onSettled(() => {
-    setChildRefs('control', { explicitId: id, ref: switchRef, id: () => local.id });
+    setChildRefs((refs) => {
+      refs.control = {
+        explicitId: id,
+        ref: switchRef,
+        id: () => normalizeOptionalId(local.id),
+      };
+    });
 
     if (inputRef) {
       setFilled(inputRef!.checked);
@@ -96,20 +102,19 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     native: nativeButton,
   });
 
-  const rootProps: JSX.HTMLAttributes<HTMLButtonElement> = {
+  const rootProps: JSX.ButtonHTMLAttributes<HTMLButtonElement> = {
     role: 'switch',
     get id() {
       return id();
     },
-    // @ts-expect-error - disabled is not a valid attribute for a button
     get disabled() {
-      return disabled();
+      return disabled() ? true : undefined;
     },
     get 'aria-checked'() {
-      return checked();
+      return checked() ? 'true' : 'false';
     },
     get 'aria-readonly'() {
-      return readonly() || undefined;
+      return readonly() ? 'true' : undefined;
     },
     get 'aria-labelledby'() {
       return labelId();
@@ -122,14 +127,12 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
         return;
       }
 
-      batch(() => {
-        setTouched(true);
-        setFocused(false);
+      setTouched(true);
+      setFocused(false);
 
-        if (validationMode() === 'onBlur') {
-          commitValidation(inputRef!.checked);
-        }
-      });
+      if (validationMode() === 'onBlur') {
+        commitValidation(inputRef!.checked);
+      }
     },
     onClick(event) {
       if (event.defaultPrevented || readonly()) {
@@ -160,7 +163,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
       style: visuallyHidden,
       tabindex: -1,
       type: 'checkbox',
-      'aria-hidden': true,
+      'aria-hidden': 'true',
       ref: (el) => {
         if (local.refs) {
           local.refs.inputRef = el;
@@ -174,21 +177,19 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
           return;
         }
 
-        batch(() => {
-          const nextChecked = event.target.checked;
+        const nextChecked = event.target.checked;
 
-          setDirty(nextChecked !== validityData.initialValue);
-          setFilled(nextChecked);
-          setCheckedState(nextChecked);
-          local.onCheckedChange?.(nextChecked, event);
-          clearErrors(name());
+        setDirty(nextChecked !== validityData.initialValue);
+        setFilled(nextChecked);
+        setCheckedState(nextChecked);
+        local.onCheckedChange?.(nextChecked, event);
+        clearErrors(name());
 
-          if (validationMode() === 'onChange') {
-            commitValidation(nextChecked);
-          } else {
-            commitValidation(nextChecked, true);
-          }
-        });
+        if (validationMode() === 'onChange') {
+          commitValidation(nextChecked);
+        } else {
+          commitValidation(nextChecked, true);
+        }
       },
     },
     getInputValidationProps,

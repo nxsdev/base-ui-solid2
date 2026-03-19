@@ -1,5 +1,5 @@
 import {
-  createEffect,
+  createTrackedEffect,
   createMemo,
   createSignal,
   For,
@@ -14,7 +14,7 @@ import { useFieldRootContext } from '../../field/root/FieldRootContext';
 import { useField } from '../../field/useField';
 import { activeElement } from '../../floating-ui-solid/utils';
 import { useFormContext } from '../../form/FormContext';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import { areArraysEqual } from '../../utils/areArraysEqual';
 import { clamp } from '../../utils/clamp';
 import { ownerDocument } from '../../utils/owner';
@@ -73,7 +73,7 @@ export function SliderRoot<Value extends number | readonly number[]>(
     'tabindex',
     'value',
   ]);
-  const disabledProp = () => local.disabled ?? false;
+  const disabledProp = () => Boolean(local.disabled);
   const largeStep = () => local.largeStep ?? 10;
   const max = () => local.max ?? 100;
   const min = () => local.min ?? 0;
@@ -98,7 +98,8 @@ export function SliderRoot<Value extends number | readonly number[]>(
 
   const fieldControlValidation = useFieldControlValidation();
 
-  const ariaLabelledby = () => local['aria-labelledby'] ?? labelId();
+  const ariaLabelledby = () =>
+    typeof local['aria-labelledby'] === 'string' ? local['aria-labelledby'] : labelId();
   const disabled = () => fieldDisabled() || disabledProp();
   const name = () => fieldName() ?? local.name ?? '';
 
@@ -207,7 +208,7 @@ export function SliderRoot<Value extends number | readonly number[]>(
     refs.thumbRefs[0]?.focus();
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (local.value === undefined || dragging()) {
       return;
     }
@@ -217,7 +218,7 @@ export function SliderRoot<Value extends number | readonly number[]>(
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const activeEl = activeElement(ownerDocument(sliderRef));
     if (disabled() && sliderRef?.contains(activeEl)) {
       // This is necessary because Firefox and Safari will keep focus
@@ -228,14 +229,20 @@ export function SliderRoot<Value extends number | readonly number[]>(
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (disabled() && active() !== -1) {
       setActive(-1);
     }
   });
 
   onSettled(() => {
-    setCodependentRefs('control', { explicitId: id, ref: () => sliderRef, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.control = {
+        explicitId: id,
+        ref: () => sliderRef,
+        id: () => normalizeOptionalId(local.id),
+      };
+    });
   });
 
   const state: SliderRoot.State = solidMergeProps(fieldState, {

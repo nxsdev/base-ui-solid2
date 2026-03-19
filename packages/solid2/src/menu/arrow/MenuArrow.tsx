@@ -39,7 +39,7 @@ export function MenuArrow(componentProps: MenuArrow.Props) {
     customStyleHookMapping: popupStateMapping,
     props: [
       {
-        'aria-hidden': true,
+        'aria-hidden': 'true',
         get style() {
           return arrowStyles();
         },

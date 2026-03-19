@@ -1,5 +1,5 @@
 import { onSettled } from 'solid-js';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -20,7 +20,13 @@ export function FieldsetLegend(componentProps: FieldsetLegend.Props) {
   let ref!: HTMLElement;
 
   onSettled(() => {
-    setCodependentRefs('legend', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.legend = {
+        explicitId: id,
+        ref: () => ref,
+        id: () => normalizeOptionalId(local.id),
+      };
+    });
   });
 
   const state: FieldsetLegend.State = {

@@ -1,5 +1,5 @@
 import { onSettled } from 'solid-js';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -25,7 +25,7 @@ export function PopoverDescription(componentProps: PopoverDescription.Props) {
       refs.description = {
         explicitId: id,
         ref: () => ref,
-        id: () => elementProps.id,
+        id: () => normalizeOptionalId(elementProps.id),
       };
     });
   });

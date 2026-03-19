@@ -17,7 +17,7 @@ import { usePopoverRootContext } from '../root/PopoverRootContext';
  */
 export function PopoverTrigger(componentProps: PopoverTrigger.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, ['disabled', 'nativeButton']);
-  const disabled = () => local.disabled ?? false;
+  const disabled = () => Boolean(local.disabled);
   const nativeButton = () => local.nativeButton ?? true;
 
   const { open, setTriggerElement, triggerProps, openReason } = usePopoverRootContext();

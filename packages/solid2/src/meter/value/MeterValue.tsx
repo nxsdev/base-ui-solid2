@@ -17,7 +17,7 @@ export function MeterValue(componentProps: MeterValue.Props) {
   const { value, formattedValue } = useMeterRootContext();
 
   const element = useRenderElement('span', componentProps, {
-    props: [{ 'aria-hidden': true }, elementProps],
+    props: [{ 'aria-hidden': 'true' }, elementProps],
     get children() {
       return (
         <>

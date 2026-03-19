@@ -13,7 +13,7 @@ import { FieldsetRootContext } from './FieldsetRootContext';
  */
 export function FieldsetRoot(componentProps: FieldsetRoot.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, ['disabled']);
-  const disabled = () => local.disabled ?? false;
+  const disabled = () => local.disabled === true || local.disabled === '';
 
   const [legendId, setLegendId] = createSignal<string | undefined>();
   const [codependentRefs, setCodependentRefs] = createStore<CodependentRefs<['legend']>>({});

@@ -9,7 +9,7 @@ import {
   type JSX,
 } from 'solid-js';
 import { AccordionRootDataAttributes } from '../../accordion/root/AccordionRootDataAttributes';
-import { access, type MaybeAccessor } from '../../solid-helpers';
+import { access, normalizeOptionalId, type MaybeAccessor } from '../../solid-helpers';
 import { HTMLProps } from '../../utils/types';
 import { AnimationFrame } from '../../utils/useAnimationFrame';
 import { warn } from '../../utils/warn';
@@ -344,7 +344,7 @@ export function useCollapsiblePanel<T extends HTMLElement>(
       refs.panel = {
         explicitId: () => undefined,
         ref: () => ref,
-        id: () => access(parameters.id),
+        id: () => normalizeOptionalId(access(parameters.id)),
       };
     });
   });

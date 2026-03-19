@@ -1,5 +1,4 @@
-import { createEffect, onCleanup } from 'solid-js';
-import { produce } from 'solid-js';
+import { createTrackedEffect, onCleanup } from 'solid-js';
 import { useFormContext } from '../form/FormContext';
 import { type MaybeAccessor, access } from '../solid-helpers';
 import { useFieldRootContext } from './root/FieldRootContext';
@@ -14,7 +13,7 @@ export function useField(params: useField.Parameters) {
   const name = () => access(params.name);
   const controlRef = () => access(params.controlRef);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -25,46 +24,47 @@ export function useField(params: useField.Parameters) {
     }
 
     if (validityData.initialValue === null && initialValue !== validityData.initialValue) {
-      setValidityData('initialValue', initialValue);
+      setValidityData((state) => {
+        state.initialValue = initialValue;
+      });
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
 
     const idValue = id();
     if (idValue) {
-      setFormRef('fields', idValue, {
-        controlRef: controlRef(),
-        validityData: getCombinedFieldValidityData(validityData, invalid()),
-        validate() {
-          let nextValue = value();
-          if (nextValue === undefined) {
-            nextValue = params.getValue?.();
-          }
-          refs.markedDirtyRef = true;
+      setFormRef((formRef) => {
+        formRef.fields[idValue] = {
+          controlRef: controlRef(),
+          validityData: getCombinedFieldValidityData(validityData, invalid()),
+          validate() {
+            let nextValue = value();
+            if (nextValue === undefined) {
+              nextValue = params.getValue?.();
+            }
+            refs.markedDirtyRef = true;
 
-          // Synchronously update the validity state so the submit event can be prevented.
-          params.commitValidation?.(nextValue);
-        },
-        getValueRef: params.getValue,
-        name: name(),
+            // Synchronously update the validity state so the submit event can be prevented.
+            params.commitValidation?.(nextValue);
+          },
+          getValueRef: params.getValue,
+          name: name(),
+        };
       });
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const idValue = id();
     onCleanup(() => {
       if (idValue) {
-        setFormRef(
-          'fields',
-          produce((fields) => {
-            delete fields[idValue];
-          }),
-        );
+        setFormRef((formRef) => {
+          delete formRef.fields[idValue];
+        });
       }
     });
   });

@@ -13,7 +13,7 @@ import { useAlertDialogRootContext } from '../root/AlertDialogRootContext';
  */
 export function AlertDialogTrigger(componentProps: AlertDialogTrigger.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, ['disabled', 'nativeButton']);
-  const disabled = () => local.disabled ?? false;
+  const disabled = () => local.disabled === true || local.disabled === '';
   const native = () => local.nativeButton ?? true;
 
   const { open, setTriggerElement, triggerProps } = useAlertDialogRootContext();

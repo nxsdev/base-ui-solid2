@@ -1,5 +1,5 @@
 import { onSettled } from 'solid-js';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -21,7 +21,11 @@ export function DialogDescription(componentProps: DialogDescription.Props) {
 
   onSettled(() => {
     setCodependentRefs((refs) => {
-      refs.description = { explicitId: id, ref: () => ref, id: () => local.id };
+      refs.description = {
+        explicitId: id,
+        ref: () => ref,
+        id: () => normalizeOptionalId(local.id),
+      };
     });
   });
 

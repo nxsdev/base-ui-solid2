@@ -21,12 +21,12 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
     'id',
     'nativeButton',
   ]);
-  const disabledProp = () => local.disabled ?? false;
+  const disabledProp = () => local.disabled === true || local.disabled === '';
   const native = () => local.nativeButton ?? true;
 
   const { panelId, open, handleTrigger, disabled: contextDisabled } = useCollapsibleRootContext();
 
-  const disabled = () => disabledProp() ?? contextDisabled();
+  const disabled = () => disabledProp() || contextDisabled();
 
   const { getButtonProps, buttonRef } = useButton({
     disabled,
@@ -36,16 +36,15 @@ export function AccordionTrigger(componentProps: AccordionTrigger.Props) {
 
   const { state, triggerId: id } = useAccordionItemContext();
 
-  const props: JSX.HTMLAttributes<HTMLButtonElement> = {
+  const props: JSX.ButtonHTMLAttributes<HTMLButtonElement> = {
     get 'aria-controls'() {
       return open() ? panelId() : undefined;
     },
     get 'aria-expanded'() {
-      return open();
+      return open() ? 'true' : 'false';
     },
-    // @ts-expect-error - disabled is not a valid attribute for a button
     get disabled() {
-      return disabled();
+      return disabled() ? true : undefined;
     },
     get id() {
       return id?.();

@@ -1,5 +1,5 @@
 import { onSettled } from 'solid-js';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -23,7 +23,11 @@ export function ProgressLabel(componentProps: ProgressLabel.Props) {
 
   onSettled(() => {
     setCodependentRefs((refs) => {
-      refs.label = { explicitId: id, ref: () => ref, id: () => local.id };
+      refs.label = {
+        explicitId: id,
+        ref: () => ref,
+        id: () => normalizeOptionalId(local.id),
+      };
     });
   });
 

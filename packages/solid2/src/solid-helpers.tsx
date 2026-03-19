@@ -87,22 +87,6 @@ function omitProps<T extends Record<PropertyKey, any>, K extends readonly (keyof
   return omitted;
 }
 
-export function splitObjectProps<
-  T extends Record<PropertyKey, any>,
-  K extends [readonly (keyof T)[], ...(readonly (keyof T)[])[]],
->(props: T, ...keys: K) {
-  const allKeys = keys.flat() as (keyof T)[];
-  const groups = keys.map((groupKeys) => pickProps(props, groupKeys));
-  const rest = omitProps(props, allKeys);
-
-  return [...groups, rest] as unknown as [
-    ...{
-      [I in keyof K]: Pick<T, K[I][number]>;
-    },
-    Omit<T, K[number][number]>,
-  ];
-}
-
 export function splitComponentProps<
   T extends Record<any, any>,
   K extends [readonly (keyof T)[], ...(readonly (keyof T)[])[]],
@@ -129,6 +113,10 @@ export type CodependentRefs<T extends string[]> = {
     explicitId: Accessor<string | undefined>;
   };
 };
+
+export function normalizeOptionalId(value: string | JSX.RemoveAttribute | undefined) {
+  return typeof value === 'string' ? value : undefined;
+}
 
 // https://github.com/solidjs/solid/issues/2478#issuecomment-2888503241
 export function childrenLazy(resolver: () => JSX.Element) {

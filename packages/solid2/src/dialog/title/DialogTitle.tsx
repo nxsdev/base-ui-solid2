@@ -1,5 +1,5 @@
 import { onSettled } from 'solid-js';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import { type BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -20,7 +20,11 @@ export function DialogTitle(componentProps: DialogTitle.Props) {
 
   onSettled(() => {
     setCodependentRefs((refs) => {
-      refs.title = { explicitId: id, ref: () => ref, id: () => local.id };
+      refs.title = {
+        explicitId: id,
+        ref: () => ref,
+        id: () => normalizeOptionalId(local.id),
+      };
     });
   });
 

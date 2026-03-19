@@ -1,4 +1,4 @@
-import { batch, createSignal, type Accessor } from 'solid-js';
+import { createSignal, type Accessor } from 'solid-js';
 import { useBaseUiId } from '../utils/useBaseUiId';
 
 const EMPTY: string[] = [];
@@ -34,45 +34,42 @@ export function useCheckboxGroupParent(
         .join(' ');
     },
     onCheckedChange(_, event) {
-      batch(() => {
-        const uncontrolledState = uncontrolledStateRef;
+      const uncontrolledState = uncontrolledStateRef;
 
-        // None except the disabled ones that are checked, which can't be changed.
-        const none = allValues().filter(
-          (v) => disabledStatesRef.get(v) && uncontrolledState.includes(v),
-        );
-        // "All" that are valid:
-        // - any that aren't disabled
-        // - disabled ones that are checked
-        const all = allValues().filter(
-          (v) =>
-            !disabledStatesRef.get(v) ||
-            (disabledStatesRef.get(v) && uncontrolledState.includes(v)),
-        );
+      // None except the disabled ones that are checked, which can't be changed.
+      const none = allValues().filter(
+        (v) => disabledStatesRef.get(v) && uncontrolledState.includes(v),
+      );
+      // "All" that are valid:
+      // - any that aren't disabled
+      // - disabled ones that are checked
+      const all = allValues().filter(
+        (v) =>
+          !disabledStatesRef.get(v) ||
+          (disabledStatesRef.get(v) && uncontrolledState.includes(v)),
+      );
 
-        const allOnOrOff =
-          uncontrolledState.length === all.length || uncontrolledState.length === 0;
+      const allOnOrOff = uncontrolledState.length === all.length || uncontrolledState.length === 0;
 
-        if (allOnOrOff) {
-          if (value().length === all.length) {
-            params.onValueChange?.(none, event);
-          } else {
-            params.onValueChange?.(all, event);
-          }
-          return;
-        }
-
-        if (status() === 'mixed') {
-          params.onValueChange?.(all, event);
-          setStatus('on');
-        } else if (status() === 'on') {
+      if (allOnOrOff) {
+        if (value().length === all.length) {
           params.onValueChange?.(none, event);
-          setStatus('off');
-        } else if (status() === 'off') {
-          params.onValueChange?.(uncontrolledState, event);
-          setStatus('mixed');
+        } else {
+          params.onValueChange?.(all, event);
         }
-      });
+        return;
+      }
+
+      if (status() === 'mixed') {
+        params.onValueChange?.(all, event);
+        setStatus('on');
+      } else if (status() === 'on') {
+        params.onValueChange?.(none, event);
+        setStatus('off');
+      } else if (status() === 'off') {
+        params.onValueChange?.(uncontrolledState, event);
+        setStatus('mixed');
+      }
     },
   });
 
@@ -87,17 +84,15 @@ export function useCheckboxGroupParent(
       return value().includes(name);
     },
     onCheckedChange(nextChecked, event) {
-      batch(() => {
-        const newValue = value().slice();
-        if (nextChecked) {
-          newValue.push(name);
-        } else {
-          newValue.splice(newValue.indexOf(name), 1);
-        }
-        uncontrolledStateRef = newValue;
-        params.onValueChange?.(newValue, event);
-        setStatus('mixed');
-      });
+      const newValue = value().slice();
+      if (nextChecked) {
+        newValue.push(name);
+      } else {
+        newValue.splice(newValue.indexOf(name), 1);
+      }
+      uncontrolledStateRef = newValue;
+      params.onValueChange?.(newValue, event);
+      setStatus('mixed');
     },
   });
 

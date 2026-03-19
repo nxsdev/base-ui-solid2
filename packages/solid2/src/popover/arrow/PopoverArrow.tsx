@@ -42,7 +42,7 @@ export function PopoverArrow(componentProps: PopoverArrow.Props) {
         get style() {
           return arrowStyles();
         },
-        'aria-hidden': true,
+        'aria-hidden': 'true',
       },
       elementProps,
     ],

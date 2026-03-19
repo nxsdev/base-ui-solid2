@@ -1,6 +1,6 @@
-import { createEffect, onSettled, merge as solidMergeProps, type JSX } from 'solid-js';
+import { createTrackedEffect, onSettled, merge as solidMergeProps, type JSX } from 'solid-js';
 import { mergeProps } from '../../merge-props';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import { useControlled } from '../../utils';
 import { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
@@ -30,12 +30,12 @@ export function FieldControl(componentProps: FieldControl.Props) {
     'onValueChange',
     'defaultValue',
   ]);
-  const disabledProp = () => local.disabled ?? false;
+  const disabledProp = () => Boolean(local.disabled);
 
   const { state: fieldState, name: fieldName, disabled: fieldDisabled } = useFieldRootContext();
 
   const disabled = () => fieldDisabled() || disabledProp();
-  const name = () => fieldName() ?? local.name;
+  const name = () => fieldName() ?? (typeof local.name === 'string' ? local.name : undefined);
 
   const {
     labelId,
@@ -54,14 +54,21 @@ export function FieldControl(componentProps: FieldControl.Props) {
   const id = useBaseUiId(() => local.id);
 
   onSettled(() => {
-    setChildRefs('control', { explicitId: id, ref: () => refs.inputRef, id });
+    setChildRefs((childRefs) => {
+      childRefs.control = {
+        explicitId: id,
+        ref: () => refs.inputRef,
+        id: () => normalizeOptionalId(local.id),
+      };
+    });
   });
 
-  createEffect(() => {
-    const hasExternalValue = local.value != null;
-    if (refs.inputRef?.value || (hasExternalValue && local.value !== '')) {
+  createTrackedEffect(() => {
+    const explicitValue = typeof local.value === 'string' ? local.value : undefined;
+    const hasExternalValue = explicitValue != null;
+    if (refs.inputRef?.value || (hasExternalValue && explicitValue !== '')) {
       setFilled(true);
-    } else if (hasExternalValue && local.value === '') {
+    } else if (hasExternalValue && explicitValue === '') {
       setFilled(false);
     }
   });
@@ -105,7 +112,7 @@ export function FieldControl(componentProps: FieldControl.Props) {
           return id();
         },
         get disabled() {
-          return disabled();
+          return disabled() ? true : undefined;
         },
         get name() {
           return name();

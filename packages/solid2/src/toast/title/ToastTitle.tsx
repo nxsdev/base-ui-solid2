@@ -1,5 +1,5 @@
 import { onSettled } from 'solid-js';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useId } from '../../utils/useId';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -22,7 +22,13 @@ export function ToastTitle(componentProps: ToastTitle.Props) {
   const { setCodependentRefs } = useToastRootContext();
 
   onSettled(() => {
-    setCodependentRefs('title', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.title = {
+        explicitId: id,
+        ref: () => ref,
+        id: () => normalizeOptionalId(local.id),
+      };
+    });
   });
 
   const state: ToastTitle.State = {

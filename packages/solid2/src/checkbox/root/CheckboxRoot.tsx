@@ -14,7 +14,7 @@ import { useFieldRootContext } from '../../field/root/FieldRootContext';
 import { useField } from '../../field/useField';
 import { useFormContext } from '../../form/FormContext';
 import { mergeProps } from '../../merge-props';
-import { splitComponentProps } from '../../solid-helpers';
+import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import { useButton } from '../../use-button/useButton';
 import type { BaseUIComponentProps, BaseUIHTMLProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
@@ -51,11 +51,11 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   ]);
   const checkedProp = () => local.checked;
   const defaultChecked = () => local.defaultChecked ?? false;
-  const disabledProp = () => local.disabled ?? false;
-  const indeterminate = () => local.indeterminate ?? false;
-  const parent = () => local.parent ?? false;
-  const readonly = () => local.readonly ?? false;
-  const required = () => local.required ?? false;
+  const disabledProp = () => Boolean(local.disabled);
+  const indeterminate = () => Boolean(local.indeterminate);
+  const parent = () => Boolean(local.parent);
+  const readonly = () => Boolean(local.readonly);
+  const required = () => Boolean(local.required);
   const nativeButton = () => local.nativeButton ?? true;
 
   const { clearErrors } = useFormContext();
@@ -78,18 +78,20 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   const isGrouped = createMemo(() => parentContext() && groupContext?.allValues());
 
   const disabled = () => fieldDisabled() || groupContext?.disabled() || disabledProp();
-  const name = () => fieldName() ?? local.name;
-  const value = () => local.value ?? name();
+  const name = () => fieldName() ?? (typeof local.name === 'string' ? local.name : undefined);
+  const value = () => (typeof local.value === 'string' ? local.value : undefined) ?? name();
 
   const groupProps = createMemo(() => {
     let mainProps = {} as Partial<Omit<CheckboxRoot.Props, 'class'>>;
     if (isGrouped()) {
+      const currentValue = value();
+
       if (parent()) {
         mainProps = groupContext!.parent.getParentProps();
       }
 
-      if (value()) {
-        mainProps = groupContext!.parent.getChildProps(value()!);
+      if (currentValue !== undefined) {
+        mainProps = groupContext!.parent.getChildProps(currentValue);
       }
     }
 
@@ -126,14 +128,19 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
 
   const [checked, setCheckedState] = useControlled({
     controlled: () => {
-      return value() && groupValue() && !parent()
-        ? groupValue()!.includes(value()!)
+      const currentValue = value();
+
+      return currentValue !== undefined && groupValue() && !parent()
+        ? groupValue()!.includes(currentValue)
         : groupProps().local.checked;
     },
-    default: () =>
-      value() && defaultGroupValue() && !parent()
-        ? defaultGroupValue()!.includes(value()!)
-        : defaultChecked(),
+    default: () => {
+      const currentValue = value();
+
+      return currentValue !== undefined && defaultGroupValue() && !parent()
+        ? defaultGroupValue()!.includes(currentValue)
+        : defaultChecked();
+    },
     name: 'Checkbox',
     state: 'checked',
   });
@@ -142,7 +149,11 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
 
   onSettled(() => {
     setChildRefs((refs) => {
-      refs.control = { explicitId: id, ref: controlRef, id: () => local.id };
+      refs.control = {
+        explicitId: id,
+        ref: controlRef,
+        id: () => normalizeOptionalId(local.id),
+      };
     });
   });
 
@@ -244,10 +255,12 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
             }
           }
 
-          if (value() && groupContextValue && setGroupValue && !parent()) {
+          const currentValue = value();
+
+          if (currentValue !== undefined && groupContextValue && setGroupValue && !parent()) {
             const nextGroupValue = nextChecked
-              ? [...groupContextValue!, value()!]
-              : groupContextValue!.filter((item) => item !== value());
+              ? [...groupContextValue!, currentValue]
+              : groupContextValue!.filter((item) => item !== currentValue);
 
             setGroupValue(nextGroupValue, event);
             setFilled(nextGroupValue.length > 0);
@@ -265,8 +278,14 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
         // React <19 sets an empty value if `undefined` is passed explicitly
         // To avoid this, we only set the value if it's defined
         get value() {
-          return local.value !== undefined
-            ? (groupContext ? checked() && local.value : local.value) || ''
+          const explicitValue = typeof local.value === 'string' ? local.value : undefined;
+
+          return explicitValue !== undefined
+            ? groupContext
+              ? checked() && explicitValue
+                ? explicitValue
+                : ''
+              : explicitValue
             : undefined;
         },
       },
@@ -281,8 +300,9 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
     isGrouped() ? groupProps().local.indeterminate || indeterminate() : indeterminate();
 
   createTrackedEffect(() => {
-    if (parentContext() && value()) {
-      parentContext()?.disabledStatesRef.set(value()!, disabled());
+    const currentValue = value();
+    if (parentContext() && currentValue !== undefined) {
+      parentContext()?.disabledStatesRef.set(currentValue, disabled());
     }
   });
 
@@ -321,16 +341,16 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
         },
         role: 'checkbox',
         get disabled() {
-          return disabled();
+          return disabled() ? true : undefined;
         },
         get 'aria-checked'() {
-          return groupProps().local.indeterminate ? 'mixed' : checked();
+          return groupProps().local.indeterminate ? 'mixed' : checked() ? 'true' : 'false';
         },
         get 'aria-readonly'() {
-          return readonly() || undefined;
+          return readonly() ? 'true' : undefined;
         },
         get 'aria-required'() {
-          return required() || undefined;
+          return required() ? 'true' : undefined;
         },
         get 'aria-labelledby'() {
           return labelId();
