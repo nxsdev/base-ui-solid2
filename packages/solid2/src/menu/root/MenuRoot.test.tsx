@@ -552,10 +552,10 @@ describe('<Menu.Root />', () => {
       const otherItems = () => screen.getAllByRole('menuitem').slice(1);
 
       await waitFor(() => {
-        expect(firstItem().tabIndex).to.equal(0);
+        expect(firstItem().tabindex).to.equal(0);
       });
       otherItems().forEach((item) => {
-        expect(item.tabIndex).to.equal(-1);
+        expect(item.tabindex).to.equal(-1);
       });
     });
 
@@ -571,9 +571,9 @@ describe('<Menu.Root />', () => {
       const otherItems = () => screen.getAllByRole('menuitem').slice(1);
 
       await waitFor(() => expect(firstItem()).toHaveFocus());
-      expect(firstItem().tabIndex).to.equal(0);
+      expect(firstItem().tabindex).to.equal(0);
       otherItems().forEach((item) => {
-        expect(item.tabIndex).to.equal(-1);
+        expect(item.tabindex).to.equal(-1);
       });
     });
 
@@ -594,9 +594,9 @@ describe('<Menu.Root />', () => {
         expect(lastItem()).toHaveFocus();
       });
 
-      expect(lastItem().tabIndex).to.equal(0);
+      expect(lastItem().tabindex).to.equal(0);
       [firstItem, secondItem].forEach((item) => {
-        expect(item().tabIndex).to.equal(-1);
+        expect(item().tabindex).to.equal(-1);
       });
     });
 

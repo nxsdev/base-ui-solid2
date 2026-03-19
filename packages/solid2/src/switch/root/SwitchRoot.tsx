@@ -28,12 +28,12 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     'refs',
     'nativeButton',
     'onCheckedChange',
-    'readOnly',
+    'readonly',
     'required',
     'disabled',
   ]);
   const nativeButton = () => local.nativeButton ?? true;
-  const readOnly = () => local.readOnly ?? false;
+  const readonly = () => local.readonly ?? false;
   const required = () => local.required ?? false;
   const disabledProp = () => local.disabled ?? false;
 
@@ -109,7 +109,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
       return checked();
     },
     get 'aria-readonly'() {
-      return readOnly() || undefined;
+      return readonly() || undefined;
     },
     get 'aria-labelledby'() {
       return labelId();
@@ -132,7 +132,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
       });
     },
     onClick(event) {
-      if (event.defaultPrevented || readOnly()) {
+      if (event.defaultPrevented || readonly()) {
         return;
       }
 
@@ -158,7 +158,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
         return required();
       },
       style: visuallyHidden,
-      tabIndex: -1,
+      tabindex: -1,
       type: 'checkbox',
       'aria-hidden': true,
       ref: (el) => {
@@ -201,8 +201,8 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     get checked() {
       return checked();
     },
-    get readOnly() {
-      return readOnly();
+    get readonly() {
+      return readonly();
     },
     get required() {
       return required();
@@ -217,7 +217,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     focused: () => fieldState.focused,
     checked,
     disabled,
-    readOnly,
+    readonly,
     required,
   };
 
@@ -286,7 +286,7 @@ export namespace SwitchRoot {
      * Whether the user should be unable to activate or deactivate the switch.
      * @default false
      */
-    readOnly?: boolean;
+    readonly?: boolean;
     /**
      * Whether the user must activate the switch before submitting a form.
      * @default false
@@ -306,7 +306,7 @@ export namespace SwitchRoot {
     /**
      * Whether the user should be unable to activate or deactivate the switch.
      */
-    readOnly: boolean;
+    readonly: boolean;
     /**
      * Whether the user must activate the switch before submitting a form.
      */

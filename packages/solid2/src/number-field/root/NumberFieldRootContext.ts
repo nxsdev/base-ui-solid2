@@ -13,7 +13,7 @@ export interface NumberFieldRootContext {
   minWithDefault: Accessor<number>;
   maxWithDefault: Accessor<number>;
   disabled: Accessor<boolean>;
-  readOnly: Accessor<boolean>;
+  readonly: Accessor<boolean>;
   id: Accessor<string | undefined>;
   setValue: (unvalidatedValue: number | null, event?: Event, dir?: 1 | -1) => void;
   getStepAmount: (event?: EventWithOptionalKeyState) => number | undefined;

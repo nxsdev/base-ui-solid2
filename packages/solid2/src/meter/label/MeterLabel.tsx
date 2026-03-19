@@ -20,7 +20,9 @@ export function MeterLabel(componentProps: MeterLabel.Props) {
   const { setCodependentRefs } = useMeterRootContext();
 
   onSettled(() => {
-    setCodependentRefs('label', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.label = { explicitId: id, ref: () => ref, id: () => local.id };
+    });
   });
 
   const element = useRenderElement('span', componentProps, {

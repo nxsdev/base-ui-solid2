@@ -16,7 +16,7 @@ export interface SelectRootContext {
   };
   name: Accessor<string | undefined>;
   disabled: Accessor<boolean>;
-  readOnly: Accessor<boolean>;
+  readonly: Accessor<boolean>;
   required: Accessor<boolean>;
   setValue: (nextValue: any, event?: Event) => void;
   setOpen: (

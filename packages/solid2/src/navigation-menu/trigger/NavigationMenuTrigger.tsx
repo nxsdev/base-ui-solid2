@@ -360,7 +360,7 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
     props: [
       (props) => mergeProps(props, getReferenceProps),
       {
-        tabIndex: 0,
+        tabindex: 0,
         onMouseEnter: handleOpenEvent,
         onClick: handleOpenEvent,
         onPointerEnter: handleSetPointerType,

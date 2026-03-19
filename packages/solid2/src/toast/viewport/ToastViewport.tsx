@@ -177,7 +177,7 @@ export function ToastViewport(componentProps: ToastViewport.Props) {
 
   const props: JSX.HTMLAttributes<HTMLDivElement> = {
     role: 'region',
-    tabIndex: -1,
+    tabindex: -1,
     get 'aria-label'() {
       return `${numToasts()} notification${numToasts() !== 1 ? 's' : ''} (F6)`;
     },

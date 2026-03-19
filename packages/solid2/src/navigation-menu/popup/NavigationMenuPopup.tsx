@@ -98,7 +98,7 @@ export function NavigationMenuPopup(componentProps: NavigationMenuPopup.Props) {
         get id() {
           return id();
         },
-        tabIndex: -1,
+        tabindex: -1,
         get style(): JSX.CSSProperties | undefined {
           return calculatedStyles().isOriginSide
             ? {

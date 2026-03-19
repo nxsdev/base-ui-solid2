@@ -1,11 +1,11 @@
 import {
-  batch,
   createEffect,
   createMemo,
   createSignal,
+  createTrackedEffect,
+  omit,
   onSettled,
   merge as solidMergeProps,
-  splitProps,
 } from 'solid-js';
 import { useCheckboxGroupContext } from '../../checkbox-group/CheckboxGroupContext';
 import { useFieldControlValidation } from '../../field/control/useFieldControlValidation';
@@ -43,7 +43,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
     'name',
     'onCheckedChange',
     'parent',
-    'readOnly',
+    'readonly',
     'render',
     'required',
     'value',
@@ -54,7 +54,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   const disabledProp = () => local.disabled ?? false;
   const indeterminate = () => local.indeterminate ?? false;
   const parent = () => local.parent ?? false;
-  const readOnly = () => local.readOnly ?? false;
+  const readonly = () => local.readonly ?? false;
   const required = () => local.required ?? false;
   const nativeButton = () => local.nativeButton ?? true;
 
@@ -93,22 +93,18 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
       }
     }
 
-    const [localGroup, otherGorup] = splitProps(mainProps, [
-      'checked',
-      'indeterminate',
-      'onCheckedChange',
-    ]);
+    const otherGorup = omit(mainProps, 'checked', 'indeterminate', 'onCheckedChange');
     return {
       other: otherGorup,
       local: {
         get checked() {
-          return localGroup.checked ?? checkedProp();
+          return mainProps.checked ?? checkedProp();
         },
         get indeterminate() {
-          return localGroup.indeterminate ?? indeterminate();
+          return mainProps.indeterminate ?? indeterminate();
         },
         // eslint-disable-next-line solid/reactivity
-        onCheckedChange: localGroup.onCheckedChange,
+        onCheckedChange: mainProps.onCheckedChange,
       },
     };
   });
@@ -145,7 +141,9 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   const id = useBaseUiId(() => local.id);
 
   onSettled(() => {
-    setChildRefs('control', { explicitId: id, ref: controlRef, id: () => local.id });
+    setChildRefs((refs) => {
+      refs.control = { explicitId: id, ref: controlRef, id: () => local.id };
+    });
   });
 
   useField({
@@ -160,7 +158,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
 
   let inputRef = null as HTMLInputElement | null | undefined;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (inputRef) {
       inputRef.indeterminate = groupProps().local.indeterminate;
       if (checked()) {
@@ -185,7 +183,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   };
 
   const onClick = (event: Event) => {
-    if (event.defaultPrevented || readOnly()) {
+    if (event.defaultPrevented || readonly()) {
       return;
     }
 
@@ -219,9 +217,9 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
           fieldControlValidation().refs.inputRef = el;
         },
         style: visuallyHidden,
-        tabIndex: -1,
+        tabindex: -1,
         type: 'checkbox',
-        'aria-hidden': true,
+        'aria-hidden': 'true',
         onChange(event) {
           const groupContextValue = groupContext?.value();
           // Workaround for https://github.com/facebook/react/issues/9023
@@ -229,39 +227,37 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
             return;
           }
 
-          batch(() => {
-            const nextChecked = event.target.checked;
-            setDirty(nextChecked !== validityData.initialValue);
-            setCheckedState(nextChecked);
-            groupProps().local.onCheckedChange?.(nextChecked, event);
-            local.onCheckedChange?.(nextChecked, event);
-            clearErrors(name());
+          const nextChecked = event.target.checked;
+          setDirty(nextChecked !== validityData.initialValue);
+          setCheckedState(nextChecked);
+          groupProps().local.onCheckedChange?.(nextChecked, event);
+          local.onCheckedChange?.(nextChecked, event);
+          clearErrors(name());
 
-            if (!groupContext) {
-              setFilled(nextChecked);
+          if (!groupContext) {
+            setFilled(nextChecked);
 
-              if (validationMode() === 'onChange') {
-                fieldControlValidation().commitValidation(nextChecked);
-              } else {
-                fieldControlValidation().commitValidation(nextChecked, true);
-              }
+            if (validationMode() === 'onChange') {
+              fieldControlValidation().commitValidation(nextChecked);
+            } else {
+              fieldControlValidation().commitValidation(nextChecked, true);
             }
+          }
 
-            if (value() && groupContextValue && setGroupValue && !parent()) {
-              const nextGroupValue = nextChecked
-                ? [...groupContextValue!, value()!]
-                : groupContextValue!.filter((item) => item !== value());
+          if (value() && groupContextValue && setGroupValue && !parent()) {
+            const nextGroupValue = nextChecked
+              ? [...groupContextValue!, value()!]
+              : groupContextValue!.filter((item) => item !== value());
 
-              setGroupValue(nextGroupValue, event);
-              setFilled(nextGroupValue.length > 0);
+            setGroupValue(nextGroupValue, event);
+            setFilled(nextGroupValue.length > 0);
 
-              if (validationMode() === 'onChange') {
-                fieldControlValidation().commitValidation(nextGroupValue);
-              } else {
-                fieldControlValidation().commitValidation(nextGroupValue, true);
-              }
+            if (validationMode() === 'onChange') {
+              fieldControlValidation().commitValidation(nextGroupValue);
+            } else {
+              fieldControlValidation().commitValidation(nextGroupValue, true);
             }
-          });
+          }
         },
         onFocus() {
           controlRef()?.focus();
@@ -284,7 +280,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   const computedIndeterminate = () =>
     isGrouped() ? groupProps().local.indeterminate || indeterminate() : indeterminate();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (parentContext() && value()) {
       parentContext()?.disabledStatesRef.set(value()!, disabled());
     }
@@ -297,8 +293,8 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
     get checked() {
       return computedChecked();
     },
-    get readOnly() {
-      return readOnly();
+    get readonly() {
+      return readonly();
     },
     get required() {
       return required();
@@ -331,7 +327,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
           return groupProps().local.indeterminate ? 'mixed' : checked();
         },
         get 'aria-readonly'() {
-          return readOnly() || undefined;
+          return readonly() || undefined;
         },
         get 'aria-required'() {
           return required() || undefined;
@@ -377,7 +373,7 @@ export namespace CheckboxRoot {
     /**
      * Whether the user should be unable to tick or untick the checkbox.
      */
-    readOnly: boolean;
+    readonly: boolean;
     /**
      * Whether the user must tick the checkbox before submitting a form.
      */
@@ -414,7 +410,7 @@ export namespace CheckboxRoot {
      * Whether the user should be unable to tick or untick the checkbox.
      * @default false
      */
-    readOnly?: boolean;
+    readonly?: boolean;
     /**
      * Whether the user must tick the checkbox before submitting a form.
      * @default false

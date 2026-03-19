@@ -95,7 +95,7 @@ function Option(props: { label: string }) {
       type="button"
       role="option"
       aria-selected={isActive() && isSelected()}
-      tabIndex={isFocusable() ? 0 : -1}
+      tabindex={isFocusable() ? 0 : -1}
       style={{
         background: isActive() ? 'cyan' : '',
         'font-weight': isSelected() ? 'bold' : '',

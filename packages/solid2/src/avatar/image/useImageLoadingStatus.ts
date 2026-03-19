@@ -5,8 +5,8 @@ export type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
 
 interface UseImageLoadingStatusOptions {
   src: MaybeAccessor<string | undefined>;
-  referrerPolicy?: MaybeAccessor<JSX.HTMLReferrerPolicy | undefined>;
-  crossOrigin?: MaybeAccessor<JSX.ImgHTMLAttributes<HTMLImageElement>['crossOrigin'] | undefined>;
+  referrerpolicy?: MaybeAccessor<JSX.HTMLReferrerPolicy | undefined>;
+  crossorigin?: MaybeAccessor<JSX.ImgHTMLAttributes<HTMLImageElement>['crossorigin'] | undefined>;
 }
 
 export function useImageLoadingStatus(
@@ -14,8 +14,8 @@ export function useImageLoadingStatus(
 ): Accessor<ImageLoadingStatus> {
   const [loadingStatus, setLoadingStatus] = createSignal<ImageLoadingStatus>('idle');
   const src = () => access(options.src);
-  const referrerPolicy = () => access(options.referrerPolicy);
-  const crossOrigin = () => access(options.crossOrigin);
+  const referrerpolicy = () => access(options.referrerpolicy);
+  const crossorigin = () => access(options.crossorigin);
 
   createEffect(() => {
     if (!src()) {
@@ -37,10 +37,10 @@ export function useImageLoadingStatus(
     setLoadingStatus('loading');
     image.onload = updateStatus('loaded');
     image.onerror = updateStatus('error');
-    if (referrerPolicy()) {
-      image.referrerPolicy = referrerPolicy()!;
+    if (referrerpolicy()) {
+      image.referrerpolicy = referrerpolicy()!;
     }
-    image.crossOrigin = crossOrigin() ?? null;
+    image.crossorigin = crossorigin() ?? null;
     image.src = src()!;
 
     onCleanup(() => {

@@ -193,7 +193,7 @@ export function ScrollAreaViewport(componentProps: ScrollAreaViewport.Props) {
           return context.rootId() ? `${context.rootId()}-viewport` : undefined;
         },
         // https://accessibilityinsights.io/info-examples/web/scrollable-region-focusable/
-        get tabIndex() {
+        get tabindex() {
           return !context.hiddenState.scrollbarXHidden || !context.hiddenState.scrollbarYHidden
             ? 0
             : undefined;

@@ -15,7 +15,7 @@ export function SelectRoot<Value>(props: SelectRoot.Props<Value>): JSX.Element {
   const defaultValue = () => props.defaultValue ?? null;
   const defaultOpen = () => props.defaultOpen ?? false;
   const disabled = () => props.disabled ?? false;
-  const readOnly = () => props.readOnly ?? false;
+  const readonly = () => props.readonly ?? false;
   const required = () => props.required ?? false;
   const modal = () => props.modal ?? true;
 
@@ -31,7 +31,7 @@ export function SelectRoot<Value>(props: SelectRoot.Props<Value>): JSX.Element {
     onOpenChange: props.onOpenChange,
     name: () => props.name,
     disabled,
-    readOnly,
+    readonly,
     required,
     modal,
     actionsRef: () => props.actionsRef,
@@ -94,10 +94,10 @@ export function SelectRoot<Value>(props: SelectRoot.Props<Value>): JSX.Element {
             name: rootContext.name(),
             disabled: rootContext.disabled(),
             required: rootContext.required(),
-            readOnly: rootContext.readOnly(),
+            readonly: rootContext.readonly(),
             value: serializedValue(),
             style: visuallyHidden,
-            tabIndex: -1,
+            tabindex: -1,
             'aria-hidden': true,
           }) as unknown as JSX.HTMLAttributes<HTMLInputElement>)}
         />
@@ -133,7 +133,7 @@ export namespace SelectRoot {
      * Whether the user should be unable to choose a different option from the select menu.
      * @default false
      */
-    readOnly?: boolean;
+    readonly?: boolean;
     /**
      * Whether the component should ignore user interaction.
      * @default false

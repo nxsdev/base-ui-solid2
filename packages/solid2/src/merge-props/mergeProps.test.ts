@@ -340,7 +340,7 @@ describe('mergeProps', () => {
               titleGetterCalls += 1;
               return `title-${count()}`;
             },
-            get tabIndex() {
+            get tabindex() {
               tabIndexGetterCalls += 1;
               return mode() === 'a' ? 0 : -1;
             },
@@ -366,7 +366,7 @@ describe('mergeProps', () => {
         const styleValue = createMemo(() => mergedProps.style);
         const classListValue = createMemo(() => mergedProps.classList);
         const titleValue = createMemo(() => mergedProps.title);
-        const tabIndexValue = createMemo(() => mergedProps.tabIndex);
+        const tabIndexValue = createMemo(() => mergedProps.tabindex);
         const staticValue = createMemo(() => mergedProps.id);
 
         expect(classValue()).to.equal('off static-class');

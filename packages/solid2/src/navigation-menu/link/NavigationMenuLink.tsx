@@ -48,7 +48,7 @@ export function NavigationMenuLink(componentProps: NavigationMenuLink.Props) {
     ],
   });
 
-  return <CompositeItem tabIndex={undefined} render={element} />;
+  return <CompositeItem tabindex={undefined} render={element} />;
 }
 
 export namespace NavigationMenuLink {

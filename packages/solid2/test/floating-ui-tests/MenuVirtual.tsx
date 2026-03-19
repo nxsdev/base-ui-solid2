@@ -205,7 +205,7 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
             }
           }}
           data-open={isOpen() ? '' : undefined}
-          tabIndex={-1}
+          tabindex={-1}
           role="menuitem"
           aria-autocomplete="list"
           class={c(
@@ -256,7 +256,7 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
           }}
           id={id}
           data-open={isOpen() ? '' : undefined}
-          tabIndex={isNested ? -1 : 0}
+          tabindex={isNested ? -1 : 0}
           // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
           role="combobox"
           aria-autocomplete="list"
@@ -331,7 +331,7 @@ export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLElement>)
         }
       }}
       role="option"
-      tabIndex={-1}
+      tabindex={-1}
       aria-selected={isActive()}
       aria-disabled={local.disabled}
       class={c('focus:bg-red-500 flex cursor-default rounded px-2 py-1 text-left outline-none', {

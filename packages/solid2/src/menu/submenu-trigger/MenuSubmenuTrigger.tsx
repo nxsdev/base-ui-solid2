@@ -95,7 +95,7 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
       elementProps,
       getItemProps,
       {
-        get tabIndex() {
+        get tabindex() {
           return open() || highlighted() ? 0 : -1;
         },
         onBlur() {

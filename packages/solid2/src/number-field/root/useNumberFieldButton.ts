@@ -20,7 +20,7 @@ export function useNumberFieldButton(
   const locale = () => access(params.locale);
   const maxWithDefault = () => access(params.maxWithDefault);
   const minWithDefault = () => access(params.minWithDefault);
-  const readOnly = () => access(params.readOnly);
+  const readonly = () => access(params.readonly);
   const value = () => access(params.value);
 
   let incrementDownCoordsRef = { x: 0, y: 0 };
@@ -51,7 +51,7 @@ export function useNumberFieldButton(
       return disabled() || (isIncrement() ? isMax() : isMin());
     },
     get 'aria-readonly'() {
-      return readOnly() || undefined;
+      return readonly() || undefined;
     },
     get 'aria-label'() {
       return isIncrement() ? 'Increase' : 'Decrease';
@@ -62,7 +62,7 @@ export function useNumberFieldButton(
     // Keyboard users shouldn't have access to the buttons, since they can use the input element
     // to change the value. On the other hand, `aria-hidden` is not applied because touch screen
     // readers should be able to use the buttons.
-    tabIndex: -1,
+    tabindex: -1,
     style: {
       '--webkit-user-select': 'none',
       'user-select': 'none',
@@ -74,7 +74,7 @@ export function useNumberFieldButton(
       isTouchingButtonRef = false;
     },
     onClick(event) {
-      const isDisabled = disabled() || readOnly() || (isIncrement() ? isMax() : isMin());
+      const isDisabled = disabled() || readonly() || (isIncrement() ? isMax() : isMin());
       if (
         event.defaultPrevented ||
         isDisabled ||
@@ -93,7 +93,7 @@ export function useNumberFieldButton(
     onPointerDown(event) {
       const isMainButton = !event.button || event.button === 0;
       const isDisabled = disabled() || (isIncrement() ? isMax() : isMin());
-      if (event.defaultPrevented || readOnly() || !isMainButton || isDisabled) {
+      if (event.defaultPrevented || readonly() || !isMainButton || isDisabled) {
         return;
       }
 
@@ -125,7 +125,7 @@ export function useNumberFieldButton(
       }
     },
     onPointerMove(event) {
-      const isDisabled = disabled() || readOnly() || (isIncrement() ? isMax() : isMin());
+      const isDisabled = disabled() || readonly() || (isIncrement() ? isMax() : isMin());
       if (isDisabled || event.pointerType !== 'touch' || !params.refs.isPressedRef) {
         return;
       }
@@ -145,7 +145,7 @@ export function useNumberFieldButton(
       }
     },
     onMouseEnter(event) {
-      const isDisabled = disabled() || readOnly() || (isIncrement() ? isMax() : isMin());
+      const isDisabled = disabled() || readonly() || (isIncrement() ? isMax() : isMin());
       if (
         event.defaultPrevented ||
         isDisabled ||
@@ -201,7 +201,7 @@ export namespace useNumberFieldButton {
     locale?: MaybeAccessor<Intl.LocalesArgument | undefined>;
     maxWithDefault: MaybeAccessor<number>;
     minWithDefault: MaybeAccessor<number>;
-    readOnly: MaybeAccessor<boolean>;
+    readonly: MaybeAccessor<boolean>;
     setValue: (unvalidatedValue: number | null, event?: Event) => void;
     startAutoChange: (isIncrement: boolean, event?: MouseEvent | Event) => void;
     stopAutoChange: () => void;

@@ -21,7 +21,9 @@ export function PopoverTitle(componentProps: PopoverTitle.Props) {
   let ref: HTMLElement;
 
   onSettled(() => {
-    setCodependentRefs('title', { explicitId: id, ref: () => ref, id: () => elementProps.id });
+    setCodependentRefs((refs) => {
+      refs.title = { explicitId: id, ref: () => ref, id: () => elementProps.id };
+    });
   });
 
   const element = useRenderElement('h2', componentProps, {

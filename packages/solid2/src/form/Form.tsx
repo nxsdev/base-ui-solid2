@@ -68,7 +68,7 @@ export function Form(componentProps: Form.Props) {
     state: EMPTY,
     props: [
       {
-        noValidate: true,
+        novalidate: true,
         onSubmit(event) {
           // Async validation isn't supported to stop the submit event.
           Object.values(formRef.fields).forEach((field) => field.validate());

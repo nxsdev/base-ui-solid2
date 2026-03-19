@@ -52,7 +52,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
     max,
     min,
     name,
-    readOnly,
+    readonly,
     required,
     setValue,
     state,
@@ -131,8 +131,8 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
     get disabled() {
       return disabled();
     },
-    get readOnly() {
-      return readOnly();
+    get readonly() {
+      return readonly();
     },
     get inputMode() {
       return inputMode();
@@ -151,7 +151,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
     // causing a hydration mismatch.
     // suppressHydrationWarning: true,
     onFocus(event) {
-      if (event.defaultPrevented || readOnly() || disabled() || hasTouchedInputRef) {
+      if (event.defaultPrevented || readonly() || disabled() || hasTouchedInputRef) {
         return;
       }
 
@@ -165,7 +165,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
       target.setSelectionRange(length, length);
     },
     onBlur(event) {
-      if (event.defaultPrevented || readOnly() || disabled()) {
+      if (event.defaultPrevented || readonly() || disabled()) {
         return;
       }
 
@@ -254,7 +254,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
       }
     },
     onKeyDown(event) {
-      if (event.defaultPrevented || readOnly() || disabled()) {
+      if (event.defaultPrevented || readonly() || disabled()) {
         return;
       }
 
@@ -330,7 +330,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
       }
     },
     onPaste(event) {
-      if (event.defaultPrevented || readOnly() || disabled()) {
+      if (event.defaultPrevented || readonly() || disabled()) {
         return;
       }
 

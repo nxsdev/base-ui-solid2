@@ -84,7 +84,7 @@ describe('<Menu.SubmenuTrigger />', () => {
     });
   });
 
-  it('sets tabIndex to 0 on the submenu trigger after opening the submenu with a keydown event', async () => {
+  it('sets tabindex to 0 on the submenu trigger after opening the submenu with a keydown event', async () => {
     render(() => <TestComponent direction="ltr" />);
     const submenuTrigger = screen.getByText('2');
 
@@ -92,7 +92,7 @@ describe('<Menu.SubmenuTrigger />', () => {
     fireEvent.keyDown(submenuTrigger, { key: 'ArrowRight' });
 
     await waitFor(() => {
-      expect(submenuTrigger).to.have.attribute('tabIndex', '0');
+      expect(submenuTrigger).to.have.attribute('tabindex', '0');
     });
   });
 });

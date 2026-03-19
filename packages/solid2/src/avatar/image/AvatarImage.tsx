@@ -16,15 +16,15 @@ import { ImageLoadingStatus, useImageLoadingStatus } from './useImageLoadingStat
 export function AvatarImage(componentProps: AvatarImage.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, [
     'onLoadingStatusChange',
-    'referrerPolicy',
-    'crossOrigin',
+    'referrerpolicy',
+    'crossorigin',
   ]);
 
   const context = useAvatarRootContext();
   const imageLoadingStatus = useImageLoadingStatus({
     src: () => componentProps.src,
-    referrerPolicy: local.referrerPolicy,
-    crossOrigin: local.crossOrigin,
+    referrerpolicy: local.referrerpolicy,
+    crossorigin: local.crossorigin,
   });
 
   const handleLoadingStatusChange = (status: ImageLoadingStatus) => {

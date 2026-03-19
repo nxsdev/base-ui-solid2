@@ -78,14 +78,14 @@ function handleTabIndex(
       (element.hasAttribute('data-tabindex') && !dataTabIndex.startsWith('-'))
     );
   });
-  const tabIndex = floatingFocusElement.getAttribute('tabindex');
+  const tabindex = floatingFocusElement.getAttribute('tabindex');
 
   if (orderRef.includes('floating') || tabbableContent.length === 0) {
-    if (tabIndex !== '0') {
+    if (tabindex !== '0') {
       floatingFocusElement.setAttribute('tabindex', '0');
     }
   } else if (
-    tabIndex !== '-1' ||
+    tabindex !== '-1' ||
     (floatingFocusElement.hasAttribute('data-tabindex') &&
       floatingFocusElement.getAttribute('data-tabindex') !== '-1')
   ) {
@@ -95,7 +95,7 @@ function handleTabIndex(
 }
 
 function VisuallyHiddenDismiss(props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button {...props} type="button" tabIndex={-1} style={visuallyHidden} />;
+  return <button {...props} type="button" tabindex={-1} style={visuallyHidden} />;
 }
 
 export interface FloatingFocusManagerProps {
@@ -498,7 +498,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
     const doc = getDocument(floatingElement);
     const previouslyFocusedElement = activeElement(doc);
 
-    // Wait for any layout effect state setters to execute to set `tabIndex`.
+    // Wait for any layout effect state setters to execute to set `tabindex`.
     // eslint-disable-next-line solid/reactivity
     queueMicrotask(() => {
       const open = props.context.open();

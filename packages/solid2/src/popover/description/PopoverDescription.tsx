@@ -21,10 +21,12 @@ export function PopoverDescription(componentProps: PopoverDescription.Props) {
   let ref: HTMLElement;
 
   onSettled(() => {
-    setCodependentRefs('description', {
-      explicitId: id,
-      ref: () => ref,
-      id: () => elementProps.id,
+    setCodependentRefs((refs) => {
+      refs.description = {
+        explicitId: id,
+        ref: () => ref,
+        id: () => elementProps.id,
+      };
     });
   });
 

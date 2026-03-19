@@ -50,7 +50,7 @@ export function useInteractions(
         .map((item) => item?.()?.floating)
         .filter((i): i is JSX.HTMLAttributes<any> => !!i);
 
-      list.unshift({ tabIndex: -1, [FOCUSABLE_ATTRIBUTE as any]: '' });
+      list.unshift({ tabindex: -1, [FOCUSABLE_ATTRIBUTE as any]: '' });
 
       if (userProps) {
         list.push(userProps);

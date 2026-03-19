@@ -1,9 +1,7 @@
 import {
-  batch,
   createEffect,
   createSignal,
-  on,
-  onCleanup,
+  createTrackedEffect,
   type Accessor,
   type JSX,
   type Setter,
@@ -67,65 +65,58 @@ export function useCollapsibleRoot(
   function handleTrigger() {
     const nextOpen = !open();
 
-    batch(() => {
-      if (animationType() === 'css-animation' && refs.panelRef != null) {
-        refs.panelRef!.style.removeProperty('animation-name');
-      }
+    if (animationType() === 'css-animation' && refs.panelRef != null) {
+      refs.panelRef.style.removeProperty('animation-name');
+    }
 
-      if (!hiddenUntilFound() && !keepMounted()) {
-        if (animationType() != null && animationType() !== 'css-animation') {
-          if (!mounted() && nextOpen) {
-            setMounted(true);
-          }
-        }
-
-        if (animationType() === 'css-animation') {
-          if (!visible() && nextOpen) {
-            setVisible(true);
-          }
-          if (!mounted() && nextOpen) {
-            setMounted(true);
-          }
+    if (!hiddenUntilFound() && !keepMounted()) {
+      if (animationType() != null && animationType() !== 'css-animation') {
+        if (!mounted() && nextOpen) {
+          setMounted(true);
         }
       }
 
-      setOpen(nextOpen);
-      parameters.onOpenChange(nextOpen);
-
-      if (animationType() === 'none') {
-        if (mounted() && !nextOpen) {
-          setMounted(false);
+      if (animationType() === 'css-animation') {
+        if (!visible() && nextOpen) {
+          setVisible(true);
+        }
+        if (!mounted() && nextOpen) {
+          setMounted(true);
         }
       }
-    });
+    }
+
+    setOpen(nextOpen);
+    parameters.onOpenChange(nextOpen);
+
+    if (animationType() === 'none') {
+      if (mounted() && !nextOpen) {
+        setMounted(false);
+      }
+    }
   }
 
   createEffect(
-    on(
-      () => codependentRefs.panel,
-      (panel) => {
-        if (panel) {
-          setPanelIdState(panel.id() ?? panel.explicitId());
-        }
-
-        onCleanup(() => {
-          setPanelIdState(undefined);
-        });
-      },
-    ),
+    () => codependentRefs.panel,
+    (panel) => {
+      setPanelIdState(panel ? (panel.id() ?? panel.explicitId()) : undefined);
+    },
   );
 
-  createEffect(
-    on([open, keepMounted, openParam, isControlled, animationType], () => {
-      /**
-       * Unmount immediately when closing in controlled mode and keepMounted={false}
-       * and no CSS animations or transitions are applied
-       */
-      if (isControlled() && animationType() === 'none' && !keepMounted() && !open()) {
-        setMounted(false);
-      }
-    }),
-  );
+  createTrackedEffect(() => {
+    open();
+    keepMounted();
+    openParam();
+    isControlled();
+    animationType();
+    /**
+     * Unmount immediately when closing in controlled mode and keepMounted={false}
+     * and no CSS animations or transitions are applied
+     */
+    if (isControlled() && animationType() === 'none' && !keepMounted() && !open()) {
+      setMounted(false);
+    }
+  });
 
   return {
     refs,

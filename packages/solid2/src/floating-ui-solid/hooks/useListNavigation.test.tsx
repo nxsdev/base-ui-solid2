@@ -52,7 +52,7 @@ function App(props: Omit<Partial<UseListNavigationProps>, 'listRef'>) {
                 <li
                   data-testid={`item-${index()}`}
                   aria-selected={activeIndex() === index()}
-                  tabIndex={-1}
+                  tabindex={-1}
                   {...getItemProps<HTMLLIElement>({
                     ref(node) {
                       listRef[index()] = node;
@@ -1222,7 +1222,7 @@ describe('useListNavigation', () => {
                     <li
                       data-testid={`item-${index()}`}
                       aria-selected={activeIndex() === index()}
-                      tabIndex={-1}
+                      tabindex={-1}
                       {...getItemProps({
                         ref(node) {
                           listRef[index()] = node as HTMLLIElement;

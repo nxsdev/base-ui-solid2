@@ -84,42 +84,42 @@ describe('useButton', () => {
     });
   });
 
-  describe('param: tabIndex', () => {
-    it('returns tabIndex in getButtonProps when host component is BUTTON', async () => {
+  describe('param: tabindex', () => {
+    it('returns tabindex in getButtonProps when host component is BUTTON', async () => {
       function TestButton() {
         const { getButtonProps } = useButton();
 
-        expect(getButtonProps().tabIndex).to.equal(0);
+        expect(getButtonProps().tabindex).to.equal(0);
 
         return <button {...getButtonProps()} />;
       }
 
       render(() => <TestButton />);
-      expect(screen.getByRole('button')).to.have.property('tabIndex', 0);
+      expect(screen.getByRole('button')).to.have.property('tabindex', 0);
     });
 
-    it('returns tabIndex in getButtonProps when host component is not BUTTON', async () => {
+    it('returns tabindex in getButtonProps when host component is not BUTTON', async () => {
       function TestButton() {
         const { getButtonProps } = useButton({ native: false });
 
-        expect(getButtonProps().tabIndex).to.equal(0);
+        expect(getButtonProps().tabindex).to.equal(0);
 
         return <span {...getButtonProps()} />;
       }
 
       render(() => <TestButton />);
-      expect(screen.getByRole('button')).to.have.property('tabIndex', 0);
+      expect(screen.getByRole('button')).to.have.property('tabindex', 0);
     });
 
-    it('returns tabIndex in getButtonProps if it is explicitly provided', async () => {
+    it('returns tabindex in getButtonProps if it is explicitly provided', async () => {
       const customTabIndex = 3;
       function TestButton() {
-        const { getButtonProps } = useButton({ tabIndex: customTabIndex });
+        const { getButtonProps } = useButton({ tabindex: customTabIndex });
         return <button {...getButtonProps()} />;
       }
 
       render(() => <TestButton />);
-      expect(screen.getByRole('button')).to.have.property('tabIndex', customTabIndex);
+      expect(screen.getByRole('button')).to.have.property('tabindex', customTabIndex);
     });
   });
 

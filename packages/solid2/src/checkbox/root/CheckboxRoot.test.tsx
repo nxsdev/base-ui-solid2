@@ -114,19 +114,19 @@ describe('<Checkbox.Root />', () => {
     });
   });
 
-  describe('prop: readOnly', () => {
+  describe('prop: readonly', () => {
     it('should have the `aria-readonly` attribute', async () => {
-      render(() => <Checkbox.Root readOnly />);
+      render(() => <Checkbox.Root readonly />);
       expect(screen.getAllByRole('checkbox')[0]).to.have.attribute('aria-readonly', 'true');
     });
 
-    it('should not have the aria attribute when `readOnly` is not set', async () => {
+    it('should not have the aria attribute when `readonly` is not set', async () => {
       render(() => <Checkbox.Root />);
       expect(screen.getAllByRole('checkbox')[0]).not.to.have.attribute('aria-readonly');
     });
 
     it('should not change its state when clicked', async () => {
-      render(() => <Checkbox.Root readOnly />);
+      render(() => <Checkbox.Root readonly />);
       const [checkbox] = screen.getAllByRole('checkbox');
 
       expect(checkbox).to.have.attribute('aria-checked', 'false');
@@ -177,9 +177,9 @@ describe('<Checkbox.Root />', () => {
 
   it('should place the style hooks on the root and the indicator', async () => {
     const [disabled, setDisabled] = createSignal(true);
-    const [readOnly, setReadOnly] = createSignal(true);
+    const [readonly, setReadOnly] = createSignal(true);
     render(() => (
-      <Checkbox.Root defaultChecked disabled={disabled()} readOnly={readOnly()} required>
+      <Checkbox.Root defaultChecked disabled={disabled()} readonly={readonly()} required>
         <Checkbox.Indicator />
       </Checkbox.Root>
     ));

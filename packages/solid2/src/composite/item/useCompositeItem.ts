@@ -14,7 +14,7 @@ export function useCompositeItem<Metadata>(params: UseCompositeItemParameters<Me
   const [itemRef, setItemRef] = createSignal<HTMLElement | null>(null);
 
   const props: HTMLProps = {
-    get tabIndex() {
+    get tabindex() {
       return isHighlighted() ? 0 : -1;
     },
     onFocus() {

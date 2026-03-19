@@ -70,7 +70,7 @@ export function SliderRoot<Value extends number | readonly number[]>(
     'onValueCommitted',
     'orientation',
     'step',
-    'tabIndex',
+    'tabindex',
     'value',
   ]);
   const disabledProp = () => local.disabled ?? false;
@@ -290,7 +290,7 @@ export function SliderRoot<Value extends number | readonly number[]>(
     setValue,
     state,
     step,
-    tabIndex: () => local.tabIndex ?? null,
+    tabindex: () => local.tabindex ?? null,
     thumbArray,
     values,
   };
@@ -337,7 +337,7 @@ export function SliderRoot<Value extends number | readonly number[]>(
                 value: valueUnwrapped,
                 onFocus: handleHiddenInputFocus,
                 style: visuallyHidden,
-                tabIndex: -1,
+                tabindex: -1,
                 'aria-hidden': true,
               }) as any)}
             />
@@ -358,7 +358,7 @@ export function SliderRoot<Value extends number | readonly number[]>(
                   value,
                   onFocus: handleHiddenInputFocus,
                   style: visuallyHidden,
-                  tabIndex: -1,
+                  tabindex: -1,
                   'aria-hidden': true,
                 }) as any)}
               />
@@ -408,7 +408,7 @@ export namespace SliderRoot {
   }
 
   export interface Props<Value extends number | readonly number[] = number | readonly number[]>
-    extends Omit<BaseUIComponentProps<'div', State>, 'tabIndex'> {
+    extends Omit<BaseUIComponentProps<'div', State>, 'tabindex'> {
     /**
      * The uncontrolled value of the slider when it’s initially rendered.
      *
@@ -476,7 +476,7 @@ export namespace SliderRoot {
     /**
      * Optional tab index attribute for the thumb components.
      */
-    tabIndex?: number;
+    tabindex?: number;
     /**
      * The value of the slider.
      * For ranged sliders, provide an array with two values.

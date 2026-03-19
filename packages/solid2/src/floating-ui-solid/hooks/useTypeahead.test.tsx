@@ -161,7 +161,7 @@ describe('useTypeahead', () => {
             onClick: () => inputRef?.focus(),
           })}
         >
-          <input ref={inputRef} readOnly />
+          <input ref={inputRef} readonly />
         </div>
         {open() && (
           <div {...getFloatingProps()}>
@@ -169,7 +169,7 @@ describe('useTypeahead', () => {
               {(value, i) => (
                 <div
                   role="option"
-                  tabIndex={i() === activeIndex() ? 0 : -1}
+                  tabindex={i() === activeIndex() ? 0 : -1}
                   aria-selected={i() === activeIndex()}
                 >
                   {value}

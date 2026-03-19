@@ -87,7 +87,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
     'onBlur',
     'onFocus',
     'onKeyDown',
-    'tabIndex',
+    'tabindex',
   ]);
   const disabledProp = () => local.disabled ?? false;
 
@@ -110,13 +110,13 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
     setActive,
     state,
     step,
-    tabIndex: contextTabIndex,
+    tabindex: contextTabIndex,
     values: sliderValues,
   } = useSliderRootContext();
 
   const disabled = () => disabledProp() || contextDisabled();
 
-  const externalTabIndex = () => local.tabIndex ?? contextTabIndex();
+  const externalTabIndex = () => local.tabindex ?? contextTabIndex();
 
   const direction = useDirection();
   const { setTouched, setFocused, validationMode } = useFieldRootContext();
@@ -292,7 +292,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
       get style() {
         return getThumbStyle();
       },
-      get tabIndex() {
+      get tabindex() {
         return externalTabIndex() ?? (disabled() ? undefined : 0);
       },
     },
@@ -383,7 +383,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
           'writing-mode': cssWritingMode(),
         };
       },
-      tabIndex: -1,
+      tabindex: -1,
       type: 'range',
       get value() {
         return thumbValue() ?? '';

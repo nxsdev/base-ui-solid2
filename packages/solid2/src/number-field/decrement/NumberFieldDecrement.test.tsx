@@ -232,9 +232,9 @@ describe('<NumberField.Decrement />', () => {
     });
   });
 
-  it('should not decrement when readOnly', async () => {
+  it('should not decrement when readonly', async () => {
     render(() => (
-      <NumberField.Root readOnly>
+      <NumberField.Root readonly>
         <NumberField.Decrement />
         <NumberField.Input />
       </NumberField.Root>

@@ -75,7 +75,7 @@ export function TabsPanel(componentProps: TabsPanel.Props) {
         get id() {
           return id();
         },
-        get tabIndex() {
+        get tabindex() {
           return hidden() ? -1 : 0;
         },
         get [TabsPanelDataAttributes.index as string]() {

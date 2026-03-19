@@ -1,7 +1,7 @@
 import {
   createEffect,
   createMemo,
-  on,
+  createTrackedEffect,
   onCleanup,
   onSettled,
   Setter,
@@ -147,90 +147,83 @@ export function useCollapsiblePanel<T extends HTMLElement>(
     });
   }
 
-  createEffect(
-    on(
-      [
-        parameters.animationType,
-        hiddenUntilFound,
-        keepMounted,
-        mounted,
-        open,
-        parameters.transitionDimension,
-      ],
-      () => {
-        if (parameters.animationType() !== 'css-transition') {
-          return;
-        }
+  createTrackedEffect(() => {
+    parameters.animationType();
+    hiddenUntilFound();
+    keepMounted();
+    mounted();
+    open();
+    parameters.transitionDimension();
+    if (parameters.animationType() !== 'css-transition') {
+      return;
+    }
 
-        const panel = parameters.refs.panelRef;
+    const panel = parameters.refs.panelRef;
 
-        if (!panel) {
-          return;
-        }
+    if (!panel) {
+      return;
+    }
 
-        let resizeFrame = -1;
+    let resizeFrame = -1;
 
-        if (parameters.refs.abortControllerRef != null) {
-          parameters.refs.abortControllerRef.abort();
-          parameters.refs.abortControllerRef = null;
-        }
+    if (parameters.refs.abortControllerRef != null) {
+      parameters.refs.abortControllerRef.abort();
+      parameters.refs.abortControllerRef = null;
+    }
 
-        if (open()) {
-          /* opening */
-          panel.style.setProperty('display', 'block', 'important');
+    if (open()) {
+      /* opening */
+      panel.style.setProperty('display', 'block', 'important');
 
-          /**
-           * When `keepMounted={false}` and the panel is initially closed, the very
-           * first time it opens (not any subsequent opens) `data-starting-style` is
-           * off or missing by a frame so we need to set it manually. Otherwise any
-           * CSS properties expected to transition using [data-starting-style] may
-           * be mis-timed and appear to be complete skipped.
-           */
-          if (!shouldCancelInitialOpenTransitionRef && !keepMounted()) {
-            panel.setAttribute(CollapsiblePanelDataAttributes.startingStyle, '');
-          }
+      /**
+       * When `keepMounted={false}` and the panel is initially closed, the very
+       * first time it opens (not any subsequent opens) `data-starting-style` is
+       * off or missing by a frame so we need to set it manually. Otherwise any
+       * CSS properties expected to transition using [data-starting-style] may
+       * be mis-timed and appear to be complete skipped.
+       */
+      if (!shouldCancelInitialOpenTransitionRef && !keepMounted()) {
+        panel.setAttribute(CollapsiblePanelDataAttributes.startingStyle, '');
+      }
 
-          parameters.setDimensions({ height: panel.scrollHeight, width: panel.scrollWidth });
+      parameters.setDimensions({ height: panel.scrollHeight, width: panel.scrollWidth });
 
-          resizeFrame = AnimationFrame.request(() => {
+      resizeFrame = AnimationFrame.request(() => {
+        panel.style.removeProperty('display');
+      });
+    } else {
+      /* closing */
+      parameters.setDimensions({ height: panel.scrollHeight, width: panel.scrollWidth });
+
+      parameters.refs.abortControllerRef = new AbortController();
+      const signal = parameters.refs.abortControllerRef.signal;
+
+      let frame2 = -1;
+      const frame1 = AnimationFrame.request(() => {
+        // Wait until the `[data-ending-style]` attribute is added.
+        frame2 = AnimationFrame.request(() => {
+          parameters.runOnceAnimationsFinish(() => {
+            parameters.setDimensions({ height: 0, width: 0 });
+            panel.style.removeProperty('content-visibility');
             panel.style.removeProperty('display');
-          });
-        } else {
-          /* closing */
-          parameters.setDimensions({ height: panel.scrollHeight, width: panel.scrollWidth });
-
-          parameters.refs.abortControllerRef = new AbortController();
-          const signal = parameters.refs.abortControllerRef.signal;
-
-          let frame2 = -1;
-          const frame1 = AnimationFrame.request(() => {
-            // Wait until the `[data-ending-style]` attribute is added.
-            frame2 = AnimationFrame.request(() => {
-              parameters.runOnceAnimationsFinish(() => {
-                parameters.setDimensions({ height: 0, width: 0 });
-                panel.style.removeProperty('content-visibility');
-                panel.style.removeProperty('display');
-                parameters.setMounted(false);
-                parameters.refs.abortControllerRef = null;
-              }, signal);
-            });
-          });
-
-          onCleanup(() => {
-            AnimationFrame.cancel(frame1);
-            AnimationFrame.cancel(frame2);
-          });
-          return;
-        }
-
-        onCleanup(() => {
-          AnimationFrame.cancel(resizeFrame);
+            parameters.setMounted(false);
+            parameters.refs.abortControllerRef = null;
+          }, signal);
         });
-      },
-    ),
-  );
+      });
 
-  createEffect(() => {
+      return () => {
+        AnimationFrame.cancel(frame1);
+        AnimationFrame.cancel(frame2);
+      };
+    }
+
+    return () => {
+      AnimationFrame.cancel(resizeFrame);
+    };
+  });
+
+  createTrackedEffect(() => {
     if (parameters.animationType() !== 'css-animation') {
       return;
     }
@@ -274,7 +267,7 @@ export function useCollapsiblePanel<T extends HTMLElement>(
     onCleanup(() => AnimationFrame.cancel(frame));
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!hiddenUntilFound()) {
       return;
     }
@@ -300,13 +293,13 @@ export function useCollapsiblePanel<T extends HTMLElement>(
       });
     }
 
-    onCleanup(() => {
+    return () => {
       AnimationFrame.cancel(frame);
       AnimationFrame.cancel(nextFrame);
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const panel = parameters.refs.panelRef;
 
     if (panel && hiddenUntilFound() && hidden()) {
@@ -328,7 +321,7 @@ export function useCollapsiblePanel<T extends HTMLElement>(
     }
   });
 
-  createEffect(function registerBeforeMatchListener() {
+  createTrackedEffect(function registerBeforeMatchListener() {
     const panel = parameters.refs.panelRef;
     if (!panel) {
       return;
@@ -347,10 +340,12 @@ export function useCollapsiblePanel<T extends HTMLElement>(
   });
 
   onSettled(() => {
-    setCodependentRefs('panel', {
-      explicitId: () => undefined,
-      ref: () => ref,
-      id: () => access(parameters.id),
+    setCodependentRefs((refs) => {
+      refs.panel = {
+        explicitId: () => undefined,
+        ref: () => ref,
+        id: () => access(parameters.id),
+      };
     });
   });
 

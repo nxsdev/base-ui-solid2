@@ -76,14 +76,14 @@ describe('<RadioGroup />', () => {
     });
   });
 
-  describe('prop: readOnly', () => {
+  describe('prop: readonly', () => {
     it('should have the `aria-readonly` attribute', async () => {
-      render(() => <RadioGroup readOnly />);
+      render(() => <RadioGroup readonly />);
       const group = screen.getByRole('radiogroup');
       expect(group).to.have.attribute('aria-readonly', 'true');
     });
 
-    it('should not have the aria attribute when `readOnly` is not set', async () => {
+    it('should not have the aria attribute when `readonly` is not set', async () => {
       render(() => <RadioGroup />);
       const group = screen.getByRole('radiogroup');
       expect(group).not.to.have.attribute('aria-readonly');
@@ -91,7 +91,7 @@ describe('<RadioGroup />', () => {
 
     it('should not change its state when clicked', async () => {
       render(() => (
-        <RadioGroup readOnly>
+        <RadioGroup readonly>
           <Radio.Root value="" data-testid="item" />
         </RadioGroup>
       ));
@@ -125,7 +125,7 @@ describe('<RadioGroup />', () => {
 
   it('should place the style hooks on the root and subcomponents', async () => {
     render(() => (
-      <RadioGroup defaultValue="1" disabled readOnly required>
+      <RadioGroup defaultValue="1" disabled readonly required>
         <Radio.Root value="1" data-testid="item">
           <Radio.Indicator data-testid="indicator" />
         </Radio.Root>
@@ -563,7 +563,7 @@ describe('<RadioGroup />', () => {
       expect(screen.getByTestId('radio-group')).not.to.have.attribute('value');
     });
 
-    it('sets tabIndex=0 to the correct element initially', async () => {
+    it('sets tabindex=0 to the correct element initially', async () => {
       render(() => (
         <RadioGroup defaultValue="b">
           <Radio.Root value="a" data-testid="radio-a" />

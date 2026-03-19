@@ -124,7 +124,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
     get 'aria-disabled'() {
       return disabled() || undefined;
     },
-    get tabIndex() {
+    get tabindex() {
       return highlighted() ? 0 : -1;
     },
     onFocus() {

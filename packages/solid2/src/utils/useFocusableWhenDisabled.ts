@@ -8,7 +8,7 @@ export function useFocusableWhenDisabled(
   const focusableWhenDisabled = () => access(parameters.focusableWhenDisabled);
   const disabled = () => access(parameters.disabled);
   const composite = () => access(parameters.composite) ?? false;
-  const tabIndexProp = () => access(parameters.tabIndex) ?? 0;
+  const tabIndexProp = () => access(parameters.tabindex) ?? 0;
   const isNativeButton = () => access(parameters.isNativeButton);
 
   const isFocusableComposite = () => composite?.() && focusableWhenDisabled?.() !== false;
@@ -77,7 +77,7 @@ export namespace useFocusableWhenDisabled {
     /**
      * @default 0
      */
-    tabIndex?: MaybeAccessor<string | number | undefined>;
+    tabindex?: MaybeAccessor<string | number | undefined>;
     /**
      * @default true
      */

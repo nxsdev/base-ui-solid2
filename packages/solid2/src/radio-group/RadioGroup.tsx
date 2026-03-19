@@ -34,7 +34,7 @@ const MODIFIER_KEYS = [SHIFT];
 export function RadioGroup(componentProps: RadioGroup.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, [
     'disabled',
-    'readOnly',
+    'readonly',
     'required',
     'onValueChange',
     'value',
@@ -146,10 +146,10 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         id: id(),
         name: name(),
         disabled: disabled(),
-        readOnly: local.readOnly,
+        readonly: local.readonly,
         required: local.required,
         'aria-hidden': true,
-        tabIndex: -1,
+        tabindex: -1,
         style: visuallyHidden,
         ref: (el) => {
           if (local.refs) {
@@ -172,8 +172,8 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
     get required() {
       return local.required ?? false;
     },
-    get readOnly() {
-      return local.readOnly ?? false;
+    get readonly() {
+      return local.readonly ?? false;
     },
   });
 
@@ -190,7 +190,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
           return disabled() || undefined;
         },
         get 'aria-readonly'() {
-          return local.readOnly || undefined;
+          return local.readonly || undefined;
         },
         get 'aria-labelledby'() {
           return labelId();
@@ -213,7 +213,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         disabled,
         name,
         onValueChange: (...args) => local.onValueChange?.(...args),
-        readOnly: () => local.readOnly,
+        readonly: () => local.readonly,
         required: () => local.required,
         registerControlRef,
         setCheckedValue,
@@ -237,7 +237,7 @@ export namespace RadioGroup {
     /**
      * Whether the user should be unable to select a different radio button in the group.
      */
-    readOnly: boolean | undefined;
+    readonly: boolean | undefined;
   }
 
   export interface Props extends Omit<BaseUIComponentProps<'div', State>, 'value'> {
@@ -250,7 +250,7 @@ export namespace RadioGroup {
      * Whether the user should be unable to select a different radio button in the group.
      * @default false
      */
-    readOnly?: boolean;
+    readonly?: boolean;
     /**
      * Whether the user must choose a value before submitting a form.
      * @default false

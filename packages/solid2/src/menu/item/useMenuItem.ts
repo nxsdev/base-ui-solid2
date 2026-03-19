@@ -33,7 +33,7 @@ export function useMenuItem(params: useMenuItem.Parameters): useMenuItem.ReturnV
         get id() {
           return id();
         },
-        get tabIndex() {
+        get tabindex() {
           return highlighted() ? 0 : -1;
         },
         onMouseEnter() {

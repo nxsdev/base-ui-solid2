@@ -30,7 +30,7 @@ import { RadioRootContext } from './RadioRootContext';
 export function RadioRoot(componentProps: RadioRoot.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, [
     'disabled',
-    'readOnly',
+    'readonly',
     'required',
     'value',
     'refs',
@@ -38,13 +38,13 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
   ]);
 
   const disabledProp = () => local.disabled ?? false;
-  const readOnlyProp = () => local.readOnly ?? false;
+  const readOnlyProp = () => local.readonly ?? false;
   const requiredProp = () => local.required ?? false;
   const nativeButton = () => local.nativeButton ?? true;
 
   const {
     disabled: disabledRoot,
-    readOnly: readOnlyRoot,
+    readonly: readOnlyRoot,
     required: requiredRoot,
     checkedValue,
     setCheckedValue,
@@ -58,7 +58,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
   const { state: fieldState, disabled: fieldDisabled } = useFieldRootContext();
 
   const disabled = () => fieldDisabled() || disabledRoot() || disabledProp();
-  const readOnly = () => readOnlyRoot() || readOnlyProp();
+  const readonly = () => readOnlyRoot() || readOnlyProp();
   const required = () => requiredRoot() || requiredProp();
 
   const { setDirty, validityData, setTouched: setFieldTouched, setFilled } = useFieldRootContext();
@@ -79,7 +79,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
       return disabled() || undefined;
     },
     get 'aria-readonly'() {
-      return readOnly() || undefined;
+      return readonly() || undefined;
     },
     get [ACTIVE_COMPOSITE_ITEM as string]() {
       return checked() ? '' : undefined;
@@ -94,7 +94,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
       }
     },
     onClick(event) {
-      if (event.defaultPrevented || disabled() || readOnly()) {
+      if (event.defaultPrevented || disabled() || readonly()) {
         return;
       }
 
@@ -103,7 +103,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
       inputRef()?.click();
     },
     onFocus(event) {
-      if (event.defaultPrevented || disabled() || readOnly() || !touched()) {
+      if (event.defaultPrevented || disabled() || readonly() || !touched()) {
         return;
       }
 
@@ -129,7 +129,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
   const inputProps: JSX.InputHTMLAttributes<HTMLInputElement> = {
     'aria-hidden': true,
     type: 'radio',
-    tabIndex: -1,
+    tabindex: -1,
     style: visuallyHidden,
     // Set `id` to stop Chrome warning about an unassociated input
     get id() {
@@ -144,8 +144,8 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
     get required() {
       return required();
     },
-    get readOnly() {
-      return readOnly();
+    get readonly() {
+      return readonly();
     },
     ref: (el) => {
       if (local.refs) {
@@ -159,7 +159,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
         return;
       }
 
-      if (disabled() || readOnly() || local.value === undefined) {
+      if (disabled() || readonly() || local.value === undefined) {
         return;
       }
 
@@ -180,8 +180,8 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
     get required() {
       return required();
     },
-    get readOnly() {
-      return readOnly();
+    get readonly() {
+      return readonly();
     },
     get checked() {
       return checked();
@@ -195,7 +195,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
     focused: () => fieldState.focused,
     disabled,
     touched,
-    readOnly,
+    readonly,
     checked,
     required,
   };
@@ -246,7 +246,7 @@ export namespace RadioRoot {
      * Whether the user should be unable to select the radio button.
      * @default false
      */
-    readOnly?: boolean;
+    readonly?: boolean;
     refs?: {
       /**
        * A ref to access the hidden input element.
@@ -274,7 +274,7 @@ export namespace RadioRoot {
     /**
      * Whether the user should be unable to select the radio button.
      */
-    readOnly: boolean;
+    readonly: boolean;
     /**
      * Whether the user must choose a value before submitting a form.
      */

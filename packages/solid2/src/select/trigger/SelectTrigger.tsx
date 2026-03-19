@@ -41,7 +41,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     setOpen,
     refs,
     fieldControlValidation,
-    readOnly,
+    readonly,
     disabled: selectDisabled,
   } = useSelectRootContext();
 
@@ -98,8 +98,8 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     get value() {
       return store.value;
     },
-    get readOnly() {
-      return readOnly();
+    get readonly() {
+      return readonly();
     },
   });
 
@@ -117,9 +117,9 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
           return labelId();
         },
         get 'aria-readonly'() {
-          return readOnly() || undefined;
+          return readonly() || undefined;
         },
-        get tabIndex() {
+        get tabindex() {
           return disabled() ? -1 : 0;
         },
         onFocus(event) {
@@ -243,7 +243,7 @@ export namespace SelectTrigger {
     /**
      * Whether the select menu is readonly.
      */
-    readOnly: boolean;
+    readonly: boolean;
     /**
      * The value of the currently selected item.
      */

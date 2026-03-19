@@ -70,7 +70,7 @@ export interface SliderRootContext {
    * @default 1
    */
   step: Accessor<number>;
-  tabIndex: Accessor<number | null>;
+  tabindex: Accessor<number | null>;
   thumbArray: Accessor<
     Array<{ element: Element; metadata: CompositeMetadata<ThumbMetadata> | null }>
   >;

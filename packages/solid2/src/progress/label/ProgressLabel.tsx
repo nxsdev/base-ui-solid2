@@ -22,7 +22,9 @@ export function ProgressLabel(componentProps: ProgressLabel.Props) {
   const { setCodependentRefs, state } = useProgressRootContext();
 
   onSettled(() => {
-    setCodependentRefs('label', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.label = { explicitId: id, ref: () => ref, id: () => local.id };
+    });
   });
 
   const element = useRenderElement('span', componentProps, {

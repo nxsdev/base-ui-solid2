@@ -50,7 +50,7 @@ export function useDialogPopup(parameters: useDialogPopup.Parameters): useDialog
       return mounted() && modal() === true ? true : undefined;
     },
     role: 'dialog',
-    tabIndex: -1,
+    tabindex: -1,
     get hidden() {
       return !mounted();
     },

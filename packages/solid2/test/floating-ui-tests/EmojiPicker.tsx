@@ -90,7 +90,7 @@ function Option(props: OptionProps) {
       aria-selected={local.selected}
       disabled={local.name === 'orange'}
       aria-label={local.name}
-      tabIndex={-1}
+      tabindex={-1}
       data-active={local.active ? '' : undefined}
       type="button"
     >

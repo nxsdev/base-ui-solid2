@@ -20,7 +20,9 @@ export function AlertDialogDescription(componentProps: AlertDialogDescription.Pr
   let ref: HTMLElement;
 
   onSettled(() => {
-    setCodependentRefs('description', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.description = { explicitId: id, ref: () => ref, id: () => local.id };
+    });
   });
 
   const element = useRenderElement('p', componentProps, {

@@ -76,7 +76,7 @@ export function Main(props: Props) {
                     type="button"
                     role="option"
                     aria-selected={activeIndex() === index()}
-                    tabIndex={activeIndex() === index() ? 0 : -1}
+                    tabindex={activeIndex() === index() ? 0 : -1}
                     disabled={disabledIndices.includes(index())}
                     ref={(node) => {
                       listRef[index()] = node;

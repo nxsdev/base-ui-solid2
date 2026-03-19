@@ -19,7 +19,7 @@ describe('getStyleHookProps', () => {
 
   it('changes the fields names to lowercase', () => {
     const state = {
-      readOnly: true,
+      readonly: true,
     };
 
     const result = getStyleHookProps(state);

@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal, on, onCleanup } from 'solid-js';
+import { createEffect, createSignal } from 'solid-js';
 import { createStore } from 'solid-js';
 import { useFieldsetRootContext } from '../../fieldset/root/FieldsetRootContext';
 import { useFormContext } from '../../form/FormContext';
@@ -127,36 +127,33 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
   };
 
   createEffect(
-    on([() => childRefs.control, () => childRefs.label], ([control, label]) => {
-      batch(() => {
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        let controlId: string | null | undefined = undefined;
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        let labelId: string | undefined = undefined;
+    () => [childRefs.control, childRefs.label] as const,
+    ([control, label]) => {
+      let nextControlId: string | null | undefined;
+      let nextLabelId: string | undefined;
 
-        if (control) {
-          if (control.ref()?.closest('label') != null) {
-            controlId = control.id() ?? null;
-          } else {
-            controlId = control.explicitId();
-          }
+      if (control) {
+        if (control.ref()?.closest('label') != null) {
+          nextControlId = control.id() ?? null;
+        } else {
+          nextControlId = control.explicitId();
         }
+      }
 
-        if (label) {
-          if (controlId != null || label?.id() != null) {
-            labelId = label!.explicitId();
-          }
+      if (label) {
+        if (nextControlId != null || label.id() != null) {
+          nextLabelId = label.explicitId();
         }
+      }
 
-        setControlId(controlId);
-        setLabelId(labelId);
-      });
+      setControlId(nextControlId);
+      setLabelId(nextLabelId);
 
-      onCleanup(() => {
+      return () => {
         setControlId(undefined);
         setLabelId(undefined);
-      });
-    }),
+      };
+    },
   );
 
   const element = useRenderElement('div', componentProps, {

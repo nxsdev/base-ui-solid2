@@ -8,8 +8,8 @@ import { useFocusableWhenDisabled } from '../utils/useFocusableWhenDisabled';
 
 export function useButton(parameters: useButton.Parameters = {}): useButton.ReturnValue {
   const disabled = () => access(parameters.disabled) ?? false;
-  const tabIndex = () => {
-    const value = access(parameters.tabIndex);
+  const tabindex = () => {
+    const value = access(parameters.tabindex);
     return value === undefined || value === false ? 0 : value;
   };
   const isNativeButton = () => access(parameters.native) ?? true;
@@ -27,7 +27,7 @@ export function useButton(parameters: useButton.Parameters = {}): useButton.Retu
     focusableWhenDisabled,
     disabled,
     composite: isCompositeItem,
-    tabIndex,
+    tabindex,
     isNativeButton,
   });
 
@@ -174,7 +174,7 @@ interface AdditionalButtonProps
     'aria-disabled': JSX.AriaAttributes['aria-disabled'];
     disabled: boolean;
     role: JSX.AriaAttributes['role'];
-    tabIndex?: number;
+    tabindex?: number;
   }> {}
 
 export namespace useButton {
@@ -189,7 +189,7 @@ export namespace useButton {
      * @default false
      */
     focusableWhenDisabled?: MaybeAccessor<boolean | undefined>;
-    tabIndex?: MaybeAccessor<NonNullable<JSX.HTMLAttributes<any>['tabindex']> | undefined>;
+    tabindex?: MaybeAccessor<NonNullable<JSX.HTMLAttributes<any>['tabindex']> | undefined>;
     /**
      * Whether the component is being rendered as a native button.
      * @default true

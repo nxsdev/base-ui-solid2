@@ -498,7 +498,7 @@ export function ToastRoot(componentProps: ToastRoot.Props) {
     get role() {
       return local.toast.priority === 'high' ? 'alertdialog' : 'dialog';
     },
-    tabIndex: 0,
+    tabindex: 0,
     'aria-modal': false,
     get 'aria-labelledby'() {
       return titleId();

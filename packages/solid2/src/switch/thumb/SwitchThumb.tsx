@@ -23,8 +23,8 @@ export function SwitchThumb(componentProps: SwitchThumb.Props) {
     get checked() {
       return state.checked();
     },
-    get readOnly() {
-      return state.readOnly();
+    get readonly() {
+      return state.readonly();
     },
     get required() {
       return state.required();

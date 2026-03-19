@@ -9,7 +9,7 @@ import { CheckboxRootContext } from '../root/CheckboxRootContext';
 const testContext = () => ({
   checked: true,
   disabled: false,
-  readOnly: false,
+  readonly: false,
   required: false,
   indeterminate: false,
   dirty: false,

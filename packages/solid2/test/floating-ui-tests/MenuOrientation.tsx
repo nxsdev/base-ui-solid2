@@ -226,7 +226,7 @@ export function MenuComponent(
         }}
         data-open={isOpen() ? '' : undefined}
         // eslint-disable-next-line no-nested-ternary
-        tabIndex={!isNested ? props.tabIndex : parent.activeIndex() === item.index() ? 0 : -1}
+        tabindex={!isNested ? props.tabindex : parent.activeIndex() === item.index() ? 0 : -1}
         class={c(
           props.class || 'flex items-center justify-between gap-4 rounded px-2 py-1 text-left',
           {
@@ -344,7 +344,7 @@ export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLButtonEle
       type="button"
       role="menuitem"
       disabled={local.disabled}
-      tabIndex={isActive() ? 0 : -1}
+      tabindex={isActive() ? 0 : -1}
       class={c('focus:bg-blue-500 flex rounded px-2 py-1 text-left outline-none focus:text-white', {
         'opacity-40': local.disabled,
       })}

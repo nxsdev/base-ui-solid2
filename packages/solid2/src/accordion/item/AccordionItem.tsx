@@ -1,9 +1,8 @@
 import {
-  batch,
   createEffect,
   createMemo,
   createSignal,
-  on,
+  createTrackedEffect,
   merge as solidMergeProps,
 } from 'solid-js';
 import { createStore } from 'solid-js';
@@ -61,10 +60,8 @@ export function AccordionItem(componentProps: AccordionItem.Props) {
   });
 
   const onOpenChange = (nextOpen: boolean) => {
-    batch(() => {
-      handleValueChange(value(), nextOpen);
-      local.onOpenChange?.(nextOpen);
-    });
+    handleValueChange(value(), nextOpen);
+    local.onOpenChange?.(nextOpen);
   };
 
   const collapsible = useCollapsibleRoot({
@@ -111,14 +108,12 @@ export function AccordionItem(componentProps: AccordionItem.Props) {
   const [codependentRefs, setCodependentRefs] = createStore<CodependentRefs<['trigger']>>({});
 
   createEffect(
-    on(
-      () => codependentRefs.trigger,
-      (trigger) => {
-        if (trigger) {
-          setTriggerId(trigger.id() ?? trigger.explicitId());
-        }
-      },
-    ),
+    () => codependentRefs.trigger,
+    (trigger) => {
+      if (trigger) {
+        setTriggerId(trigger.id() ?? trigger.explicitId());
+      }
+    },
   );
 
   const accordionItemContext: AccordionItemContext = {

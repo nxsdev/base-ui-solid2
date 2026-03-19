@@ -24,7 +24,9 @@ export function FieldLabel(componentProps: FieldLabel.Props) {
   let ref: HTMLElement;
 
   onSettled(() => {
-    setCodependentRefs('label', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.label = { explicitId: id, ref: () => ref, id: () => local.id };
+    });
   });
 
   const element = useRenderElement('label', componentProps, {

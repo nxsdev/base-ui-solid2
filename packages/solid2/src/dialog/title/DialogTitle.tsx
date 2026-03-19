@@ -19,7 +19,9 @@ export function DialogTitle(componentProps: DialogTitle.Props) {
   let ref: HTMLElement;
 
   onSettled(() => {
-    setCodependentRefs('title', { explicitId: id, ref: () => ref, id: () => local.id });
+    setCodependentRefs((refs) => {
+      refs.title = { explicitId: id, ref: () => ref, id: () => local.id };
+    });
   });
 
   const element = useRenderElement('h2', componentProps, {
