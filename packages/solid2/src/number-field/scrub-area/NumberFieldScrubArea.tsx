@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup } from 'solid-js';
+import { createSignal, createTrackedEffect } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import { isWebKit } from '../../utils/detectBrowser';
 import { ownerDocument, ownerWindow } from '../../utils/owner';
@@ -52,7 +52,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
   const [isTouchInput, setIsTouchInput] = createSignal(false);
   const [isPointerLockDenied, setIsPointerLockDenied] = createSignal(false);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!isScrubbing() || !refs.scrubAreaCursorRef) {
       return;
     }
@@ -120,7 +120,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
     updateCursorTransform(initialCoords.x, initialCoords.y);
   };
 
-  createEffect(function registerGlobalScrubbingEventListeners() {
+  createTrackedEffect(function registerGlobalScrubbingEventListeners() {
     if (!numberFieldRootRefs.inputRef || disabled() || readonly()) {
       return;
     }
@@ -165,14 +165,14 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
     win.addEventListener('pointerup', handleScrubPointerUp, true);
     win.addEventListener('pointermove', handleScrubPointerMove, true);
 
-    onCleanup(() => {
+    return () => {
       win.removeEventListener('pointerup', handleScrubPointerUp, true);
       win.removeEventListener('pointermove', handleScrubPointerMove, true);
-    });
+    };
   });
 
   // Prevent scrolling using touch input when scrubbing.
-  createEffect(function registerScrubberTouchPreventListener() {
+  createTrackedEffect(function registerScrubberTouchPreventListener() {
     const element = refs.scrubAreaRef;
     if (!element || disabled() || readonly()) {
       return;
@@ -186,9 +186,9 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
 
     element.addEventListener('touchstart', handleTouchStart);
 
-    onCleanup(() => {
+    return () => {
       element.removeEventListener('touchstart', handleTouchStart);
-    });
+    };
   });
 
   const defaultProps: HTMLProps = {

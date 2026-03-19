@@ -1,4 +1,4 @@
-import { batch, createEffect, type JSX } from 'solid-js';
+import { createTrackedEffect, type JSX } from 'solid-js';
 import { useFieldControlValidation } from '../../field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../field/root/FieldRootContext';
 import { useField } from '../../field/useField';
@@ -87,12 +87,12 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
   let prevInputValueRef = inputValue();
 
   // TODO: this effect has to be the first in order to sync the refs
-  createEffect(() => {
+  createTrackedEffect(() => {
     prevValueRef = value();
     prevInputValueRef = inputValue();
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (prevValueRef === value() && prevInputValueRef === inputValue()) {
       return;
     }
@@ -104,7 +104,7 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (prevValueRef === value() || validationMode() === 'onChange') {
       return;
     }
@@ -134,14 +134,14 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
     get readonly() {
       return readonly();
     },
-    get inputMode() {
+    get inputmode() {
       return inputMode();
     },
     get value() {
       return inputValue();
     },
     get 'aria-invalid'() {
-      return invalid() || undefined;
+      return invalid() ? 'true' : undefined;
     },
     get 'aria-labelledby'() {
       return labelId();
@@ -233,10 +233,8 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
       const targetValue = event.target.value;
 
       if (targetValue.trim() === '') {
-        batch(() => {
-          setInputValue(targetValue);
-          setValue(null, event);
-        });
+        setInputValue(targetValue);
+        setValue(null, event);
         return;
       }
 
@@ -247,10 +245,8 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
 
       const parsedValue = parseNumber(targetValue, locale(), refs.formatOptionsRef);
       if (parsedValue !== null) {
-        batch(() => {
-          setInputValue(targetValue);
-          setValue(parsedValue, event);
-        });
+        setInputValue(targetValue);
+        setValue(parsedValue, event);
       }
     },
     onKeyDown(event) {
@@ -342,11 +338,9 @@ export function NumberFieldInput(componentProps: NumberFieldInput.Props) {
       const parsedValue = parseNumber(pastedData, locale(), refs.formatOptionsRef);
 
       if (parsedValue !== null) {
-        batch(() => {
-          refs.allowInputSyncRef = false;
-          setValue(parsedValue, event);
-          setInputValue(pastedData);
-        });
+        refs.allowInputSyncRef = false;
+        setValue(parsedValue, event);
+        setInputValue(pastedData);
       }
     },
   };

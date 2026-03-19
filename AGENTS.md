@@ -40,7 +40,8 @@ This repository now contains the upstream React implementation of Base UI and an
 - Avoid top-level prop destructuring in Solid components; prefer accessors, explicit getters, and narrowly scoped internal helpers instead of recreating Solid 1 helper APIs wholesale.
 - Narrow internal helpers are acceptable only when they preserve existing Base UI behavior without introducing a generic Solid 1 compatibility surface. Do not spread generic replacements for removed Solid 1 APIs across the package.
 - Treat `JSX.RemoveAttribute` as a props-boundary concern only. Normalize it to internal `string | undefined` values before storing ids in signals, stores, or context.
-- Use `createTrackedEffect` as the default migration target for old Solid 1-style tracked effects when preserving behavior. Prefer `onSettled` for mount/settle timing and the new `createEffect` forms when compute/apply separation is clearer. Do not use `createTrackedEffect` as a blanket replacement for every effect.
+- Do not mechanically replace every legacy effect with `createTrackedEffect`. Use it narrowly for listener registration, imperative DOM synchronization, or cleanup-heavy bridges where a single tracked callback is still the clearest migration step.
+- Prefer split `createEffect(compute, apply)` for value synchronization and store/context updates, and prefer `onSettled` for mount/settle timing. Reduce temporary `createTrackedEffect` usage as files stabilize.
 - Render structural children explicitly. Do not assume React-style slotting behavior.
 - Re-derive timing-sensitive logic such as focus management, list registration, and uncontrolled state updates for Solid instead of porting React timing assumptions.
 

@@ -55,7 +55,7 @@ export function SelectItemIndicator(componentProps: SelectItemIndicator.Props) {
         get hidden() {
           return !mounted();
         },
-        'aria-hidden': true,
+        'aria-hidden': 'true',
       },
       elementProps,
     ],

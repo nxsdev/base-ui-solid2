@@ -1,5 +1,5 @@
 import { getNodeName, isHTMLElement } from '@floating-ui/utils/dom';
-import { createEffect, createMemo, createSignal, on, onCleanup, Show, type JSX } from 'solid-js';
+import { createMemo, createSignal, createTrackedEffect, Show, type JSX } from 'solid-js';
 import { focusable, isTabbable, tabbable, type FocusableElement } from 'tabbable';
 import { FocusGuard } from '../../utils/FocusGuard';
 import { visuallyHidden } from '../../utils/visuallyHidden';
@@ -442,22 +442,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
     }
   }
 
-  onCleanup(() => {
-    const doc = getDocument(floatingFocusElement());
-    doc.removeEventListener('keydown', onKeyDown);
-
-    const floating = props.context.elements.floating();
-    floating?.removeEventListener('focusin', handleFocusIn);
-    floating?.removeEventListener('focusout', handleFocusOutside);
-
-    const domReference = props.context.elements.domReference();
-    if (isHTMLElement(domReference)) {
-      domReference?.removeEventListener('focusout', handleFocusOutside);
-      domReference?.removeEventListener('pointerdown', handlePointerDown);
-    }
-  });
-
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (disabled()) {
       return;
     }
@@ -477,19 +462,29 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
       domReference.addEventListener('pointerdown', handlePointerDown);
       floating.addEventListener('focusout', handleFocusOutside);
     }
+
+    return () => {
+      doc.removeEventListener('keydown', onKeyDown);
+      floating?.removeEventListener('focusin', handleFocusIn);
+      floating?.removeEventListener('focusout', handleFocusOutside);
+
+      if (isHTMLElement(domReference)) {
+        domReference.removeEventListener('focusout', handleFocusOutside);
+        domReference.removeEventListener('pointerdown', handlePointerDown);
+      }
+    };
   });
 
-  createEffect(
-    on(disabled, () => {
-      // The `returnFocus` cleanup behavior is inside a microtask; ensure we
-      // wait for it to complete before resetting the flag.
-      queueMicrotask(() => {
-        preventReturnFocusRef = false;
-      });
-    }),
-  );
+  createTrackedEffect(() => {
+    disabled();
+    // The `returnFocus` cleanup behavior is inside a microtask; ensure we
+    // wait for it to complete before resetting the flag.
+    queueMicrotask(() => {
+      preventReturnFocusRef = false;
+    });
+  });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const floatingElement = floatingFocusElement();
     if (disabled() || !isHTMLElement(floatingElement)) {
       return;
@@ -554,7 +549,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
     ].filter((x): x is Element => x != null);
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (disabled()) {
       return;
     }
@@ -569,12 +564,12 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
         ? markOthers(insideElements(), !useInert(), useInert())
         : markOthers(insideElements());
 
-    onCleanup(() => {
+    return () => {
       cleanup();
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const floatingElement = floatingFocusElement();
     if (disabled() || !floatingElement) {
       return;
@@ -609,7 +604,7 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
       return returnFocusValue || fallbackEl;
     }
 
-    onCleanup(() => {
+    return () => {
       props.context.events.off('openchange', onOpenChangeLocal);
 
       const activeEl = activeElement(doc);
@@ -644,12 +639,12 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
 
         fallbackEl.remove();
       });
-    });
+    };
   });
 
   // Synchronize the `context` & `modal` value to the FloatingPortal context.
   // It will decide whether or not it needs to render its own guards.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (disabled()) {
       return;
     }
@@ -665,12 +660,12 @@ export function FloatingFocusManager(props: FloatingFocusManagerProps): JSX.Elem
       domReference: props.context.elements.domReference(),
     });
 
-    onCleanup(() => {
+    return () => {
       portalContext.setFocusManagerState(null);
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (disabled()) {
       return;
     }

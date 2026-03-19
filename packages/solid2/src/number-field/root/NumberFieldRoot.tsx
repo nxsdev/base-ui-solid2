@@ -1,8 +1,6 @@
 import {
-  batch,
-  createEffect,
+  createTrackedEffect,
   createSignal,
-  on,
   onCleanup,
   onSettled,
   Show,
@@ -106,14 +104,16 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
   };
 
   onSettled(() => {
-    setChildRefs('control', { explicitId: id, ref: () => refs.inputRef, id });
+    setChildRefs((state) => {
+      state.control = { explicitId: id, ref: () => refs.inputRef, id };
+    });
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     refs.valueRef = value();
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     setFilled(value() !== null);
   });
 
@@ -122,9 +122,11 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
   const intentionalTouchCheckTimeout = useTimeout();
   let unsubscribeFromGlobalContextMenuRef = () => {};
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (validityData.initialValue === null && value() !== validityData.initialValue) {
-      setValidityData('initialValue', value());
+      setValidityData((state) => {
+        state.initialValue = value();
+      });
     }
   });
 
@@ -142,22 +144,26 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
   const [inputValue, setInputValueUnwrapped] = createSignal(getProcessedValue());
   const [inputMode, setInputMode] = createSignal<InputMode>('numeric');
 
-  createEffect(
-    on([value, () => local.value, () => local.locale, () => local.format, inputValue], () => {
-      if (!refs.allowInputSyncRef) {
-        return;
-      }
+  createTrackedEffect(() => {
+    value();
+    local.value;
+    local.locale;
+    local.format;
+    inputValue();
 
-      const nextInputValue =
-        local.value !== undefined
-          ? getControlledInputValue(value(), local.locale, local.format)
-          : formatNumber(value(), local.locale, local.format);
+    if (!refs.allowInputSyncRef) {
+      return;
+    }
 
-      if (nextInputValue !== inputValue()) {
-        setInputValueUnwrapped(nextInputValue);
-      }
-    }),
-  );
+    const nextInputValue =
+      local.value !== undefined
+        ? getControlledInputValue(value(), local.locale, local.format)
+        : formatNumber(value(), local.locale, local.format);
+
+    if (nextInputValue !== inputValue()) {
+      setInputValueUnwrapped(nextInputValue);
+    }
+  });
 
   const setInputValue = (nextInputValue: string) => {
     // We need to update the input value when the external `value` prop changes. This ends up acting
@@ -216,19 +222,17 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
       small: eventWithOptionalKeyState?.altKey ?? false,
     });
 
-    batch(() => {
-      local.onValueChange?.(validatedValue, event);
-      setValueUnwrapped(validatedValue);
-      setDirty(validatedValue !== validityData.initialValue);
+    local.onValueChange?.(validatedValue, event);
+    setValueUnwrapped(validatedValue);
+    setDirty(validatedValue !== validityData.initialValue);
 
-      // Keep the visible input in sync immediately when programmatic changes occur
-      // (increment/decrement, wheel, etc). During direct typing we don't want
-      // to overwrite the user-provided text until blur, so we gate on
-      // `allowInputSyncRef`.
-      if (refs.allowInputSyncRef) {
-        setInputValueUnwrapped(formatNumber(validatedValue, local.locale, local.format));
-      }
-    });
+    // Keep the visible input in sync immediately when programmatic changes occur
+    // (increment/decrement, wheel, etc). During direct typing we don't want
+    // to overwrite the user-provided text until blur, so we gate on
+    // `allowInputSyncRef`.
+    if (refs.allowInputSyncRef) {
+      setInputValueUnwrapped(formatNumber(validatedValue, local.locale, local.format));
+    }
     // TODO: force render
     // Formatting can change even if the numeric value hasn't, so ensure a re-render when needed.
     // forceRender();
@@ -247,13 +251,11 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
   };
 
   const stopAutoChange = () => {
-    batch(() => {
-      intentionalTouchCheckTimeout.clear();
-      startTickTimeout.clear();
-      tickInterval.clear();
-      unsubscribeFromGlobalContextMenuRef();
-      refs.movesAfterTouchRef = 0;
-    });
+    intentionalTouchCheckTimeout.clear();
+    startTickTimeout.clear();
+    tickInterval.clear();
+    unsubscribeFromGlobalContextMenuRef();
+    refs.movesAfterTouchRef = 0;
   };
 
   const startAutoChange = (isIncrement: boolean, triggerEvent?: MouseEvent | Event) => {
@@ -297,7 +299,7 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
     });
   };
 
-  createEffect(function setDynamicInputModeForIOS() {
+  createTrackedEffect(function setDynamicInputModeForIOS() {
     if (!isIOS) {
       return;
     }
@@ -318,7 +320,7 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
   onCleanup(() => stopAutoChange());
 
   // The `onWheel` prop can't be prevented, so we need to use a global event listener.
-  createEffect(function registerElementWheelListener() {
+  createTrackedEffect(function registerElementWheelListener() {
     const element = refs.inputRef;
     if (disabled() || readonly() || !allowWheelScrub() || !element) {
       return;
@@ -343,9 +345,9 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
 
     element.addEventListener('wheel', handleWheel);
 
-    onCleanup(() => {
+    return () => {
       element.removeEventListener('wheel', handleWheel);
-    });
+    };
   });
 
   const state: NumberFieldRoot.State = solidMergeProps(fieldState, {

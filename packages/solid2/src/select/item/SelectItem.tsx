@@ -1,4 +1,4 @@
-import { batch, createEffect, createMemo, onCleanup, type JSX } from 'solid-js';
+import { createMemo, createTrackedEffect, onCleanup, type JSX } from 'solid-js';
 import {
   IndexGuessBehavior,
   useCompositeListItem,
@@ -40,7 +40,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
     indexGuessBehavior: IndexGuessBehavior.GuessFromOrder,
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     refs.indexRef = listItem.index();
   });
 
@@ -62,7 +62,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
 
   const hasRegistered = () => listItem.index() !== -1;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!hasRegistered()) {
       return;
     }
@@ -76,7 +76,7 @@ export function SelectItem(componentProps: SelectItem.Props) {
     });
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (hasRegistered() && value() === rootValue()) {
       registerSelectedItem(listItem.index());
     }
@@ -114,29 +114,33 @@ export function SelectItem(componentProps: SelectItem.Props) {
   });
 
   function commitSelection(event: MouseEvent) {
-    batch(() => {
-      setValue(value(), event);
-      setOpen(false, event, 'item-press');
-    });
+    setValue(value(), event);
+    setOpen(false, event, 'item-press');
   }
 
   const defaultProps: HTMLProps = {
     get 'aria-disabled'() {
-      return disabled() || undefined;
+      return disabled() ? 'true' : undefined;
     },
     get tabindex() {
       return highlighted() ? 0 : -1;
     },
     onFocus() {
-      setStore('activeIndex', refs.indexRef);
+      setStore((state) => {
+        state.activeIndex = refs.indexRef;
+      });
     },
     onMouseEnter() {
       if (!rootRefs.keyboardActiveRef && store.selectedIndex === null) {
-        setStore('activeIndex', refs.indexRef);
+        setStore((state) => {
+          state.activeIndex = refs.indexRef;
+        });
       }
     },
     onMouseMove() {
-      setStore('activeIndex', refs.indexRef);
+      setStore((state) => {
+        state.activeIndex = refs.indexRef;
+      });
     },
     onMouseLeave(event) {
       if (rootRefs.keyboardActiveRef || isMouseWithinBounds(event)) {
@@ -145,7 +149,9 @@ export function SelectItem(componentProps: SelectItem.Props) {
 
       highlightTimeout.start(0, () => {
         if (store.activeIndex === refs.indexRef) {
-          setStore('activeIndex', null);
+          setStore((state) => {
+            state.activeIndex = null;
+          });
         }
       });
     },
@@ -159,7 +165,9 @@ export function SelectItem(componentProps: SelectItem.Props) {
     onKeyDown(event) {
       rootRefs.selectionRef.allowSelect = true;
       lastKeyRef = event.key;
-      setStore('activeIndex', refs.indexRef);
+      setStore((state) => {
+        state.activeIndex = refs.indexRef;
+      });
     },
     onClick(event) {
       didPointerDownRef = false;

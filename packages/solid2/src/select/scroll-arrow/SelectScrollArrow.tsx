@@ -56,7 +56,7 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
     get hidden() {
       return !mounted();
     },
-    'aria-hidden': true,
+    'aria-hidden': 'true',
     get children() {
       return <>{local.direction === 'up' ? '▲' : '▼'}</>;
     },
@@ -72,7 +72,9 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
         return;
       }
 
-      setStore('activeIndex', null);
+      setStore((state) => {
+        state.activeIndex = null;
+      });
 
       function scrollNextItem() {
         const popupElement = refs.popupRef;
@@ -80,7 +82,9 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
           return;
         }
 
-        setStore('activeIndex', null);
+        setStore((state) => {
+          state.activeIndex = null;
+        });
 
         const isScrolledToTop = popupElement.scrollTop === 0;
         const isScrolledToBottom =
@@ -88,9 +92,13 @@ export function SelectScrollArrow(componentProps: SelectScrollArrow.Props) {
           popupElement.scrollHeight;
 
         if (local.direction === 'up') {
-          setStore('scrollUpArrowVisible', !isScrolledToTop);
+          setStore((state) => {
+            state.scrollUpArrowVisible = !isScrolledToTop;
+          });
         } else if (local.direction === 'down') {
-          setStore('scrollDownArrowVisible', !isScrolledToBottom);
+          setStore((state) => {
+            state.scrollDownArrowVisible = !isScrolledToBottom;
+          });
         }
 
         if (

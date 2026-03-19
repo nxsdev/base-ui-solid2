@@ -1,4 +1,4 @@
-import { createEffect, onCleanup, Show, type JSX } from 'solid-js';
+import { createTrackedEffect, Show, type JSX } from 'solid-js';
 import { useDirection } from '../../direction-provider/DirectionContext';
 import { splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
@@ -38,7 +38,7 @@ export function ScrollAreaScrollbar(componentProps: ScrollAreaScrollbar.Props) {
 
   const direction = useDirection();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const viewportEl = context.refs.viewportRef;
     const scrollbarEl =
       orientation() === 'vertical' ? context.refs.scrollbarYRef : context.refs.scrollbarXRef;
@@ -85,9 +85,9 @@ export function ScrollAreaScrollbar(componentProps: ScrollAreaScrollbar.Props) {
 
     scrollbarEl.addEventListener('wheel', handleWheel, { passive: false });
 
-    onCleanup(() => {
+    return () => {
       scrollbarEl.removeEventListener('wheel', handleWheel);
-    });
+    };
   });
 
   const contextValue: ScrollAreaScrollbarContext = { orientation };

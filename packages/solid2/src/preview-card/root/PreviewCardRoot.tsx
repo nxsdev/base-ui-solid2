@@ -1,4 +1,4 @@
-import { batch, createSignal, onSettled, type JSX } from 'solid-js';
+import { createSignal, onSettled, type JSX } from 'solid-js';
 import {
   safePolygon,
   useDismiss,
@@ -48,10 +48,8 @@ export function PreviewCardRoot(props: PreviewCardRoot.Props) {
   const { mounted, setMounted, transitionStatus } = useTransitionStatus(open);
 
   const handleUnmount = () => {
-    batch(() => {
-      setMounted(false);
-      props.onOpenChangeComplete?.(false);
-    });
+    setMounted(false);
+    props.onOpenChangeComplete?.(false);
   };
 
   useOpenChangeComplete({
@@ -81,10 +79,8 @@ export function PreviewCardRoot(props: PreviewCardRoot.Props) {
     const isDismissClose = !nextOpen && (reason === 'trigger-press' || reason === 'escape-key');
 
     function changeState() {
-      batch(() => {
-        props.onOpenChange?.(nextOpen, event, reason);
-        setOpenUnwrapped(nextOpen);
-      });
+      props.onOpenChange?.(nextOpen, event, reason);
+      setOpenUnwrapped(nextOpen);
     }
 
     if (isHover) {

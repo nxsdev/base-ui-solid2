@@ -13,6 +13,7 @@ import { useScrollAreaRootContext } from '../root/ScrollAreaRootContext';
 export function ScrollAreaCorner(componentProps: ScrollAreaCorner.Props) {
   const [, , elementProps] = splitComponentProps(componentProps, []);
   const context = useScrollAreaRootContext();
+  const hidden = () => context.hiddenState.scrollbarXHidden || context.hiddenState.scrollbarYHidden;
 
   const element = useRenderElement('div', componentProps, {
     ref: (el) => {
@@ -34,7 +35,7 @@ export function ScrollAreaCorner(componentProps: ScrollAreaCorner.Props) {
     ],
   });
 
-  return <Show when={!context.hiddenState.cornerHidden}>{element()}</Show>;
+  return <Show when={!hidden()}>{element()}</Show>;
 }
 
 export namespace ScrollAreaCorner {

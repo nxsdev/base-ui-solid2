@@ -1,5 +1,5 @@
 import { getWindow, isElement, isHTMLElement } from '@floating-ui/utils/dom';
-import { createEffect, createMemo, onCleanup, type Accessor } from 'solid-js';
+import { createMemo, createTrackedEffect, type Accessor } from 'solid-js';
 import { isMac, isSafari } from '../../utils/detectBrowser';
 import { useTimeout } from '../../utils/useTimeout';
 import {
@@ -49,7 +49,7 @@ export function useFocus(
   let keyboardModalityRef = true;
   const timeout = useTimeout();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -85,14 +85,14 @@ export function useFocus(
       win.addEventListener('pointerdown', onPointerDown, true);
     }
 
-    onCleanup(() => {
+    return () => {
       win.removeEventListener('blur', onBlur);
 
       if (isMacSafari) {
         win.removeEventListener('keydown', onKeyDown, true);
         win.removeEventListener('pointerdown', onPointerDown, true);
       }
-    });
+    };
   });
 
   function onOpenChangeLocal({ reason }: { reason: OpenChangeReason }) {
@@ -101,15 +101,15 @@ export function useFocus(
     }
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
 
     context().events.on('openchange', onOpenChangeLocal);
-    onCleanup(() => {
+    return () => {
       context().events.off('openchange', onOpenChangeLocal);
-    });
+    };
   });
 
   const reference = createMemo<ElementProps['reference']>(() => ({

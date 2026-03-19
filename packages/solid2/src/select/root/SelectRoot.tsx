@@ -63,7 +63,9 @@ export function SelectRoot<Value>(props: SelectRoot.Props<Value>): JSX.Element {
 
               const nextValue = (event.target as HTMLSelectElement).value;
 
-              rootContext.setStore('forceMount', true);
+              rootContext.setStore((state) => {
+                state.forceMount = true;
+              });
               const resolvedValue = value();
 
               queueMicrotask(() => {
@@ -98,7 +100,7 @@ export function SelectRoot<Value>(props: SelectRoot.Props<Value>): JSX.Element {
             value: serializedValue(),
             style: visuallyHidden,
             tabindex: -1,
-            'aria-hidden': true,
+            'aria-hidden': 'true',
           }) as unknown as JSX.HTMLAttributes<HTMLInputElement>)}
         />
       </SelectFloatingContext>

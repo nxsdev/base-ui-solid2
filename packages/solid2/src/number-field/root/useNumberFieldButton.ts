@@ -1,5 +1,5 @@
 import { access, type MaybeAccessor } from '../../solid-helpers';
-import type { HTMLProps } from '../../utils/types';
+import type { JSX } from 'solid-js';
 import type { Timeout } from '../../utils/useTimeout';
 import {
   DEFAULT_STEP,
@@ -45,13 +45,12 @@ export function useNumberFieldButton(
     }
   };
 
-  const props: HTMLProps = {
-    // @ts-expect-error - disabled is not a valid attribute for HTMLProps
+  const props: JSX.ButtonHTMLAttributes<HTMLButtonElement> = {
     get disabled() {
       return disabled() || (isIncrement() ? isMax() : isMin());
     },
     get 'aria-readonly'() {
-      return readonly() || undefined;
+      return readonly() ? 'true' : undefined;
     },
     get 'aria-label'() {
       return isIncrement() ? 'Increase' : 'Decrease';
@@ -209,6 +208,6 @@ export namespace useNumberFieldButton {
   }
 
   export interface ReturnValue {
-    props: HTMLProps;
+    props: JSX.ButtonHTMLAttributes<HTMLButtonElement>;
   }
 }

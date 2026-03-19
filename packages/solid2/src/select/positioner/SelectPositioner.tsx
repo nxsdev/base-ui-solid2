@@ -1,5 +1,4 @@
-import { createEffect, createSignal, merge as solidMergeProps, type JSX } from 'solid-js';
-import { produce } from 'solid-js';
+import { createSignal, createTrackedEffect, merge as solidMergeProps, type JSX } from 'solid-js';
 import { CompositeList } from '../../composite/list/CompositeList';
 import type { Padding, VirtualElement } from '../../floating-ui-solid';
 import { splitComponentProps } from '../../solid-helpers';
@@ -67,24 +66,28 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
   const alignItemWithTriggerActive = () =>
     store.mounted && controlledAlignItemWithTrigger() && !store.touchModality;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!store.mounted && controlledAlignItemWithTrigger() !== alignItemWithTrigger()) {
       setControlledAlignItemWithTrigger(alignItemWithTrigger());
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!alignItemWithTrigger() || !store.mounted) {
       if (store.scrollUpArrowVisible) {
-        setStore('scrollUpArrowVisible', false);
+        setStore((state) => {
+          state.scrollUpArrowVisible = false;
+        });
       }
       if (store.scrollDownArrowVisible) {
-        setStore('scrollDownArrowVisible', false);
+        setStore((state) => {
+          state.scrollDownArrowVisible = false;
+        });
       }
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     refs.alignItemWithTriggerActiveRef = alignItemWithTriggerActive();
   });
 
@@ -152,29 +155,27 @@ export function SelectPositioner(componentProps: SelectPositioner.Props) {
   };
 
   const setPositionerElement = (element: HTMLElement | null | undefined) => {
-    setStore('positionerElement', element);
+    setStore((state) => {
+      state.positionerElement = element;
+    });
   };
 
   const onMapChange = () => {
     if (store.value !== null) {
       const valueIndex = refs.valuesRef.indexOf(store.value);
       if (valueIndex === -1) {
-        setStore(
-          produce((state) => {
-            state.label = '';
-            state.selectedIndex = null;
-          }),
-        );
+        setStore((state) => {
+          state.label = '';
+          state.selectedIndex = null;
+        });
       }
     }
 
     if (store.open && alignItemWithTriggerActive()) {
-      setStore(
-        produce((state) => {
-          state.scrollUpArrowVisible = false;
-          state.scrollDownArrowVisible = false;
-        }),
-      );
+      setStore((state) => {
+        state.scrollUpArrowVisible = false;
+        state.scrollDownArrowVisible = false;
+      });
 
       if (store.positionerElement) {
         clearPositionerStyles(store.positionerElement, { height: '' });

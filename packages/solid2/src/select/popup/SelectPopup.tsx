@@ -1,4 +1,4 @@
-import { createEffect, onCleanup, onSettled, type JSX } from 'solid-js';
+import { createTrackedEffect, onSettled, type JSX } from 'solid-js';
 import { FloatingFocusManager } from '../../floating-ui-solid';
 import { splitComponentProps } from '../../solid-helpers';
 import { DISABLED_TRANSITIONS_STYLE } from '../../utils/constants';
@@ -13,6 +13,7 @@ import type { BaseUIComponentProps, HTMLProps } from '../../utils/types';
 import type { Side } from '../../utils/useAnchorPositioning';
 import { useOpenChangeComplete } from '../../utils/useOpenChangeComplete';
 import { useRenderElement } from '../../utils/useRenderElement';
+import { useTimeout } from '../../utils/useTimeout';
 import type { TransitionStatus } from '../../utils/useTransitionStatus';
 import { useSelectPositionerContext } from '../positioner/SelectPositionerContext';
 import { useSelectRootContext } from '../root/SelectRootContext';
@@ -66,6 +67,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
   let reachedMaxHeightRef = false;
   let initialPlacedRef = false;
   let originalPositionerStylesRef: JSX.CSSProperties = {};
+  const initialPlacementTimeout = useTimeout();
 
   const handleScrollArrowVisibility = () => {
     if (!alignItemWithTriggerActive() || !refs.popupRef) {
@@ -77,14 +79,18 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
       refs.popupRef.scrollTop + refs.popupRef.clientHeight >= refs.popupRef.scrollHeight - 1;
 
     if (store.scrollUpArrowVisible !== !isScrolledToTop) {
-      setStore('scrollUpArrowVisible', !isScrolledToTop);
+      setStore((state) => {
+        state.scrollUpArrowVisible = !isScrolledToTop;
+      });
     }
     if (store.scrollDownArrowVisible !== !isScrolledToBottom) {
-      setStore('scrollDownArrowVisible', !isScrolledToBottom);
+      setStore((state) => {
+        state.scrollDownArrowVisible = !isScrolledToBottom;
+      });
     }
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!store.positionerElement || Object.keys(originalPositionerStylesRef).length) {
       return;
     }
@@ -102,7 +108,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
     };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (store.mounted || alignItemWithTriggerActive()) {
       return;
     }
@@ -116,7 +122,7 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const popupElement = refs.popupRef;
     const positionerElement = store.positionerElement;
     const triggerElement = store.triggerElement;
@@ -233,13 +239,13 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
       handleScrollArrowVisibility();
 
       // Avoid the `onScroll` event logic from triggering before the popup is placed.
-      setTimeout(() => {
+      initialPlacementTimeout.start(0, () => {
         initialPlacedRef = true;
       });
     });
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!alignItemWithTriggerActive() || !store.positionerElement || !store.mounted) {
       return;
     }
@@ -252,9 +258,9 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
 
     win.addEventListener('resize', handleResize);
 
-    onCleanup(() => {
+    return () => {
       win.removeEventListener('resize', handleResize);
-    });
+    };
   });
 
   const defaultProps: HTMLProps = {
@@ -272,7 +278,9 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
       const popup = event.currentTarget;
 
       highlightTimeout.start(0, () => {
-        setStore('activeIndex', null);
+        setStore((state) => {
+          state.activeIndex = null;
+        });
         popup.focus({ preventScroll: true });
       });
     },
@@ -377,12 +385,14 @@ export function SelectPopup(componentProps: SelectPopup.Props) {
     if (!document.head.getElementsByTagName('style').namedItem(STYLE_TAG_ID)) {
       const el = styleDisableScrollbar.element();
       document.head.appendChild(el);
-      onCleanup(() => {
+      return () => {
         if (document.head.getElementsByTagName('style').namedItem(STYLE_TAG_ID)) {
           document.head.removeChild(el);
         }
-      });
+      };
     }
+
+    return undefined;
   });
 
   return (

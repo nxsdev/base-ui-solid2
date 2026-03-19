@@ -1,4 +1,4 @@
-import { batch, createEffect, onCleanup, merge as solidMergeProps, type JSX } from 'solid-js';
+import { createTrackedEffect, merge as solidMergeProps, type JSX } from 'solid-js';
 import type { FieldRoot } from '../../field/root/FieldRoot';
 import { useFieldRootContext } from '../../field/root/FieldRootContext';
 import { fieldValidityMapping } from '../../field/utils/constants';
@@ -61,7 +61,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
   const timeout1 = useTimeout();
   const timeout2 = useTimeout();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (store.open) {
       // mousedown -> move to unselected item -> mouseup should not select within 200ms.
       timeout2.start(200, () => {
@@ -73,10 +73,10 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
         });
       });
 
-      onCleanup(() => {
+      return () => {
         timeout1.clear();
         timeout2.clear();
-      });
+      };
     }
 
     refs.selectionRef = {
@@ -108,7 +108,9 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
     ref: (el) => {
       triggerRef = el;
       buttonRef(el);
-      setStore('triggerElement', el);
+      setStore((state) => {
+        state.triggerElement = el;
+      });
     },
     props: [
       (props) => mergeProps(props, store.triggerProps),
@@ -117,7 +119,7 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
           return labelId();
         },
         get 'aria-readonly'() {
-          return readonly() || undefined;
+          return readonly() ? 'true' : undefined;
         },
         get tabindex() {
           return disabled() ? -1 : 0;
@@ -135,25 +137,29 @@ export function SelectTrigger(componentProps: SelectTrigger.Props) {
           //
           // XXX: might be causing `act()` warnings.
           timeoutFocus.start(0, () => {
-            setStore('forceMount', true);
+            setStore((state) => {
+              state.forceMount = true;
+            });
           });
         },
         onBlur() {
-          batch(() => {
-            setTouched(true);
-            setFocused(false);
+          setTouched(true);
+          setFocused(false);
 
-            if (validationMode() === 'onBlur') {
-              fieldControlValidation.commitValidation(store.value);
-            }
-          });
+          if (validationMode() === 'onBlur') {
+            fieldControlValidation.commitValidation(store.value);
+          }
         },
         onPointerMove({ pointerType }) {
           refs.keyboardActiveRef = false;
-          setStore('touchModality', pointerType === 'touch');
+          setStore((state) => {
+            state.touchModality = pointerType === 'touch';
+          });
         },
         onPointerDown({ pointerType }) {
-          setStore('touchModality', pointerType === 'touch');
+          setStore((state) => {
+            state.touchModality = pointerType === 'touch';
+          });
         },
         onKeyDown(event) {
           refs.keyboardActiveRef = true;

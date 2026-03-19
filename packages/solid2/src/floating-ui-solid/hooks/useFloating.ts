@@ -1,6 +1,6 @@
 import { type VirtualElement } from '@floating-ui/dom';
 import { isElement } from '@floating-ui/utils/dom';
-import { createEffect, createMemo, createSignal, merge as solidMergeProps } from 'solid-js';
+import { createMemo, createSignal, createTrackedEffect, merge as solidMergeProps } from 'solid-js';
 import { access } from '../../solid-helpers';
 import { useFloatingTree } from '../components/FloatingTree';
 import type {
@@ -129,7 +129,7 @@ export function useFloating<RT extends ReferenceType = ReferenceType>(
     nodeId: () => access(options.nodeId),
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     rootContext().dataRef.floatingContext = context;
 
     if (!tree) {

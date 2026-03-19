@@ -1,8 +1,7 @@
 import {
-  batch,
-  createEffect,
   createMemo,
   createSignal,
+  createTrackedEffect,
   merge as solidMergeProps,
 } from 'solid-js';
 import { SHIFT } from '../composite/composite';
@@ -85,7 +84,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
 
   let prevValueRef = checkedValue();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (prevValueRef === checkedValue()) {
       return;
     }
@@ -99,32 +98,28 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     prevValueRef = checkedValue();
   });
 
   const [touched, setTouched] = createSignal(false);
 
   const onBlur = (event: FocusEvent) => {
-    batch(() => {
-      if (!contains(event.currentTarget as Element, event.relatedTarget as Element)) {
-        setFieldTouched(true);
-        setFocused(false);
+    if (!contains(event.currentTarget as Element, event.relatedTarget as Element)) {
+      setFieldTouched(true);
+      setFocused(false);
 
-        if (validationMode() === 'onBlur') {
-          fieldControlValidation.commitValidation(checkedValue());
-        }
+      if (validationMode() === 'onBlur') {
+        fieldControlValidation.commitValidation(checkedValue());
       }
-    });
+    }
   };
 
   const onKeyDownCapture = (event: KeyboardEvent) => {
     if (event.key.startsWith('Arrow')) {
-      batch(() => {
-        setFieldTouched(true);
-        setTouched(true);
-        setFocused(true);
-      });
+      setFieldTouched(true);
+      setTouched(true);
+      setFocused(true);
     }
   };
 
@@ -148,7 +143,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         disabled: disabled(),
         readonly: local.readonly,
         required: local.required,
-        'aria-hidden': true,
+        'aria-hidden': 'true',
         tabindex: -1,
         style: visuallyHidden,
         ref: (el) => {
@@ -184,13 +179,13 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
       {
         role: 'radiogroup',
         get 'aria-required'() {
-          return local.required || undefined;
+          return local.required ? 'true' : undefined;
         },
         get 'aria-disabled'() {
-          return disabled() || undefined;
+          return disabled() ? 'true' : undefined;
         },
         get 'aria-readonly'() {
-          return local.readonly || undefined;
+          return local.readonly ? 'true' : undefined;
         },
         get 'aria-labelledby'() {
           return labelId();

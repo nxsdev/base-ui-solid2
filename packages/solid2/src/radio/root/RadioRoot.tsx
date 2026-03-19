@@ -1,7 +1,6 @@
 import {
-  batch,
-  createEffect,
   createSignal,
+  createTrackedEffect,
   Show,
   merge as solidMergeProps,
   type JSX,
@@ -67,24 +66,23 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
 
   const [inputRef, setInputRef] = createSignal<HTMLInputElement | null | undefined>(null);
 
-  const rootProps: JSX.HTMLAttributes<HTMLButtonElement> = {
+  const rootProps: JSX.ButtonHTMLAttributes<HTMLButtonElement> = {
     role: 'radio',
     get 'aria-checked'() {
-      return checked();
+      return checked() ? 'true' : 'false';
     },
     get 'aria-required'() {
-      return required() || undefined;
+      return required() ? 'true' : undefined;
     },
     get 'aria-disabled'() {
-      return disabled() || undefined;
+      return disabled() ? 'true' : undefined;
     },
     get 'aria-readonly'() {
-      return readonly() || undefined;
+      return readonly() ? 'true' : undefined;
     },
     get [ACTIVE_COMPOSITE_ITEM as string]() {
       return checked() ? '' : undefined;
     },
-    // @ts-expect-error - disabled is not a valid attribute for a button
     get disabled() {
       return disabled();
     },
@@ -120,14 +118,14 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
 
   const id = useBaseUiId();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (checked()) {
       setFilled(true);
     }
   });
 
   const inputProps: JSX.InputHTMLAttributes<HTMLInputElement> = {
-    'aria-hidden': true,
+    'aria-hidden': 'true',
     type: 'radio',
     tabindex: -1,
     style: visuallyHidden,
@@ -163,13 +161,11 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
         return;
       }
 
-      batch(() => {
-        setFieldTouched(true);
-        setDirty(local.value !== validityData.initialValue);
-        setCheckedValue(local.value);
-        setFilled(true);
-        onValueChange?.(local.value, event);
-      });
+      setFieldTouched(true);
+      setDirty(local.value !== validityData.initialValue);
+      setCheckedValue(local.value);
+      setFilled(true);
+      onValueChange?.(local.value, event);
     },
   };
 

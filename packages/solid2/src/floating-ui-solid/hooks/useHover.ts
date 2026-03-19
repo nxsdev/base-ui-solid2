@@ -1,8 +1,7 @@
 import { isElement } from '@floating-ui/utils/dom';
 import {
-  createEffect,
   createMemo,
-  on,
+  createTrackedEffect,
   onCleanup,
   merge as solidMergeProps,
   type Accessor,
@@ -149,18 +148,18 @@ export function useHover(
 
   // When closing before opening, clear the delay timeouts to cancel it
   // from showing.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
 
     context().events.on('openchange', onOpenChangeLocal);
-    onCleanup(() => {
+    return () => {
       context().events.off('openchange', onOpenChangeLocal);
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -174,9 +173,9 @@ export function useHover(
     const floating = context().elements.floating();
     const html = getDocument(floating).documentElement;
     html.addEventListener('mouseleave', onLeave);
-    onCleanup(() => {
+    return () => {
       html.removeEventListener('mouseleave', onLeave);
-    });
+    };
   });
 
   const closeWithDelay = (
@@ -331,7 +330,7 @@ export function useHover(
   // Registering the mouse events on the reference directly to bypass React's
   // delegation system. If the cursor was on a disabled element and then entered
   // the reference (no gap), `mouseenter` doesn't fire in the delegation system.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -360,7 +359,7 @@ export function useHover(
         floating.addEventListener('mouseleave', onFloatingMouseLeave);
       }
 
-      onCleanup(() => {
+      return () => {
         if (context().open()) {
           reference.removeEventListener('mouseleave', onScrollMouseLeave);
         }
@@ -377,7 +376,7 @@ export function useHover(
           floating.removeEventListener('mouseenter', onFloatingMouseEnter);
           floating.removeEventListener('mouseleave', onFloatingMouseLeave);
         }
-      });
+      };
     }
   });
 
@@ -385,7 +384,7 @@ export function useHover(
   // while the floating element is open and has a `handleClose` handler. Also
   // handles nested floating elements.
   // https://github.com/floating-ui/floating-ui/issues/1722
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -415,16 +414,16 @@ export function useHover(
         ref.style.pointerEvents = 'auto';
         floatingEl.style.pointerEvents = 'auto';
 
-        onCleanup(() => {
+        return () => {
           body.style.pointerEvents = '';
           ref.style.pointerEvents = '';
           floatingEl.style.pointerEvents = '';
-        });
+        };
       }
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!context().open()) {
       pointerTypeRef = undefined;
       restTimeoutPendingRef = false;
@@ -433,16 +432,17 @@ export function useHover(
     }
   });
 
-  createEffect(
-    on([enabled, () => context().elements.domReference()], () => {
-      onCleanup(() => {
-        cleanupMouseMoveHandler();
-        timeout.clear();
-        restTimeout.clear();
-        clearPointerEvents();
-      });
-    }),
-  );
+  createTrackedEffect(() => {
+    enabled();
+    context().elements.domReference();
+
+    return () => {
+      cleanupMouseMoveHandler();
+      timeout.clear();
+      restTimeout.clear();
+      clearPointerEvents();
+    };
+  });
 
   function setPointerRef(event: PointerEvent) {
     pointerTypeRef = event.pointerType;

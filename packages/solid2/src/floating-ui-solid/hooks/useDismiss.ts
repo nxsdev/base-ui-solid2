@@ -7,7 +7,7 @@ import {
   isLastTraversableNode,
   isWebKit,
 } from '@floating-ui/utils/dom';
-import { createEffect, createMemo, onCleanup, type Accessor } from 'solid-js';
+import { createMemo, createTrackedEffect, type Accessor } from 'solid-js';
 import { access, type MaybeAccessor } from '../../solid-helpers';
 import { useTimeout } from '../../utils/useTimeout';
 import {
@@ -316,7 +316,7 @@ export function useDismiss(
     context().onOpenChange(false, event, 'outside-press');
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!context().open() || !enabled()) {
       return;
     }
@@ -356,18 +356,10 @@ export function useDismiss(
       doc.addEventListener('keydown', closeOnEscapeKeyDown, capture().escapeKey);
       doc.addEventListener('compositionstart', handleCompositionStart);
       doc.addEventListener('compositionend', handleCompositionEnd);
-      onCleanup(() => {
-        doc.removeEventListener('keydown', closeOnEscapeKeyDown, capture().escapeKey);
-        doc.removeEventListener('compositionstart', handleCompositionStart);
-        doc.removeEventListener('compositionend', handleCompositionEnd);
-      });
     }
 
     if (outsidePress()) {
       doc.addEventListener(outsidePressEvent(), closeOnPressOutside, capture().outsidePress);
-      onCleanup(() => {
-        doc.removeEventListener(outsidePressEvent(), closeOnPressOutside, capture().outsidePress);
-      });
     }
 
     let ancestors: (Element | Window | VisualViewport)[] = [];
@@ -394,12 +386,27 @@ export function useDismiss(
       .filter((ancestor) => ancestor !== doc.defaultView?.visualViewport)
       .forEach((ancestor) => {
         ancestor.addEventListener('scroll', onScroll, { passive: true });
-        onCleanup(() => ancestor.removeEventListener('scroll', onScroll));
       });
 
-    onCleanup(() => {
+    return () => {
+      if (escapeKey()) {
+        doc.removeEventListener('keydown', closeOnEscapeKeyDown, capture().escapeKey);
+        doc.removeEventListener('compositionstart', handleCompositionStart);
+        doc.removeEventListener('compositionend', handleCompositionEnd);
+      }
+
+      if (outsidePress()) {
+        doc.removeEventListener(outsidePressEvent(), closeOnPressOutside, capture().outsidePress);
+      }
+
+      ancestors
+        .filter((ancestor) => ancestor !== doc.defaultView?.visualViewport)
+        .forEach((ancestor) => {
+          ancestor.removeEventListener('scroll', onScroll);
+        });
+
       compositionTimeout.clear();
-    });
+    };
   });
 
   const reference = createMemo<ElementProps['reference']>(() => ({

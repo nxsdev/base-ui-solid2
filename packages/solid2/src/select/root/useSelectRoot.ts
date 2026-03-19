@@ -1,13 +1,11 @@
 import {
-  batch,
   createEffect,
-  createSelector,
-  on,
+  createTrackedEffect,
   onSettled,
   type Accessor,
   type JSX,
 } from 'solid-js';
-import { createStore, produce } from 'solid-js';
+import { createStore } from 'solid-js';
 import { useFieldControlValidation } from '../../field/control/useFieldControlValidation';
 import { useFieldRootContext } from '../../field/root/FieldRootContext';
 import { useField } from '../../field/useField';
@@ -122,26 +120,29 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
     scrollDownArrowVisible: false,
   });
 
-  const isActive = createSelector(() => store.activeIndex);
-  const isSelected = createSelector(
-    () => [store.selectedIndex, store.value] as [index: number, value: number],
-    // `selectedIndex` is only updated after the items mount for the first time,
-    // the value check avoids a re-render for the initially selected item.
-    (a, b) => a[0] === b[0] && a[1] === b[1],
-  );
+  const isActive = (index: number) => store.activeIndex === index;
+  const isSelected = ([index, itemValue]: [index: number, value: any]) =>
+    store.selectedIndex === index && store.value === itemValue;
 
   const initialValueRef = value();
-  createEffect(() => {
+  createEffect(
+    () => value(),
+    (nextValue) => {
     // Ensure the values and labels are registered for programmatic value changes.
-    if (value() !== initialValueRef) {
-      setStore('forceMount', true);
-    }
-  });
+      if (nextValue !== initialValueRef) {
+        setStore((state) => {
+          state.forceMount = true;
+        });
+      }
+    },
+  );
 
   const commitValidation = fieldControlValidation.commitValidation;
 
   onSettled(() => {
-    setCodependentRefs('control', { explicitId: id, ref: () => store.triggerElement, id: idProp });
+    setCodependentRefs((refs) => {
+      refs.control = { explicitId: id, ref: () => store.triggerElement, id: idProp };
+    });
   });
 
   useField({
@@ -155,37 +156,31 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
 
   let prevValueRef = value();
 
-  createEffect(() => {
-    setFilled(value() !== null);
-  });
+  createTrackedEffect(() => {
+    const nextValue = value();
 
-  createEffect(() => {
-    if (prevValueRef === value()) {
+    setFilled(nextValue !== null);
+
+    if (prevValueRef === nextValue) {
       return;
     }
 
-    const index = refs.valuesRef.indexOf(value());
+    const index = refs.valuesRef.indexOf(nextValue);
 
-    batch(() => {
-      setStore(
-        produce((state) => {
-          state.selectedIndex = index === -1 ? null : index;
-          state.label = refs.labelsRef[index] ?? '';
-        }),
-      );
-
-      clearErrors(name());
-      setDirty(value() !== initialValueRef);
-      commitValidation(value(), validationMode() !== 'onChange');
-
-      if (validationMode() === 'onChange') {
-        commitValidation(value());
-      }
+    setStore((state) => {
+      state.selectedIndex = index === -1 ? null : index;
+      state.label = refs.labelsRef[index] ?? '';
     });
-  });
 
-  createEffect(() => {
-    prevValueRef = value();
+    clearErrors(name());
+    setDirty(nextValue !== initialValueRef);
+    commitValidation(nextValue, validationMode() !== 'onChange');
+
+    if (validationMode() === 'onChange') {
+      commitValidation(nextValue);
+    }
+
+    prevValueRef = nextValue;
   });
 
   const setOpen = (
@@ -193,10 +188,8 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
     event: Event | undefined,
     reason: SelectOpenChangeReason | undefined,
   ) => {
-    batch(() => {
-      params.onOpenChange?.(nextOpen, event, reason);
-      setOpenUnwrapped(nextOpen);
-    });
+    params.onOpenChange?.(nextOpen, event, reason);
+    setOpenUnwrapped(nextOpen);
 
     // Workaround `enableFocusInside` in Floating UI setting `tabindex=0` of a non-highlighted
     // option upon close when tabbing out due to `keepMounted=true`:
@@ -213,11 +206,11 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
   };
 
   const handleUnmount = () => {
-    batch(() => {
-      setMounted(false);
-      setStore('activeIndex', null);
-      params.onOpenChangeComplete?.(false);
+    setMounted(false);
+    setStore((state) => {
+      state.activeIndex = null;
     });
+    params.onOpenChangeComplete?.(false);
   };
 
   useOpenChangeComplete({
@@ -238,10 +231,8 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
   });
 
   const setValue = (nextValue: any, event?: Event) => {
-    batch(() => {
-      params.onValueChange?.(nextValue, event);
-      setValueUnwrapped(nextValue);
-    });
+    params.onValueChange?.(nextValue, event);
+    setValueUnwrapped(nextValue);
   };
 
   let hasRegisteredRef = false;
@@ -255,12 +246,10 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
     const hasIndex = index !== -1;
 
     if (hasIndex || value() === null) {
-      setStore(
-        produce((state) => {
-          state.selectedIndex = index;
-          state.label = hasIndex ? (refs.labelsRef[index] ?? '') : '';
-        }),
-      );
+      setStore((state) => {
+        state.selectedIndex = index;
+        state.label = hasIndex ? (refs.labelsRef[index] ?? '') : '';
+      });
       return;
     }
 
@@ -274,13 +263,14 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
   };
 
   createEffect(
-    on(value, () => {
+    () => value(),
+    () => {
       if (!hasRegisteredRef) {
         return;
       }
 
       registerSelectedItem(undefined);
-    }),
+    },
   );
 
   const floatingContext = useFloatingRootContext({
@@ -320,7 +310,9 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
         return;
       }
 
-      setStore('activeIndex', nextActiveIndex);
+      setStore((state) => {
+        state.activeIndex = nextActiveIndex;
+      });
     },
     // Implement our own listeners since `onPointerLeave` on each option fires while scrolling with
     // the `alignItemWithTrigger=true`, causing a performance issue on Chrome.
@@ -334,7 +326,9 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
     selectedIndex: () => store.selectedIndex,
     onMatch(index) {
       if (open()) {
-        setStore('activeIndex', index);
+        setStore((state) => {
+          state.activeIndex = index;
+        });
       } else {
         setValue(refs.valuesRef[index]);
       }
@@ -357,29 +351,37 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
   useOnFirstRender(() => {
     // These should be initialized at store creation, but there is an interdependency
     // between some values used in floating hooks above.
-    setStore(
-      produce((state) => {
-        state.popupProps = getFloatingProps();
-        state.triggerProps = getReferenceProps();
-      }),
-    );
+    setStore((state) => {
+      state.popupProps = getFloatingProps();
+      state.triggerProps = getReferenceProps();
+    });
   });
 
   // Store values that depend on other hooks
-  createEffect(() => {
-    setStore(
-      produce((state) => {
-        state.id = id();
-        state.modal = modal();
-        state.value = value();
-        state.open = open();
-        state.mounted = mounted();
-        state.transitionStatus = transitionStatus();
-        state.popupProps = getFloatingProps();
-        state.triggerProps = getReferenceProps();
-      }),
-    );
-  });
+  createEffect(
+    () => ({
+      id: id(),
+      modal: modal(),
+      value: value(),
+      open: open(),
+      mounted: mounted(),
+      transitionStatus: transitionStatus(),
+      popupProps: getFloatingProps(),
+      triggerProps: getReferenceProps(),
+    }),
+    (nextState) => {
+      setStore((state) => {
+        state.id = nextState.id;
+        state.modal = nextState.modal;
+        state.value = nextState.value;
+        state.open = nextState.open;
+        state.mounted = nextState.mounted;
+        state.transitionStatus = nextState.transitionStatus;
+        state.popupProps = nextState.popupProps;
+        state.triggerProps = nextState.triggerProps;
+      });
+    },
+  );
 
   const rootContext: SelectRootContext = {
     store,

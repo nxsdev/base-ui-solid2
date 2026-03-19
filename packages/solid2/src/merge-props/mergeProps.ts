@@ -110,6 +110,10 @@ type PropsOf<T extends ElementType> = WithBaseUIEvent<ComponentProps<T>>;
 export type MergablePropsCallback<T extends ElementType> = (otherProps: PropsOf<T>) => PropsOf<T>;
 
 type PropsInput<T extends ElementType> = PropsOf<T> | MergablePropsCallback<T> | undefined;
+type StyleProps = { style?: JSX.CSSProperties | string | JSX.RemoveAttribute };
+type ClassProps = { class?: string | JSX.RemoveAttribute };
+type ClassListValue = Record<string, boolean>;
+type ClassListProps = { classList?: ClassListValue | JSX.RemoveAttribute };
 
 const reduce = <T, K extends keyof T>(
   sources: Iterable<T>,
@@ -123,6 +127,38 @@ const reduce = <T, K extends keyof T>(
   }
   return v;
 };
+
+function combineMergedStyle(
+  a: JSX.CSSProperties | string | JSX.RemoveAttribute,
+  b: JSX.CSSProperties | string | JSX.RemoveAttribute,
+) {
+  const left = typeof a === 'string' || (a && typeof a === 'object') ? a : undefined;
+  const right = typeof b === 'string' || (b && typeof b === 'object') ? b : undefined;
+  return combineStyle(left, right);
+}
+
+function combineMergedClass(
+  a: string | JSX.RemoveAttribute,
+  b: string | JSX.RemoveAttribute,
+): string | undefined {
+  const left = typeof a === 'string' ? a : undefined;
+  const right = typeof b === 'string' ? b : undefined;
+
+  if (left && right) {
+    return `${left} ${right}`;
+  }
+
+  return left ?? right;
+}
+
+function combineMergedClassList(
+  a: ClassListValue | JSX.RemoveAttribute,
+  b: ClassListValue | JSX.RemoveAttribute,
+): ClassListValue | undefined {
+  const left = a && typeof a === 'object' ? a : undefined;
+  const right = b && typeof b === 'object' ? b : undefined;
+  return { ...left, ...right };
+}
 
 /**
  * A helper that reactively merges multiple props objects together while smartly combining some of Solid's JSX/DOM attributes.
@@ -160,10 +196,10 @@ export function mergeProps<
   const sources = (Array.isArray(args[0]) ? args[0] : args) as Args;
 
   let cachedListeners = {} as Record<string, EventHandler | undefined>;
-  let cacheStyles = [] as JSX.HTMLAttributes<any>[];
+  let cacheStyles = [] as StyleProps[];
   let cacheRefs = [] as Array<Ref<any>>;
-  let cacheClasses = [] as JSX.HTMLAttributes<any>[];
-  let cacheClassList = [] as JSX.HTMLAttributes<any>[];
+  let cacheClasses = [] as ClassProps[];
+  let cacheClassList = [] as ClassListProps[];
   const lastDescriptor = {} as Record<string, PropertyDescriptor | undefined>;
 
   /*
@@ -184,16 +220,16 @@ export function mergeProps<
 
       const localMerged = {
         get style() {
-          return reduce(mergedStyles, 'style', combineStyle);
+          return reduce(mergedStyles, 'style', combineMergedStyle);
         },
         get ref() {
           return reverseChain(mergedRefs);
         },
         get class() {
-          return reduce(mergedClasses, 'class', (a, b) => `${a} ${b}`);
+          return reduce(mergedClasses, 'class', combineMergedClass);
         },
         get classList() {
-          return reduce(mergedClassList, 'classList', (a, b) => ({ ...a, ...b }));
+          return reduce(mergedClassList, 'classList', combineMergedClassList);
         },
       };
 
@@ -278,16 +314,16 @@ export function mergeProps<
   const mergedListeners = { ...cachedListeners };
   const localMerged = {
     get style() {
-      return reduce(cacheStyles, 'style', combineStyle);
+      return reduce(cacheStyles, 'style', combineMergedStyle);
     },
     get ref() {
       return reverseChain(cacheRefs);
     },
     get class() {
-      return reduce(cacheClasses, 'class', (a, b) => `${a} ${b}`);
+      return reduce(cacheClasses, 'class', combineMergedClass);
     },
     get classList() {
-      return reduce(cacheClassList, 'classList', (a, b) => ({ ...a, ...b }));
+      return reduce(cacheClassList, 'classList', combineMergedClassList);
     },
   };
 

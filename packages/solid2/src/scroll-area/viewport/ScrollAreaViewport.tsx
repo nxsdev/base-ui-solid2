@@ -1,5 +1,4 @@
-import { createEffect, on, onCleanup, onSettled } from 'solid-js';
-import { produce } from 'solid-js';
+import { createTrackedEffect, onCleanup, onSettled } from 'solid-js';
 import { useDirection } from '../../direction-provider/DirectionContext';
 import { splitComponentProps } from '../../solid-helpers';
 import { clamp } from '../../utils/clamp';
@@ -120,20 +119,18 @@ export function ScrollAreaViewport(componentProps: ScrollAreaViewport.Props) {
 
     if (cornerEl) {
       if (scrollbarXHidden || scrollbarYHidden) {
-        context.setCornerSize({ width: 0, height: 0 });
+        context.setCornerSize(() => ({ width: 0, height: 0 }));
       } else if (!scrollbarXHidden && !scrollbarYHidden) {
         const width = scrollbarYEl?.offsetWidth || 0;
         const height = scrollbarXEl?.offsetHeight || 0;
-        context.setCornerSize({ width, height });
+        context.setCornerSize(() => ({ width, height }));
       }
     }
 
-    context.setHiddenState(
-      produce((state) => {
-        state.scrollbarYHidden = scrollbarYHidden;
-        state.scrollbarXHidden = scrollbarXHidden;
-      }),
-    );
+    context.setHiddenState((state) => {
+      state.scrollbarYHidden = scrollbarYHidden;
+      state.scrollbarXHidden = scrollbarXHidden;
+    });
   }
 
   onSettled(() => {
@@ -158,20 +155,14 @@ export function ScrollAreaViewport(componentProps: ScrollAreaViewport.Props) {
     onCleanup(cleanup);
   });
 
-  createEffect(
-    on(
-      [
-        () => context.hiddenState.scrollbarYHidden,
-        () => context.hiddenState.scrollbarXHidden,
-        direction,
-      ],
-      () => {
-        // Wait for scrollbar-related refs to be set
+  createTrackedEffect(() => {
+    context.hiddenState.scrollbarYHidden;
+    context.hiddenState.scrollbarXHidden;
+    direction();
 
-        queueMicrotask(computeThumbPosition);
-      },
-    ),
-  );
+    // Wait for scrollbar-related refs to be set
+    queueMicrotask(computeThumbPosition);
+  });
 
   function handleUserInteraction() {
     programmaticScrollRef = false;

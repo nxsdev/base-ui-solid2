@@ -1,10 +1,8 @@
 import { isHTMLElement } from '@floating-ui/utils/dom';
 import {
-  batch,
-  createEffect,
   createMemo,
   createSignal,
-  on,
+  createTrackedEffect,
   onCleanup,
   type Accessor,
 } from 'solid-js';
@@ -304,7 +302,7 @@ export function useListNavigation(
   const parentId = useFloatingParentNodeId();
   const tree = useFloatingTree();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     context().dataRef.orientation = orientation();
   });
 
@@ -324,17 +322,14 @@ export function useListNavigation(
   let previousMountedRef = false;
   let previousOpenRef = false;
 
-  createEffect(
-    on(
-      () => context().elements.floating(),
-      () => {
-        onCleanup(() => {
-          previousMountedRef = false;
-          previousOpenRef = false;
-        });
-      },
-    ),
-  );
+  createTrackedEffect(() => {
+    context().elements.floating();
+
+    return () => {
+      previousMountedRef = false;
+      previousOpenRef = false;
+    };
+  });
 
   const [focusItemOnOpen, setFocusItemOnOpen] = createSignal(focusItemOnOpenProp());
   const [activeId, setActiveId] = createSignal<string | undefined>();
@@ -401,7 +396,7 @@ export function useListNavigation(
 
   // Sync `selectedIndex` to be the `activeIndex` upon opening the floating
   // element. Also, reset `activeIndex` upon closing the floating element.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -423,7 +418,7 @@ export function useListNavigation(
 
   // Sync `activeIndex` to be the focused item while the floating element is
   // open.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -497,7 +492,7 @@ export function useListNavigation(
 
   // Ensure the parent floating element has focus when a nested child closes
   // to allow arrow key navigation to work after the pointer leaves the child.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled() || context().elements.floating() || !tree || virtual() || !previousMountedRef) {
       return;
     }
@@ -516,7 +511,7 @@ export function useListNavigation(
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
@@ -540,12 +535,12 @@ export function useListNavigation(
 
     tree.events.on('virtualfocus', handleVirtualFocus);
 
-    onCleanup(() => {
+    return () => {
       tree.events.off('virtualfocus', handleVirtualFocus);
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!context().open()) {
       keyRef = null;
       setFocusItemOnOpen(focusItemOnOpenProp());
@@ -885,12 +880,10 @@ export function useListNavigation(
 
     function checkVirtualPointer(event: PointerEvent) {
       // `pointerdown` fires first, reset the state then perform the checks.
-      batch(() => {
-        setFocusItemOnOpen(focusItemOnOpen());
-        if (focusItemOnOpen() === 'auto' && isVirtualPointerEvent(event)) {
-          setFocusItemOnOpen(true);
-        }
-      });
+      setFocusItemOnOpen(focusItemOnOpen());
+      if (focusItemOnOpen() === 'auto' && isVirtualPointerEvent(event)) {
+        setFocusItemOnOpen(true);
+      }
     }
 
     /**

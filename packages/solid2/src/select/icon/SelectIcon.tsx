@@ -12,7 +12,7 @@ export function SelectIcon(componentProps: SelectIcon.Props) {
   const [, , elementProps] = splitComponentProps(componentProps, []);
 
   const element = useRenderElement('span', componentProps, {
-    props: [{ 'aria-hidden': true }, elementProps],
+    props: [{ 'aria-hidden': 'true' }, elementProps],
     get children() {
       return <>{componentProps.children ?? '▼'}</>;
     },

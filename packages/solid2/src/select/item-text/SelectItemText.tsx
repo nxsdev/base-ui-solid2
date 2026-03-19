@@ -1,4 +1,4 @@
-import { createEffect, on } from 'solid-js';
+import { createTrackedEffect } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -18,15 +18,14 @@ export function SelectItemText(componentProps: SelectItemText.Props) {
   const { selected, refs } = useSelectItemContext();
   const { refs: rootRefs } = useSelectRootContext();
 
-  createEffect(
-    on(selected, () => {
-      const hasNoSelectedItemText =
-        rootRefs.selectedItemTextRef === null || !rootRefs.selectedItemTextRef?.isConnected;
-      if (selected() || (hasNoSelectedItemText && refs.indexRef === 0)) {
-        rootRefs.selectedItemTextRef = ref;
-      }
-    }),
-  );
+  createTrackedEffect(() => {
+    const hasNoSelectedItemText =
+      rootRefs.selectedItemTextRef === null || !rootRefs.selectedItemTextRef?.isConnected;
+
+    if (selected() || (hasNoSelectedItemText && refs.indexRef === 0)) {
+      rootRefs.selectedItemTextRef = ref;
+    }
+  });
 
   const element = useRenderElement('div', componentProps, {
     ref: (el) => {

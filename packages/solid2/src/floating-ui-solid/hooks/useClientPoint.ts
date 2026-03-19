@@ -1,5 +1,5 @@
 import { getWindow } from '@floating-ui/utils/dom';
-import { createEffect, createMemo, createSignal, onCleanup, type Accessor } from 'solid-js';
+import { createMemo, createSignal, createTrackedEffect, onCleanup, type Accessor } from 'solid-js';
 import { access, type MaybeAccessor } from '../../solid-helpers';
 import type { ContextData, ElementProps, FloatingRootContext } from '../types';
 import { contains, getTarget, isMouseLikePointerType } from '../utils';
@@ -183,7 +183,7 @@ export function useClientPoint(
     }
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!openCheck() || !enabled() || x() != null || y() != null) {
       return;
     }
@@ -194,28 +194,28 @@ export function useClientPoint(
     if (!openEvent || isMouseBasedEvent(openEvent as Event | null)) {
       win.addEventListener('mousemove', handleMouseMove);
 
-      onCleanup(() => {
+      return () => {
         win.removeEventListener('mousemove', handleMouseMove);
-      });
+      };
       return;
     }
 
     context().refs.setPositionReference(domReference());
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (enabled() && !floating()) {
       initialRef = false;
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled() && context().open()) {
       initialRef = true;
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (enabled() && (x() != null || y() != null)) {
       initialRef = false;
       setReference(x(), y());

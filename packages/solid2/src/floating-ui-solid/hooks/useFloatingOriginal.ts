@@ -1,15 +1,14 @@
 import { computePosition } from '@floating-ui/dom';
 import {
-  createEffect,
   createMemo,
   createSignal,
-  on,
+  createTrackedEffect,
   onCleanup,
   onSettled,
   type Accessor,
   type JSX,
 } from 'solid-js';
-import { createStore, reconcile } from 'solid-js';
+import { createStore } from 'solid-js';
 import { access, type MaybeAccessor } from '../../solid-helpers';
 import type {
   Accessorify,
@@ -164,23 +163,25 @@ export function useFloatingOriginal<RT extends ReferenceType = ReferenceType>(
 
     computePosition(r, f, config).then((computedData) => {
       if (isMountedRef) {
-        setData(
-          reconcile({
+        setData((state) => {
+          Object.assign(state, {
             ...computedData,
             // The floating element's position may be recomputed while it's closed
             // but still mounted (such as when transitioning out). To ensure
             // `isPositioned` will be `false` initially on the next open, avoid
             // setting it to `true` when `open === false` (must be specified).
             isPositioned: access(options.open) !== false,
-          }),
-        );
+          });
+        });
       }
     });
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (access(options.open) === false && data.isPositioned) {
-      setData('isPositioned', false);
+      setData((state) => {
+        state.isPositioned = false;
+      });
     }
   });
 
@@ -192,22 +193,23 @@ export function useFloatingOriginal<RT extends ReferenceType = ReferenceType>(
     });
   });
 
-  createEffect(
-    on([referenceEl, floatingEl, whileElementsMountedFn, open], () => {
-      const r = referenceEl();
-      const f = floatingEl();
-      if (r && f) {
-        const whileElementsMounted = whileElementsMountedFn();
-        if (whileElementsMounted) {
-          const cleanup = whileElementsMounted(r, f, update);
-          onCleanup(cleanup);
-          return;
-        }
+  createTrackedEffect(() => {
+    referenceEl();
+    floatingEl();
+    whileElementsMountedFn();
+    open();
 
-        update();
+    const r = referenceEl();
+    const f = floatingEl();
+    if (r && f) {
+      const whileElementsMounted = whileElementsMountedFn();
+      if (whileElementsMounted) {
+        return whileElementsMounted(r, f, update);
       }
-    }),
-  );
+
+      update();
+    }
+  });
 
   const refs = {
     reference,
