@@ -1,0 +1,26 @@
+# Utils
+
+Utility work for Solid 2 beta should track the same public shape as the React package where it still makes sense.
+
+## Expected early utilities
+
+- Direction Provider
+- mergeProps
+- useRender
+- unstable-use-media-query
+
+## Utilities that need a fresh review
+
+- Floating UI integration
+- Provider helpers that depend on React-only patterns
+- Any utility whose old Solid implementation depends on Solid 1 context or effect timing
+
+export const metadata =
+  /** @type {import('@mui/internal-docs-infra/createSitemap/types').NextMetadata} */ ({
+    robots: {
+      index: false,
+    },
+    other: {
+      audience: 'private',
+    },
+  });

@@ -1,0 +1,43 @@
+# Components
+
+The Solid 2 beta component surface will be built in phases.
+
+## Good early candidates from the legacy Solid repo
+
+- Separator
+- Input
+- Toggle
+- Toggle Group
+- Radio Group
+- Checkbox Group
+- Direction Provider
+- mergeProps
+- useRender
+
+## Current React components that need fresh Solid 2 work
+
+- Autocomplete
+- Button
+- Calendar
+- Combobox
+- Drawer
+- Localization and temporal utilities
+
+## Demo folder convention
+
+For each public component page, keep the same demo shape as React:
+
+- `demos/<demo-name>/css-modules/index.tsx`
+- `demos/<demo-name>/tailwind/index.tsx`
+
+When the legacy Solid repo already has the same demo, copy its structure first and then adapt the implementation to Solid 2 beta.
+
+export const metadata =
+  /** @type {import('@mui/internal-docs-infra/createSitemap/types').NextMetadata} */ ({
+    robots: {
+      index: false,
+    },
+    other: {
+      audience: 'private',
+    },
+  });

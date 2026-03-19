@@ -2,50 +2,80 @@
 
 # Repository Guidelines
 
-This repository contains the source code and documentation for Base UI: a headless, unstyled React component library.
+This repository now contains the upstream React implementation of Base UI and an in-progress Solid 2 beta port.
+
+## Sources of truth
+
+- `packages/react/` is the source of truth for public API shape, behavior, accessibility semantics, tests, and documentation coverage.
+- `../base-ui-solid/packages/solid/` is the legacy Solid reference for folder layout, demo naming, and prior Solid-specific adaptations.
+- If the React repo and `../base-ui-solid` differ, follow the current React repo first, then adapt the implementation to Solid-native patterns instead of copying React internals mechanically.
+- Do not use `../solid-base-ui` as a reference for implementation or policy.
 
 ## Project structure
 
-- Source code for components and private utils is in `packages/react/`.
-- Source code for public shared utils is in `packages/utils/`.
-- Experiments are located at `docs/src/app/(private)/experiments/`. Use for creating demos that require manual testing in the browser.
-- Public documentation is located at `docs/src/app/(docs)/react/`. Alter the docs where necessary when changes must be visible to library users.
-- When creating public demos on the docs, refer to the `hero` demo for the given component and largely follow its styles (both CSS Modules and Tailwind CSS versions). Other demos may also contain relevant styling. Do not add custom styling beyond the critical layout styles necessary for new demos.
+- React source code remains in `packages/react/`.
+- Shared public utilities remain in `packages/utils/`.
+- Solid 2 beta work lives in `packages/solid2/`.
+- Public Solid 2 beta docs live in `docs/src/app/(docs)/solid2/`.
+- Public React docs remain in `docs/src/app/(docs)/react/`.
+- Experiments that need manual browser testing belong in `docs/src/app/(private)/experiments/`.
 
-## Code guidelines
+## Porting strategy
 
-- Always use the `useTimeout` utility from `@base-ui/utils/useTimeout` instead of `window.setTimeout`, and `useAnimationFrame` from `@base-ui/utils/useAnimationFrame` instead of `requestAnimationFrame`. Search for other example usage in the codebase if unsure how to use them.
-- Use the `useStableCallback` utility from `@base-ui/utils/useStableCallback` instead of `React.useCallback` if the function is called within an effect or event handler. The utility cannot be used to memoize functions that are called directly in the body of a component (during render), so continue with `React.useCallback` in those scenarios.
-- Always use the `useIsoLayoutEffect` utility from `@base-ui/utils/useIsoLayoutEffect` instead of `React.useLayoutEffect`.
-- Avoid duplicating logic where necessary. If two components can share logic (such as event handlers), define the logic/handlers in the parent and share it through a context to the child; use the existing context if it exists.
+- Read `PORTING_PLAN.md` before starting a new Solid 2 component or utility port.
+- Preserve React API parity unless there is a Solid-specific reason to diverge.
+- Preserve existing Base UI and legacy Solid port DX conventions when they are user-facing, including `render`-based composition and prop-merging behavior that consumers rely on.
+- Do not remove or redesign public abstractions such as `render` just to make code look more Solid-native; if the public contract exists in React or the legacy Solid port, keep the contract and reimplement the internals correctly for Solid 2.
+- Recreate behavior with Solid 2 beta primitives; do not emulate React lifecycle timing unless the public API requires the same visible result.
+- Prefer copying directory shape, file naming, and demo naming from `../base-ui-solid` when those still map cleanly to the current React surface.
+- When `../base-ui-solid` is missing newer React components, keep the same docs and demo folder conventions as React and note the missing legacy reference in your work.
+
+## Solid 2 beta implementation guidelines
+
+- Prefer fine-grained Solid primitives and direct data flow over React-style state orchestration.
+- Do not add compatibility layers, shims, aliases, or wrappers to preserve Solid 1 APIs in `packages/solid2/`; migrate directly to Solid 2 beta APIs.
+- Keep compatibility at the public Base UI API layer, not at the Solid 1 API layer. Public behavior may stay compatible; internal implementation must move to native Solid 2 beta patterns.
+- Do not use legacy context provider syntax such as `<Context.Provider>...</Context.Provider>` in Solid 2 code.
+- Keep context values reactive and clean up registrations with `onCleanup`.
+- Avoid top-level prop destructuring in Solid components; prefer accessors, explicit getters, and narrowly scoped internal helpers instead of recreating Solid 1 helper APIs wholesale.
+- Narrow internal helpers are acceptable only when they preserve existing Base UI behavior without introducing a generic Solid 1 compatibility surface. Do not spread generic replacements for removed Solid 1 APIs across the package.
+- Render structural children explicitly. Do not assume React-style slotting behavior.
+- Re-derive timing-sensitive logic such as focus management, list registration, and uncontrolled state updates for Solid instead of porting React timing assumptions.
+
+## Demo and docs guidelines
+
+- For public Solid 2 component pages, mirror the React docs route shape under `docs/src/app/(docs)/solid2/`.
+- For demo folders, follow the existing React pattern: `demos/<demo-name>/css-modules/` and `demos/<demo-name>/tailwind/` when both variants are appropriate.
+- Compare against both the current React demo and the matching `../base-ui-solid` demo before adapting it to Solid 2.
+- Do not introduce custom demo styling beyond the layout patterns already used by the React docs unless a Solid-specific limitation requires it.
 
 ## Linting, typechecking, and formatting
 
-- Do not randomly cast (for example `as any`) if there are no type errors without doing so. Run `pnpm typescript` to verify types.
-- Ensure your changes pass linting - run `pnpm eslint`.
-- Ensure your styles pass stylelint - run `pnpm stylelint`.
-- Ensure your markdown passes markdownlint - run `pnpm markdownlint`.
-- Ensure your changes are formatted correctly - run `pnpm prettier`.
-- When you change a public component API (props or JSDoc), run `pnpm docs:api`.
+- Do not add casts such as `as any` unless a verified type issue requires them.
+- Run `pnpm typescript` to verify project references.
+- Run `pnpm eslint`.
+- Run `pnpm stylelint` when styles change.
+- Run `pnpm markdownlint` when docs or policy files change.
+- Run `pnpm prettier` when formatting is needed.
+- If a public API or docs surface changes, update the relevant docs page under `docs/src/app/(docs)/solid2/` or `docs/src/app/(docs)/react/`.
 
 ## Testing
 
-- If a repository command fails because dependencies are unavailable, run `pnpm i` first and then retry the command.
-- Run tests in JSDOM env with `pnpm test:jsdom {name} --no-watch` such as `pnpm test:jsdom NumberField --no-watch` or `pnpm test:jsdom parse --no-watch`.
-- Run tests in Chromium env with `pnpm test:chromium {name} --no-watch` such as `pnpm test:chromium NumberField --no-watch` or `pnpm test:jsdom parse --no-watch`.
-- Do not call `await flushMicrotasks()` directly after `await render(...)` when there are no interactions or state changes between them; `render` is already awaited, so that immediate flush is unnecessary.
-- If you made changes to the source code, ensure you verify your changes by running tests (see above), and writing new tests where applicable. If tests require the browser because, for example, they require layout measurements, restrict it to the Chromium env by using `it.skipIf(isJSDOM)` or `describe.skipIf(isJSDOM)` (search other tests for example usage if unsure).
-- Follow the established conventions in existing tests. Each file/component is tested with the filename `name.test.tsx`. For example, `PopoverRoot.test.tsx` is next to its source file `PopoverRoot.tsx`.
-- Tests use Vitest APIs only: `expect()`, `vi.fn()`, and `@testing-library/jest-dom` DOM matchers. Do not use Chai- or Sinon-style matcher chains or spies.
+- If a command fails because dependencies are missing, run `pnpm i` and retry.
+- When porting a component to Solid 2, bring over or re-create the relevant behavioral tests instead of relying on manual checks alone.
+- Prefer the current React tests as the behavioral source of truth.
+- Follow existing test naming conventions: `PascalCase.test.tsx` for components and `camelCase.test.ts` for utilities.
+- Use Vitest APIs only: `expect()`, `vi.fn()`, and `@testing-library/jest-dom` matchers.
+- If a test needs layout measurement or browser-only behavior, keep it in a browser-capable environment rather than forcing it into JSDOM.
 
 ## Commit guidelines
 
-- Commit messages follow the format `[scope] Imperative summary` (for example `[popover] Fix focus trap`). Choose scopes that mirror package or component names that were changed.
-- Use `[all components]` scope for changes that broadly affect most components.
+- Commit messages follow `[scope] Imperative summary`.
+- Use scopes that match the package or component being changed, such as `[solid2]`, `[accordion]`, or `[docs]`.
 
 ## Errors
 
-These guidelines apply only to errors thrown by public packages.
+These guidelines apply to public package errors, including future `packages/solid2` exports.
 
 Every error message must:
 
@@ -61,6 +91,6 @@ Format:
 
 ### Error Minifier
 
-You MUST run `pnpm extract-error-codes` to update `docs/src/error-codes.json` every time you add or update an error message in an `Error` constructor.
+Run `pnpm extract-error-codes` every time you add or update an error message in a public `Error` constructor.
 
-**Important:** If the update created a new error code, but the new and original message have the same number of arguments and semantics haven't changed, update the original error in `error-codes.json` instead of creating a new code.
+If a new code is created but the original and new messages still have the same arguments and semantics, reuse the original entry in `docs/src/error-codes.json` instead of keeping a duplicate.

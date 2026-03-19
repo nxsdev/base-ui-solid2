@@ -1,0 +1,62 @@
+import { merge as solidMergeProps, useContext } from 'solid-js';
+import type { DialogRoot } from '../../dialog/root/DialogRoot';
+import { type DialogOpenChangeReason, useDialogRoot } from '../../dialog/root/useDialogRoot';
+import { AlertDialogRootContext } from './AlertDialogRootContext';
+
+/**
+ * Groups all parts of the alert dialog.
+ * Doesn’t render its own HTML element.
+ *
+ * Documentation: [Base UI Alert Dialog](https://base-ui.com/react/components/alert-dialog)
+ */
+export function AlertDialogRoot(props: AlertDialogRoot.Props) {
+  const defaultOpen = () => props.defaultOpen ?? false;
+
+  const parentDialogRootContext = useContext(AlertDialogRootContext);
+
+  const dialogRoot = useDialogRoot({
+    open: () => props.open,
+    defaultOpen,
+    // eslint-disable-next-line solid/reactivity
+    onOpenChange: props.onOpenChange,
+    actionsRef: () => props.actionsRef,
+    // eslint-disable-next-line solid/reactivity
+    onOpenChangeComplete: props.onOpenChangeComplete,
+    modal: true,
+    dismissible: false,
+    onNestedDialogClose: parentDialogRootContext?.onNestedDialogClose,
+    onNestedDialogOpen: parentDialogRootContext?.onNestedDialogOpen,
+  });
+
+  const nested = () => Boolean(parentDialogRootContext);
+
+  const contextValue: AlertDialogRootContext = solidMergeProps(dialogRoot, {
+    nested,
+    // eslint-disable-next-line solid/reactivity
+    onOpenChangeComplete: props.onOpenChangeComplete,
+  });
+
+  return (
+    <AlertDialogRootContext value={contextValue}>
+      {props.children}
+    </AlertDialogRootContext>
+  );
+}
+
+export namespace AlertDialogRoot {
+  export interface Props extends Omit<DialogRoot.Props, 'modal' | 'dismissible' | 'onOpenChange'> {
+    /**
+     * Event handler called when the dialog is opened or closed.
+     * @type (open: boolean, event?: Event, reason?: AlertDialog.Root.OpenChangeReason) => void
+     */
+    onOpenChange?: (
+      open: boolean,
+      event: Event | undefined,
+      reason: DialogOpenChangeReason | undefined,
+    ) => void;
+  }
+
+  export type Actions = DialogRoot.Actions;
+
+  export type OpenChangeReason = DialogOpenChangeReason;
+}

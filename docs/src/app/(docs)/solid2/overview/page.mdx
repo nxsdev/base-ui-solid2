@@ -1,0 +1,29 @@
+# Overview
+
+Solid 2 beta work in this repository follows three rules:
+
+1. React in `packages/react/` is the behavioral and API source of truth.
+2. `../base-ui-solid` is the legacy Solid reference for structure, naming, and demo layout.
+3. Implementations must be rewritten with Solid 2 beta patterns instead of being copied mechanically from React.
+
+## Current scope
+
+- The package root is `packages/solid2/`.
+- Public docs will be added under `docs/src/app/(docs)/solid2/`.
+- Port order and component coverage are tracked in `PORTING_PLAN.md`.
+
+## Demo policy
+
+- Match the React docs route shape.
+- Reuse the React demo naming convention.
+- Compare against the corresponding `../base-ui-solid` demo before adapting to Solid 2.
+
+export const metadata =
+  /** @type {import('@mui/internal-docs-infra/createSitemap/types').NextMetadata} */ ({
+    robots: {
+      index: false,
+    },
+    other: {
+      audience: 'private',
+    },
+  });

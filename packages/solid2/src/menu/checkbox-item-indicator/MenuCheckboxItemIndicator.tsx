@@ -1,0 +1,84 @@
+import { splitComponentProps } from '../../solid-helpers';
+import { BaseUIComponentProps } from '../../utils/types';
+import { useOpenChangeComplete } from '../../utils/useOpenChangeComplete';
+import { useRenderElement } from '../../utils/useRenderElement';
+import { TransitionStatus, useTransitionStatus } from '../../utils/useTransitionStatus';
+import { useMenuCheckboxItemContext } from '../checkbox-item/MenuCheckboxItemContext';
+import { itemMapping } from '../utils/styleHookMapping';
+
+/**
+ * Indicates whether the checkbox item is ticked.
+ * Renders a `<div>` element.
+ *
+ * Documentation: [Base UI Menu](https://base-ui.com/react/components/menu)
+ */
+export function MenuCheckboxItemIndicator(componentProps: MenuCheckboxItemIndicator.Props) {
+  const [, local, elementProps] = splitComponentProps(componentProps, ['keepMounted']);
+  const keepMounted = () => local.keepMounted ?? false;
+
+  const item = useMenuCheckboxItemContext();
+
+  let indicatorRef = null as HTMLSpanElement | null | undefined;
+
+  const { transitionStatus, setMounted } = useTransitionStatus(item.checked);
+
+  useOpenChangeComplete({
+    open: item.checked,
+    ref: () => indicatorRef,
+    onComplete() {
+      if (!item.checked()) {
+        setMounted(false);
+      }
+    },
+  });
+
+  const state: MenuCheckboxItemIndicator.State = {
+    get checked() {
+      return item.checked();
+    },
+    get disabled() {
+      return item.disabled();
+    },
+    get highlighted() {
+      return item.highlighted();
+    },
+    get transitionStatus() {
+      return transitionStatus();
+    },
+  };
+
+  const element = useRenderElement('span', componentProps, {
+    state,
+    ref: (el) => {
+      indicatorRef = el;
+    },
+    customStyleHookMapping: itemMapping,
+    props: [{ 'aria-hidden': true }, elementProps],
+    enabled: () => keepMounted() || item.checked(),
+  });
+
+  return <>{element()}</>;
+}
+
+export namespace MenuCheckboxItemIndicator {
+  export interface Props extends BaseUIComponentProps<'span', State> {
+    /**
+     * Whether to keep the HTML element in the DOM when the checkbox item is not checked.
+     * @default false
+     */
+    keepMounted?: boolean;
+  }
+
+  export interface State {
+    /**
+     * Whether the checkbox item is currently ticked.
+     */
+    checked: boolean;
+    /**
+     * Whether the component should ignore user interaction.
+     */
+    disabled: boolean;
+    highlighted: boolean;
+    transitionStatus: TransitionStatus;
+  }
+}

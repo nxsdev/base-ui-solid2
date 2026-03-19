@@ -1,0 +1,24 @@
+import 'docs-solid2/src/app.css';
+import { DocsProviders } from 'docs-solid2/src/components/DocsProviders';
+import { GoogleAnalytics } from 'docs-solid2/src/components/GoogleAnalytics';
+import type { ParentProps } from 'solid-js';
+import './(public).css';
+
+export default function PublicLayout(props: ParentProps) {
+  return (
+    <DocsProviders>
+      <div class="RootLayout">
+        <div class="RootLayoutContainer">
+          <div class="RootLayoutContent">{props.children}</div>
+          <span class="RootLayoutFooter" />
+        </div>
+      </div>
+      {/* <GoogleAnalytics /> */}
+    </DocsProviders>
+  );
+}
+
+// TODO: Add metadata
+// export const metadata: Metadata = {
+//   metadataBase: new URL('https://base-ui.com'),
+// };

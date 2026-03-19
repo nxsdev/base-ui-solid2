@@ -1,0 +1,37 @@
+{
+  "extends": "../tsconfig.base.json",
+  "include": [
+    "data",
+    "scripts/*.mts",
+    "src",
+    "src/global.d.ts",
+    "../node_modules/solid-mdx/**/*.d.ts"
+  ],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "types": ["vinxi/types/client"],
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "incremental": true,
+    "composite": true,
+    "allowImportingTsExtensions": true,
+    "strictNullChecks": true
+  },
+  "exclude": ["node_modules"],
+  "references": [
+    {
+      "path": "../packages/solid2/tsconfig.build.json"
+    }
+  ]
+}

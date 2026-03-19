@@ -1,0 +1,4 @@
+interface:
+  display_name: "Base UI Solid2"
+  short_description: "Solid 2 beta port rules for Base UI"
+  default_prompt: "Use $base-ui-solid2-practices to port or review code in packages/solid2."

@@ -1,0 +1,128 @@
+import { useDemoContext } from 'docs-solid2/src/blocks/Demo/DemoContext';
+import { createCodeSandbox } from 'docs-solid2/src/blocks/createCodeSandbox/createCodeSandbox';
+import { ExternalLinkIcon } from 'docs-solid2/src/icons/ExternalLinkIcon';
+import { splitProps, type ComponentProps } from 'solid-js';
+import { GhostButton } from '../GhostButton';
+
+const COMMIT_REF = process.env.PULL_REQUEST_ID ? process.env.COMMIT_REF : undefined;
+const SOURCE_CODE_REPO = process.env.SOURCE_CODE_REPO;
+
+const globalCss = `
+    <style>
+      body {
+        font-family: system-ui;
+        margin: 0;
+      }
+      #root {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 3rem;
+        isolation: isolate;
+      }
+    </style>
+`;
+
+const tailwindSetup = `
+    <!-- Check out the Tailwind CSS' installation guide for setting it up: https://tailwindcss.com/docs/installation/framework-guides -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {},
+        },
+      }
+    </script>`;
+
+const cssThemeSetup = `
+    <link rel="stylesheet" href="theme.css" />`;
+
+interface CodeSandboxLinkProps extends ComponentProps<'button'> {
+  title: string;
+  description?: string;
+}
+
+export function CodeSandboxLink(componentProps: CodeSandboxLinkProps) {
+  const [local, props] = splitProps(componentProps, ['title', 'description']);
+  const { selectedVariant } = useDemoContext();
+
+  const handleClick = () => {
+    let additionalHtmlHeadContent = globalCss;
+
+    if (selectedVariant().name === 'tailwind') {
+      additionalHtmlHeadContent += tailwindSetup;
+
+      selectedVariant().files.forEach((file) => {
+        const cssClasses = file.content.matchAll(/class="(.+?)"/gs);
+        additionalHtmlHeadContent += `
+
+    <!-- Inject classes used so that Tailwind loaded from the CDN can pre-render them. -->
+    <!-- This is for the CodeSandbox example only. You don't need this in your app. -->`;
+        for (const match of cssClasses) {
+          // Inject css classes used on the page so that initial animations aren't broken
+          // Otherwise, TW running in the browser won't see all the classes before the components
+          // mount for the first time
+          const classes = match[1];
+          if (!additionalHtmlHeadContent.includes(classes)) {
+            additionalHtmlHeadContent += `\n    <meta name="custom" class="${classes}" />`;
+          }
+        }
+      });
+    } else if (selectedVariant().name === 'css-modules') {
+      additionalHtmlHeadContent += cssThemeSetup;
+    }
+
+    createCodeSandbox({
+      demoFiles: selectedVariant().files,
+      demoLanguage: selectedVariant().language,
+      title: local.title,
+      description: local.description,
+      dependencies: {
+        'solid-js': '^1.9.7',
+      },
+      devDependencies: {
+        typescript: '^5.7.2',
+        vite: '^6.0.3',
+        'vite-plugin-solid': '^2.11.0',
+      },
+      dependencyResolver: resolveDependencies,
+      additionalHtmlHeadContent,
+      onAddingFile: (fileName, content) => {
+        if (fileName === 'theme.css') {
+          content = content.replace(':root {', `:root {\n  color-scheme: light dark;\n`);
+
+          if (!content.includes(':root {')) {
+            throw new Error('Expected to find a ":root" selector in the demo theme file');
+          }
+
+          return ['public/theme.css', content];
+        }
+
+        return null;
+      },
+    });
+  };
+
+  return (
+    <GhostButton aria-label="Open in CodeSandbox" type="button" onClick={handleClick} {...props}>
+      CodeSandbox
+      <ExternalLinkIcon />
+    </GhostButton>
+  );
+}
+
+export function resolveDependencies(packageName: string): Record<string, string> {
+  switch (packageName) {
+    case '@base-ui/solid2': {
+      return {
+        '@base-ui/solid2': 'latest',
+      };
+    }
+
+    default:
+      return {
+        [packageName]: 'latest',
+      };
+  }
+}

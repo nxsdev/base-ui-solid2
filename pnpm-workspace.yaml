@@ -1,6 +1,7 @@
 packages:
   - packages/*
   - docs
+  - docs-solid2
   - test
   - test/*
   - scripts/*
