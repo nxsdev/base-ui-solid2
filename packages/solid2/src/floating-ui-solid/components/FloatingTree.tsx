@@ -1,7 +1,6 @@
 import {
   createContext,
-  createEffect,
-  onCleanup,
+  createTrackedEffect,
   useContext,
   type Accessor,
   type JSX,
@@ -44,7 +43,7 @@ export function useFloatingNodeId(customParentId?: string): Accessor<string | un
   const solidParentId = useFloatingParentNodeId();
   const parentId = () => customParentId || solidParentId;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!id()) {
       return;
     }
@@ -52,9 +51,9 @@ export function useFloatingNodeId(customParentId?: string): Accessor<string | un
     const node = { id: id(), parentId: parentId() };
     tree?.addNode(node);
 
-    onCleanup(() => {
+    return () => {
       tree?.removeNode(node);
-    });
+    };
   });
 
   return id;

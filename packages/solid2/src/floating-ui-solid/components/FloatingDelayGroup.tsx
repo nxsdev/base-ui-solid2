@@ -1,7 +1,7 @@
 import {
   createContext,
-  createEffect,
   createSignal,
+  createTrackedEffect,
   onCleanup,
   useContext,
   type Accessor,
@@ -140,7 +140,7 @@ export function useDelayGroup(
 
   const [isInstantPhase, setIsInstantPhase] = createSignal(false);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     function unset() {
       setIsInstantPhase(false);
       groupContext.currentContextRef?.setIsInstantPhase(false);
@@ -162,9 +162,9 @@ export function useDelayGroup(
       if (groupContext.timeoutMs()) {
         groupContext.timeout.start(groupContext.timeoutMs(), unset);
 
-        onCleanup(() => {
+        return () => {
           groupContext.timeout.clear();
-        });
+        };
         return;
       }
 
@@ -172,7 +172,7 @@ export function useDelayGroup(
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }

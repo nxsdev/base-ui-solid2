@@ -1,8 +1,8 @@
 import {
   createContext,
-  createEffect,
   createMemo,
   createSignal,
+  createTrackedEffect,
   onCleanup,
   Show,
   useContext,
@@ -50,6 +50,7 @@ const PortalContext = createContext<{
 export const usePortalContext = () => useContext(PortalContext);
 
 const attr = createAttribute('portal');
+const shadowRootPortalAttr = 'data-floating-ui-portal-root';
 
 export interface UseFloatingPortalNodeProps {
   id?: MaybeAccessor<string | undefined>;
@@ -66,7 +67,7 @@ export function useFloatingPortalNode(props: UseFloatingPortalNodeProps = {}) {
   const [portalNode, setPortalNode] = createSignal<HTMLElement | null>(null);
   const portalContext = usePortalContext();
 
-  const portalMount = createMemo<Parameters<typeof Portal>[0]['mount']>(() => {
+  const portalMount = createMemo(() => {
     const id = access(props.id);
     const root = access(props.root);
 
@@ -75,7 +76,21 @@ export function useFloatingPortalNode(props: UseFloatingPortalNodeProps = {}) {
       return existingIdRoot;
     }
 
-    const container = root || portalContext?.portalNode() || document.body;
+    let container: Element = portalContext?.portalNode() || document.body;
+    if (root instanceof ShadowRoot) {
+      let shadowRootPortal = root.querySelector<HTMLElement>(`[${shadowRootPortalAttr}]`);
+
+      if (!shadowRootPortal) {
+        shadowRootPortal = document.createElement('div');
+        shadowRootPortal.setAttribute(shadowRootPortalAttr, '');
+        root.appendChild(shadowRootPortal);
+      }
+
+      container = shadowRootPortal;
+    } else if (root) {
+      container = root;
+    }
+
     let idWrapper: HTMLDivElement | null = null;
     if (id) {
       idWrapper = document.createElement('div');
@@ -175,7 +190,7 @@ export function FloatingPortal(props: FloatingPortalProps): JSX.Element {
     focusManagerState()!.open &&
     preserveTabOrder();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const node = portalNode();
     if (!node) {
       return;
