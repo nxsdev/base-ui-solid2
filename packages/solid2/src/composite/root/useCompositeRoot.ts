@@ -1,4 +1,4 @@
-import { createEffect, createSignal, type Accessor } from 'solid-js';
+import { createSignal, createTrackedEffect, type Accessor } from 'solid-js';
 import type { TextDirection } from '../../direction-provider/DirectionContext';
 import { activeElement } from '../../floating-ui-solid/utils';
 import { access, type MaybeAccessor } from '../../solid-helpers';
@@ -113,7 +113,7 @@ export function useCompositeRoot<Metadata>(
   // if focus is currently inside the list.
   // https://github.com/mui/base-ui/issues/2101
   // TODO: Solid JS impolementation should be revisited. Patching with a signal for now.
-  createEffect(() => {
+  createTrackedEffect(() => {
     const activeEl = activeElement(ownerDocument(rootRef())) as HTMLDivElement | null;
     if (refs.elements.includes(activeEl)) {
       const focusedItem = refs.elements[highlightedIndex()];

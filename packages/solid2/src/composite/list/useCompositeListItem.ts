@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup, type Accessor } from 'solid-js';
+import { createSignal, createTrackedEffect, onCleanup, type Accessor } from 'solid-js';
 import { access, type MaybeAccessor } from '../../solid-helpers';
 import type { CompositeMetadata } from './CompositeList';
 import { useCompositeListContext } from './CompositeListContext';
@@ -74,7 +74,7 @@ export function useCompositeListItem<Metadata>(
     }
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const node = componentRef();
     if (node) {
       context.register(node, params.metadata);

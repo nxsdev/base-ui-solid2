@@ -1,4 +1,4 @@
-import { batch, type JSX } from 'solid-js';
+import { type JSX } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import { BaseUIComponentProps } from '../../utils/types';
 import { useControlled } from '../../utils/useControlled';
@@ -27,10 +27,8 @@ export function MenuRadioGroup(componentProps: MenuRadioGroup.Props) {
   });
 
   const setValue = (newValue: any, event: Event) => {
-    batch(() => {
-      setValueUnwrapped(newValue);
-      local.onValueChange?.(newValue, event);
-    });
+    setValueUnwrapped(newValue);
+    local.onValueChange?.(newValue, event);
   };
 
   const state: MenuRadioGroup.State = {
@@ -51,7 +49,7 @@ export function MenuRadioGroup(componentProps: MenuRadioGroup.Props) {
       {
         role: 'group',
         get 'aria-disabled'() {
-          return disabled() || undefined;
+          return disabled() ? 'true' : undefined;
         },
       },
       elementProps,

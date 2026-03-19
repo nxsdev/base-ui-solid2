@@ -1,5 +1,5 @@
 import { getParentNode, isHTMLElement, isLastTraversableNode } from '@floating-ui/utils/dom';
-import { createEffect, Show, type JSX } from 'solid-js';
+import { createTrackedEffect, Show, type JSX } from 'solid-js';
 import { CompositeItem } from '../../composite/item/CompositeItem';
 import { useFloatingTree } from '../../floating-ui-solid/index';
 import { contains } from '../../floating-ui-solid/utils';
@@ -51,7 +51,7 @@ export function MenuTrigger(componentProps: MenuTrigger.Props) {
 
   const { events: menuEvents } = useFloatingTree()!;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!open() && parent().type === undefined) {
       setAllowMouseUpTriggerRef(false);
     }
@@ -93,7 +93,7 @@ export function MenuTrigger(componentProps: MenuTrigger.Props) {
     menuEvents.emit('close', { domEvent: mouseEvent, reason: 'cancel-open' });
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (open() && lastOpenChangeReason() === 'trigger-hover') {
       const doc = ownerDocument(triggerRef);
       doc.addEventListener('mouseup', handleDocumentMouseUp, { once: true });

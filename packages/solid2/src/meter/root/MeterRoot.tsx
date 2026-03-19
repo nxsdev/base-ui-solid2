@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, on, onCleanup } from 'solid-js';
+import { createMemo, createSignal, createTrackedEffect } from 'solid-js';
 import { createStore } from 'solid-js';
 import { splitComponentProps, type CodependentRefs } from '../../solid-helpers';
 import { formatNumber } from '../../utils/formatNumber';
@@ -84,20 +84,10 @@ export function MeterRoot(componentProps: MeterRoot.Props) {
     setCodependentRefs,
   };
 
-  createEffect(
-    on(
-      () => codependentRefs.label,
-      (label) => {
-        if (label) {
-          setLabelId(label.id() ?? label.explicitId());
-        }
-
-        onCleanup(() => {
-          setLabelId(undefined);
-        });
-      },
-    ),
-  );
+  createTrackedEffect(() => {
+    const label = codependentRefs.label;
+    setLabelId(label?.id() ?? label?.explicitId());
+  });
 
   const element = useRenderElement('div', componentProps, {
     props: [defaultProps, elementProps],

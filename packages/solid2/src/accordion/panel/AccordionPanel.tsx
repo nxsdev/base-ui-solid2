@@ -1,4 +1,4 @@
-import { createEffect, Show, merge as solidMergeProps } from 'solid-js';
+import { createTrackedEffect, Show, merge as solidMergeProps } from 'solid-js';
 import { useCollapsiblePanel } from '../../collapsible/panel/useCollapsiblePanel';
 import { useCollapsibleRootContext } from '../../collapsible/root/CollapsibleRootContext';
 import { splitComponentProps } from '../../solid-helpers';
@@ -57,7 +57,7 @@ export function AccordionPanel(componentProps: AccordionPanel.Props) {
   } = useCollapsibleRootContext();
 
   if (process.env.NODE_ENV !== 'production') {
-    createEffect(() => {
+    createTrackedEffect(() => {
       if (keepMounted() === false && hiddenUntilFound()) {
         warn(
           'The `keepMounted={false}` prop on a Accordion.Panel will be ignored when using `contextHiddenUntilFound` on the Panel or the Root since it requires the panel to remain mounted when closed.',
@@ -66,11 +66,11 @@ export function AccordionPanel(componentProps: AccordionPanel.Props) {
     });
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     setHiddenUntilFound(hiddenUntilFound());
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     setKeepMounted(keepMounted());
   });
 

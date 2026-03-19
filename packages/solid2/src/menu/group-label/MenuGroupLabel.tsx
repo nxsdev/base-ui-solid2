@@ -1,4 +1,4 @@
-import { createRenderEffect, onCleanup } from 'solid-js';
+import { createTrackedEffect } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
@@ -17,12 +17,11 @@ export function MenuGroupLabel(componentProps: MenuGroupLabel.Props) {
 
   const { setLabelId } = useMenuGroupRootContext();
 
-  createRenderEffect(() => {
+  createTrackedEffect(() => {
     setLabelId(id());
-  });
-
-  onCleanup(() => {
-    setLabelId(undefined);
+    return () => {
+      setLabelId(undefined);
+    };
   });
 
   const element = useRenderElement('div', componentProps, {

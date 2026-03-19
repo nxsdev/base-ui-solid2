@@ -1,4 +1,4 @@
-import { createEffect, createMemo, onCleanup, type JSX } from 'solid-js';
+import { createMemo, createTrackedEffect, type JSX } from 'solid-js';
 import { useDirection } from '../../direction-provider/DirectionContext';
 import {
   getNextTabbable,
@@ -58,7 +58,7 @@ export function NavigationMenuPopup(componentProps: NavigationMenuPopup.Props) {
   };
 
   // Allow the arrow to transition while the popup's size transitions.
-  createEffect(() => {
+  createTrackedEffect(() => {
     const popupEl = popupElement();
     if (!popupEl || typeof ResizeObserver === 'undefined') {
       return;
@@ -66,9 +66,9 @@ export function NavigationMenuPopup(componentProps: NavigationMenuPopup.Props) {
 
     const observer = new ResizeObserver(positioning.update);
     observer.observe(popupEl);
-    onCleanup(() => {
+    return () => {
       observer.disconnect();
-    });
+    };
   });
 
   // Ensure popup size transitions correctly when anchored to `bottom` (side=top) or `right` (side=left).

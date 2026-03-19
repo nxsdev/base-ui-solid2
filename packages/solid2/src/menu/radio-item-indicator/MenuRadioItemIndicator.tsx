@@ -54,7 +54,7 @@ export function MenuRadioItemIndicator(componentProps: MenuRadioItemIndicator.Pr
     },
     customStyleHookMapping: itemMapping,
     enabled: () => keepMounted() || item.checked(),
-    props: [{ 'aria-hidden': true }, elementProps],
+    props: [{ 'aria-hidden': 'true' }, elementProps],
   });
 
   return <>{element()}</>;

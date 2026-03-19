@@ -95,7 +95,7 @@ export function MenuRadioItem(componentProps: MenuRadioItem.Props) {
       {
         role: 'menuitemradio',
         get 'aria-checked'() {
-          return checked();
+          return checked() ? 'true' : 'false';
         },
         onClick: (event) => {
           setChecked(event);

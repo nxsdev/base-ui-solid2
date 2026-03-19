@@ -1,4 +1,4 @@
-import { batch, createEffect, createMemo, createSignal, Show, type JSX } from 'solid-js';
+import { createMemo, createSignal, createTrackedEffect, Show, type JSX } from 'solid-js';
 import {
   ContextMenuRootContext,
   useContextMenuRootContext,
@@ -113,7 +113,7 @@ export function MenuRoot(props: MenuRoot.Props) {
     return p.type === 'menu' ? p.context.setAllowMouseEnter(allow) : setAllowMouseEnterState(allow);
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (process.env.NODE_ENV !== 'production') {
       if (parent().type !== undefined && props.modal !== undefined) {
         console.warn(
@@ -142,7 +142,7 @@ export function MenuRoot(props: MenuRoot.Props) {
   let allowOutsidePressDismissalRef = parent().type !== 'context-menu';
   const allowOutsidePressDismissalTimeout = useTimeout();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!open()) {
       openEventRef = null;
     }
@@ -174,19 +174,17 @@ export function MenuRoot(props: MenuRoot.Props) {
     referenceElement: positionerRef,
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!open() && !hoverEnabled()) {
       setHoverEnabled(true);
     }
   });
 
   const handleUnmount = () => {
-    batch(() => {
-      setMounted(false);
-      setStickIfOpen(true);
-      setAllowMouseEnter(false);
-      props.onOpenChangeComplete?.(false);
-    });
+    setMounted(false);
+    setStickIfOpen(true);
+    setAllowMouseEnter(false);
+    props.onOpenChangeComplete?.(false);
   };
 
   useOpenChangeComplete({
@@ -241,12 +239,10 @@ export function MenuRoot(props: MenuRoot.Props) {
     const isDismissClose = !nextOpen && (reason === 'escape-key' || reason == null);
 
     function changeState() {
-      batch(() => {
-        props.onOpenChange?.(nextOpen, event, reason);
-        setOpenUnwrapped(nextOpen);
-        setLastOpenChangeReason(reason ?? null);
-        openEventRef = event ?? null;
-      });
+      props.onOpenChange?.(nextOpen, event, reason);
+      setOpenUnwrapped(nextOpen);
+      setLastOpenChangeReason(reason ?? null);
+      openEventRef = event ?? null;
     }
 
     if (reason === 'trigger-hover') {
@@ -278,7 +274,7 @@ export function MenuRoot(props: MenuRoot.Props) {
     }
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const p = parent();
     if (p.type === 'context-menu') {
       p.context.refs.positionerRef = positionerRef();
@@ -286,13 +282,13 @@ export function MenuRoot(props: MenuRoot.Props) {
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (props.actionsRef) {
       props.actionsRef!.unmount = handleUnmount;
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!open()) {
       stickIfOpenTimeout.clear();
     }
@@ -463,7 +459,7 @@ export function MenuRoot(props: MenuRoot.Props) {
     }),
   );
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const p = parent();
     setAllowMouseUpTriggerRef(
       p.type ? (p.context as MenubarContext).allowMouseUpTriggerRef : EMPTY_REF,

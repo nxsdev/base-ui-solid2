@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup, type Accessor, type JSX } from 'solid-js';
+import { createSignal, createTrackedEffect, onCleanup, type Accessor, type JSX } from 'solid-js';
 import { access, type MaybeAccessor } from '../../solid-helpers';
 
 export type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
@@ -6,7 +6,7 @@ export type ImageLoadingStatus = 'idle' | 'loading' | 'loaded' | 'error';
 interface UseImageLoadingStatusOptions {
   src: MaybeAccessor<string | undefined>;
   referrerpolicy?: MaybeAccessor<JSX.HTMLReferrerPolicy | undefined>;
-  crossorigin?: MaybeAccessor<JSX.ImgHTMLAttributes<HTMLImageElement>['crossorigin'] | undefined>;
+  crossorigin?: MaybeAccessor<string | undefined>;
 }
 
 export function useImageLoadingStatus(
@@ -17,7 +17,7 @@ export function useImageLoadingStatus(
   const referrerpolicy = () => access(options.referrerpolicy);
   const crossorigin = () => access(options.crossorigin);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!src()) {
       setLoadingStatus('error');
       return;
@@ -38,9 +38,9 @@ export function useImageLoadingStatus(
     image.onload = updateStatus('loaded');
     image.onerror = updateStatus('error');
     if (referrerpolicy()) {
-      image.referrerpolicy = referrerpolicy()!;
+      image.referrerPolicy = referrerpolicy()!;
     }
-    image.crossorigin = crossorigin() ?? null;
+    image.crossOrigin = crossorigin() ?? null;
     image.src = src()!;
 
     onCleanup(() => {

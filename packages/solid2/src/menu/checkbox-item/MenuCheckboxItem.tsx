@@ -1,4 +1,4 @@
-import { batch, type JSX } from 'solid-js';
+import { type JSX } from 'solid-js';
 import { useCompositeListItem } from '../../composite/list/useCompositeListItem';
 import { useFloatingTree } from '../../floating-ui-solid';
 import { splitComponentProps } from '../../solid-helpers';
@@ -89,14 +89,12 @@ export function MenuCheckboxItem(componentProps: MenuCheckboxItem.Props) {
       {
         role: 'menuitemcheckbox',
         get 'aria-checked'() {
-          return checked();
+          return checked() ? 'true' : 'false';
         },
         onClick: (event) => {
           const nextChecked = !checked();
-          batch(() => {
-            setChecked(nextChecked);
-            local.onCheckedChange?.(nextChecked, event);
-          });
+          setChecked(nextChecked);
+          local.onCheckedChange?.(nextChecked, event);
         },
       },
       elementProps,

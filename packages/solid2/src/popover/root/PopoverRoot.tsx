@@ -1,9 +1,6 @@
 import {
-  batch,
-  createEffect,
+  createTrackedEffect,
   createSignal,
-  on,
-  onCleanup,
   onSettled,
   Show,
   type JSX,
@@ -78,12 +75,10 @@ function PopoverRootComponent(props: PopoverRoot.Props) {
   });
 
   const handleUnmount = () => {
-    batch(() => {
-      setMounted(false);
-      setStickIfOpen(true);
-      setOpenReason(null);
-      props.onOpenChangeComplete?.(false);
-    });
+    setMounted(false);
+    setStickIfOpen(true);
+    setOpenReason(null);
+    props.onOpenChangeComplete?.(false);
   };
 
   useOpenChangeComplete({
@@ -103,7 +98,7 @@ function PopoverRootComponent(props: PopoverRoot.Props) {
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!open()) {
       stickIfOpenTimeout.clear();
     }
@@ -119,14 +114,12 @@ function PopoverRootComponent(props: PopoverRoot.Props) {
     const isDismissClose = !nextOpen && (reason === 'escape-key' || reason == null);
 
     function changeState() {
-      batch(() => {
-        props.onOpenChange?.(nextOpen, event, reason);
-        setOpenUnwrapped(nextOpen);
+      props.onOpenChange?.(nextOpen, event, reason);
+      setOpenUnwrapped(nextOpen);
 
-        if (nextOpen) {
-          setOpenReason(reason ?? null);
-        }
-      });
+      if (nextOpen) {
+        setOpenReason(reason ?? null);
+      }
     }
 
     if (isHover) {
@@ -180,21 +173,13 @@ function PopoverRootComponent(props: PopoverRoot.Props) {
 
   const { getReferenceProps, getFloatingProps } = useInteractions([hover, click, dismiss, role]);
 
-  createEffect(
-    on([() => codependentRefs.title, () => codependentRefs.description], ([title, description]) => {
-      if (title) {
-        setTitleId(title.explicitId());
-      }
-      if (description) {
-        setDescriptionId(description.explicitId());
-      }
+  createTrackedEffect(() => {
+    const title = codependentRefs.title;
+    const description = codependentRefs.description;
 
-      onCleanup(() => {
-        setTitleId(undefined);
-        setDescriptionId(undefined);
-      });
-    }),
-  );
+    setTitleId(title?.explicitId());
+    setDescriptionId(description?.explicitId());
+  });
 
   const popoverContext: PopoverRootContext = {
     open,

@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal, onCleanup } from 'solid-js';
+import { createSignal, createTrackedEffect } from 'solid-js';
 import { CompositeItem } from '../../composite/item/CompositeItem';
 import {
   safePolygon,
@@ -139,7 +139,7 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
 
   const runOnceAnimationsFinish = useAnimationsFinished(popupElement, value);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!positionerElement() || !popupElement() || !open()) {
       return;
     }
@@ -147,13 +147,13 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
     sizeFrame1.request(() => {
       sizeFrame2.request(setAutoSizes);
     });
-    onCleanup(() => {
+    return () => {
       sizeFrame1.cancel();
       sizeFrame2.cancel();
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!positionerElement() || !popupElement() || !value()) {
       return;
     }
@@ -165,14 +165,14 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
       });
     });
 
-    onCleanup(() => {
+    return () => {
       sizeFrame1.cancel();
       sizeFrame2.cancel();
       ac.abort();
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!open()) {
       setPointerType('');
       stickIfOpenTimeout.clear();
@@ -181,13 +181,13 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isActiveItemRef && open() && popupElement()) {
       handleValueChange(0, 0);
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isActiveItem() && open() && popupElement() && allowFocusRef) {
       allowFocusRef = false;
       focusFrame.request(() => {
@@ -195,9 +195,9 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
       });
     }
 
-    onCleanup(() => {
+    return () => {
       focusFrame.cancel();
-    });
+    };
   });
 
   function handleOpenChange(
@@ -285,7 +285,7 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
     },
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isActiveItem()) {
       setFloatingRootContext(context);
       refs.prevTriggerElementRef = triggerElement();
@@ -305,40 +305,38 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
     const currentHeight = popupEl.offsetHeight;
     const triggerEl = triggerElement();
 
-    batch(() => {
-      const prevTriggerRect = refs.prevTriggerElementRef?.getBoundingClientRect();
+    const prevTriggerRect = refs.prevTriggerElementRef?.getBoundingClientRect();
 
-      if (mounted() && prevTriggerRect && triggerEl) {
-        const nextTriggerRect = triggerEl.getBoundingClientRect();
-        const isMovingRight = nextTriggerRect.left > prevTriggerRect.left;
-        const isMovingDown = nextTriggerRect.top > prevTriggerRect.top;
+    if (mounted() && prevTriggerRect && triggerEl) {
+      const nextTriggerRect = triggerEl.getBoundingClientRect();
+      const isMovingRight = nextTriggerRect.left > prevTriggerRect.left;
+      const isMovingDown = nextTriggerRect.top > prevTriggerRect.top;
 
-        if (orientation() === 'horizontal' && nextTriggerRect.left !== prevTriggerRect.left) {
-          setActivationDirection(isMovingRight ? 'right' : 'left');
-        } else if (orientation() === 'vertical' && nextTriggerRect.top !== prevTriggerRect.top) {
-          setActivationDirection(isMovingDown ? 'down' : 'up');
-        }
+      if (orientation() === 'horizontal' && nextTriggerRect.left !== prevTriggerRect.left) {
+        setActivationDirection(isMovingRight ? 'right' : 'left');
+      } else if (orientation() === 'vertical' && nextTriggerRect.top !== prevTriggerRect.top) {
+        setActivationDirection(isMovingDown ? 'down' : 'up');
       }
+    }
 
-      // Reset the `openEvent` to `undefined` when the active item changes so that a
-      // `click` -> `hover` move to new trigger -> `hover` move back doesn't unepxpectedly
-      // cause the popup to remain stuck open.
-      if (event.type !== 'click') {
-        context.dataRef.openEvent = undefined;
-      }
+    // Reset the `openEvent` to `undefined` when the active item changes so that a
+    // `click` -> `hover` move to new trigger -> `hover` move back doesn't unepxpectedly
+    // cause the popup to remain stuck open.
+    if (event.type !== 'click') {
+      context.dataRef.openEvent = undefined;
+    }
 
-      if (pointerType() === 'touch' && event.type !== 'click') {
-        return;
-      }
+    if (pointerType() === 'touch' && event.type !== 'click') {
+      return;
+    }
 
-      if (value() != null) {
-        setValue(
-          itemValue(),
-          event,
-          event.type === 'mouseenter' ? 'trigger-hover' : 'trigger-press',
-        );
-      }
-    });
+    if (value() != null) {
+      setValue(
+        itemValue(),
+        event,
+        event.type === 'mouseenter' ? 'trigger-hover' : 'trigger-press',
+      );
+    }
 
     handleValueChange(currentWidth, currentHeight);
   };
@@ -400,7 +398,7 @@ export function NavigationMenuTrigger(componentProps: NavigationMenuTrigger.Prop
           }
         },
         get 'aria-expanded'() {
-          return isActiveItem();
+          return isActiveItem() ? 'true' : 'false';
         },
         get 'aria-controls'() {
           return isActiveItem() ? popupElement()?.id : undefined;

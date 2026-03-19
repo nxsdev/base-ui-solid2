@@ -1,4 +1,4 @@
-import { batch, createEffect } from 'solid-js';
+import { createTrackedEffect } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import { BaseUIComponentProps } from '../../utils/types';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -19,22 +19,25 @@ export function AvatarImage(componentProps: AvatarImage.Props) {
     'referrerpolicy',
     'crossorigin',
   ]);
+  const src = () => (typeof componentProps.src === 'string' ? componentProps.src : undefined);
+  const referrerpolicy = () =>
+    typeof local.referrerpolicy === 'string' ? local.referrerpolicy : undefined;
+  const crossorigin = () =>
+    typeof local.crossorigin === 'string' ? local.crossorigin : undefined;
 
   const context = useAvatarRootContext();
   const imageLoadingStatus = useImageLoadingStatus({
-    src: () => componentProps.src,
-    referrerpolicy: local.referrerpolicy,
-    crossorigin: local.crossorigin,
+    src,
+    referrerpolicy,
+    crossorigin,
   });
 
   const handleLoadingStatusChange = (status: ImageLoadingStatus) => {
-    batch(() => {
-      local.onLoadingStatusChange?.(status);
-      context.setImageLoadingStatus(status);
-    });
+    local.onLoadingStatusChange?.(status);
+    context.setImageLoadingStatus(status);
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (imageLoadingStatus() !== 'idle') {
       handleLoadingStatusChange(imageLoadingStatus());
     }

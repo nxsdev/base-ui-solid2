@@ -1,4 +1,4 @@
-import { createEffect, createMemo } from 'solid-js';
+import { createMemo, createTrackedEffect } from 'solid-js';
 import {
   ARROW_DOWN,
   ARROW_LEFT,
@@ -60,7 +60,7 @@ export function AccordionRoot(componentProps: AccordionRoot.Props) {
     'value',
     'defaultValue',
   ]);
-  const disabled = () => local.disabled ?? false;
+  const disabled = () => Boolean(local.disabled);
   const loop = () => local.loop ?? true;
   const openMultiple = () => local.openMultiple ?? true;
   const orientation = () => local.orientation ?? 'vertical';
@@ -68,7 +68,7 @@ export function AccordionRoot(componentProps: AccordionRoot.Props) {
   const direction = useDirection();
 
   if (process.env.NODE_ENV !== 'production') {
-    createEffect(() => {
+    createTrackedEffect(() => {
       if (local.hiddenUntilFound && local.keepMounted === false) {
         warn(
           'The `keepMounted={false}` prop on a Accordion.Root will be ignored when using `hiddenUntilFound` since it requires Panels to remain mounted when closed.',

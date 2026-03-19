@@ -1,4 +1,4 @@
-import { createEffect, createMemo, on } from 'solid-js';
+import { createMemo, createTrackedEffect } from 'solid-js';
 import { createStore } from 'solid-js';
 import { access, callEventHandler, splitComponentProps } from '../solid-helpers';
 import type { BaseUIComponentProps } from '../utils/types';
@@ -33,20 +33,19 @@ export function Form(componentProps: Form.Props) {
     Object.values(formRef.fields).filter((field) => field.validityData.state.valid === false),
   );
 
-  createEffect(
-    on(invalidFields, () => {
-      if (!submitted) {
-        return;
-      }
+  createTrackedEffect(() => {
+    const fields = invalidFields();
+    if (!submitted) {
+      return;
+    }
 
-      submitted = false;
+    submitted = false;
 
-      if (invalidFields().length) {
-        const controlRef = access(invalidFields()[0].controlRef);
-        focusControl(controlRef);
-      }
-    }),
-  );
+    if (fields.length) {
+      const controlRef = access(fields[0].controlRef);
+      focusControl(controlRef);
+    }
+  });
 
   const clearErrors = (name: string | undefined) => {
     const err = local.errors;

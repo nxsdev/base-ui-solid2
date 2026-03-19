@@ -1,5 +1,5 @@
 import { isHTMLElement } from '@floating-ui/utils/dom';
-import { batch, createMemo, createSignal, Show, splitProps } from 'solid-js';
+import { createMemo, createSignal, Show } from 'solid-js';
 import {
   FloatingTree,
   useFloatingNodeId,
@@ -27,7 +27,7 @@ import {
  * Documentation: [Base UI Navigation Menu](https://base-ui.com/react/components/navigation-menu)
  */
 export function NavigationMenuRoot(componentProps: NavigationMenuRoot.Props) {
-  const [local] = splitProps(componentProps, [
+  const [, local] = splitComponentProps(componentProps, [
     'defaultValue',
     'value',
     'onValueChange',
@@ -82,19 +82,17 @@ export function NavigationMenuRoot(componentProps: NavigationMenuRoot.Props) {
     event: Event | undefined,
     reason: BaseOpenChangeReason | undefined,
   ) => {
-    batch(() => {
-      if (!nextValue) {
-        closeReasonRef = reason;
-        setActivationDirection(null);
-        setFloatingRootContext(undefined);
-      }
+    if (!nextValue) {
+      closeReasonRef = reason;
+      setActivationDirection(null);
+      setFloatingRootContext(undefined);
+    }
 
-      if (nextValue !== value()) {
-        local.onValueChange?.(nextValue, event, reason);
-      }
+    if (nextValue !== value()) {
+      local.onValueChange?.(nextValue, event, reason);
+    }
 
-      setValueUnwrapped(nextValue);
-    });
+    setValueUnwrapped(nextValue);
   };
 
   const handleUnmount = () => {
@@ -109,12 +107,10 @@ export function NavigationMenuRoot(componentProps: NavigationMenuRoot.Props) {
       refs.prevTriggerElementRef.focus({ preventScroll: true });
       refs.prevTriggerElementRef = undefined;
     }
-    batch(() => {
-      setMounted(false);
-      local.onOpenChangeComplete?.(false);
-      setActivationDirection(null);
-      setFloatingRootContext(undefined);
-    });
+    setMounted(false);
+    local.onOpenChangeComplete?.(false);
+    setActivationDirection(null);
+    setFloatingRootContext(undefined);
     refs.currentContentRef = null;
     closeReasonRef = undefined;
   };

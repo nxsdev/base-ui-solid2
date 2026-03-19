@@ -1,4 +1,3 @@
-import { reconcile } from 'solid-js';
 import { useFormContext } from '../../form/FormContext';
 import { mergeProps } from '../../merge-props';
 import type { BaseUIHTMLProps, HTMLProps } from '../../utils/types';
@@ -81,14 +80,17 @@ export function useFieldControlValidation() {
 
         const controlIdValue = controlId();
         if (controlIdValue) {
-          setFormRef(
-            'fields',
-            controlIdValue,
-            'validityData',
-            reconcile(getCombinedFieldValidityData(nextValidityData, false)),
-          );
+          setFormRef((formRef) => {
+            const field = formRef.fields[controlIdValue];
+            if (!field) {
+              return;
+            }
+            field.validityData = getCombinedFieldValidityData(nextValidityData, false);
+          });
         }
-        setValidityData(nextValidityData);
+        setValidityData((state) => {
+          Object.assign(state, nextValidityData);
+        });
         return;
       }
 
@@ -201,15 +203,18 @@ export function useFieldControlValidation() {
 
     const controlIdValue = controlId();
     if (controlIdValue) {
-      setFormRef(
-        'fields',
-        controlIdValue,
-        'validityData',
-        reconcile(getCombinedFieldValidityData(nextValidityData, invalid())),
-      );
+      setFormRef((formRef) => {
+        const field = formRef.fields[controlIdValue];
+        if (!field) {
+          return;
+        }
+        field.validityData = getCombinedFieldValidityData(nextValidityData, invalid());
+      });
     }
 
-    setValidityData(nextValidityData);
+    setValidityData((state) => {
+      Object.assign(state, nextValidityData);
+    });
   };
 
   const getValidationProps = (externalProps = {}) => {
@@ -219,7 +224,7 @@ export function useFieldControlValidation() {
           return messageIds()?.length ? messageIds().join(' ') : undefined;
         },
         get 'aria-invalid'() {
-          return state.valid === false ? true : undefined;
+          return state.valid === false ? 'true' : undefined;
         },
       },
       externalProps,

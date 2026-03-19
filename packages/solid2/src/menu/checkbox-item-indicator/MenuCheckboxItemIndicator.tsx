@@ -53,7 +53,7 @@ export function MenuCheckboxItemIndicator(componentProps: MenuCheckboxItemIndica
       indicatorRef = el;
     },
     customStyleHookMapping: itemMapping,
-    props: [{ 'aria-hidden': true }, elementProps],
+    props: [{ 'aria-hidden': 'true' }, elementProps],
     enabled: () => keepMounted() || item.checked(),
   });
 

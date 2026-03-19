@@ -1,4 +1,4 @@
-import { batch, createEffect, createMemo, onCleanup, onSettled, type JSX } from 'solid-js';
+import { createMemo, createTrackedEffect, onCleanup, onSettled, type JSX } from 'solid-js';
 import { CompositeList } from '../../composite/list/CompositeList';
 import { useContextMenuRootContext } from '../../context-menu/root/ContextMenuRootContext';
 import {
@@ -155,18 +155,16 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
   };
 
   function onMenuOpenChange(event: { open: boolean; nodeId: string; parentNodeId: string }) {
-    batch(() => {
-      if (event.open) {
-        if (event.parentNodeId === nodeId()) {
-          setHoverEnabled(false);
-        }
-        if (event.nodeId !== nodeId() && event.parentNodeId === parentNodeId) {
-          setOpen(false, undefined, 'sibling-open');
-        }
-      } else if (event.parentNodeId === nodeId()) {
-        setHoverEnabled(true);
+    if (event.open) {
+      if (event.parentNodeId === nodeId()) {
+        setHoverEnabled(false);
       }
-    });
+      if (event.nodeId !== nodeId() && event.parentNodeId === parentNodeId) {
+        setOpen(false, undefined, 'sibling-open');
+      }
+    } else if (event.parentNodeId === nodeId()) {
+      setHoverEnabled(true);
+    }
   }
 
   onSettled(() => {
@@ -176,7 +174,7 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
     });
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     menuEvents.emit('openchange', { open: open(), nodeId: nodeId(), parentNodeId });
   });
 

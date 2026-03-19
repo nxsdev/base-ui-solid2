@@ -67,7 +67,9 @@ export function FieldError(componentProps: FieldError.Props) {
                     (validityData.errors.length > 1 ? (
                       <ul>
                         {' '}
-                        <For each={validityData.errors}>{(message) => <li>{message}</li>}</For>{' '}
+                        <For each={validityData.errors}>
+                          {(message) => <li>{message()}</li>}
+                        </For>{' '}
                       </ul>
                     ) : (
                       validityData.error

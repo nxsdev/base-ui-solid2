@@ -1,5 +1,5 @@
-import { createEffect, createMemo, createSignal, createUniqueId, on, type JSX } from 'solid-js';
-import { createStore, produce } from 'solid-js';
+import { createMemo, createSignal, createTrackedEffect, createUniqueId, type JSX } from 'solid-js';
+import { createStore } from 'solid-js';
 import { access, type MaybeAccessor } from '../../solid-helpers';
 import { CompositeListContext } from './CompositeListContext';
 
@@ -36,25 +36,21 @@ export function CompositeList<Metadata>(props: CompositeList.Props<Metadata>) {
   function register(node: Element, metadata: MaybeAccessor<Metadata>) {
     const uid = nodeIds?.get(node) ?? createUniqueId();
     nodeIds.set(node, uid);
-    setNodes(
-      produce((prevNodes) => {
-        prevNodes[uid] = {
-          element: node,
-          metadata: { ...(prevNodes[uid]?.metadata ?? {}), ...access(metadata) },
-        };
-      }),
-    );
+    setNodes((prevNodes: Record<NodeId, { element: Element; metadata: Metadata }>) => {
+      prevNodes[uid] = {
+        element: node,
+        metadata: { ...(prevNodes[uid]?.metadata ?? {}), ...access(metadata) },
+      };
+    });
   }
 
   function unregister(node: Element) {
     const uid = nodeIds.get(node);
     if (uid) {
       nodeIds.delete(node);
-      setNodes(
-        produce((prevNodes) => {
-          delete prevNodes[uid];
-        }),
-      );
+      setNodes((prevNodes: Record<NodeId, { element: Element; metadata: Metadata }>) => {
+        delete prevNodes[uid];
+      });
     }
   }
 
@@ -73,19 +69,21 @@ export function CompositeList<Metadata>(props: CompositeList.Props<Metadata>) {
     }
   }
 
-  createEffect(
-    on(nodesAsArray, (newArray) => {
-      if (props.refs.elements.length !== newArray.length) {
-        props.refs.elements.length = newArray.length;
-      }
-      if (props.refs.labels && props.refs.labels.length !== newArray.length) {
-        props.refs.labels.length = newArray.length;
-      }
-      props.onMapChange?.(newArray);
-    }),
-  );
+  createTrackedEffect(() => {
+    const newArray = nodesAsArray();
+    if (props.refs.elements.length !== newArray.length) {
+      props.refs.elements.length = newArray.length;
+    }
+    if (props.refs.labels && props.refs.labels.length !== newArray.length) {
+      props.refs.labels.length = newArray.length;
+    }
+    props.onMapChange?.(newArray);
+  });
 
-  createEffect(on(sortedMap, (sorted) => listeners.forEach((l) => l(sorted))));
+  createTrackedEffect(() => {
+    const sorted = sortedMap();
+    listeners.forEach((listener) => listener(sorted));
+  });
 
   return (
     <CompositeListContext

@@ -1,5 +1,5 @@
 import { getSide } from '@floating-ui/utils';
-import { createEffect, createSignal, onCleanup, type JSX } from 'solid-js';
+import { createSignal, createTrackedEffect, type JSX } from 'solid-js';
 import type { Middleware, Padding, VirtualElement } from '../../floating-ui-solid';
 import {
   disableFocusInside,
@@ -137,7 +137,7 @@ export function NavigationMenuPositioner(componentProps: NavigationMenuPositione
 
   // When the current trigger element changes, enable transitions on the
   // positioner temporarily
-  createEffect(() => {
+  createTrackedEffect(() => {
     const currentTriggerElement = floatingRootContext()?.elements.domReference();
 
     if (currentTriggerElement) {
@@ -154,9 +154,9 @@ export function NavigationMenuPositioner(componentProps: NavigationMenuPositione
       runOnceAnimationsFinish(() => {
         setInstant(true);
       }, ac.signal);
-      onCleanup(() => {
+      return () => {
         ac.abort();
-      });
+      };
     }
   });
 

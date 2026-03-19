@@ -1,4 +1,4 @@
-import { createEffect, type JSX } from 'solid-js';
+import { createTrackedEffect, type JSX } from 'solid-js';
 import { useCompositeListItem } from '../../composite/list/useCompositeListItem';
 import { useFloatingTree } from '../../floating-ui-solid';
 import { mergeProps } from '../../merge-props';
@@ -37,7 +37,7 @@ export function MenuSubmenuTrigger(componentProps: MenuSubmenuTrigger.Props) {
     allowMouseUpTriggerRef,
   } = useMenuRootContext();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (parent().type !== 'menu') {
       throw new Error('Base UI: <Menu.SubmenuTrigger> must be placed in <Menu.SubmenuRoot>.');
     }

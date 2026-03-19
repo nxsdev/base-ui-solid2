@@ -1,4 +1,4 @@
-import { createEffect, onCleanup } from 'solid-js';
+import { createTrackedEffect } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
@@ -22,7 +22,7 @@ export function FieldDescription(componentProps: FieldDescription.Props) {
 
   const { setMessageIds } = useFieldRootContext();
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const idValue = id();
     if (!idValue) {
       return;
@@ -30,9 +30,9 @@ export function FieldDescription(componentProps: FieldDescription.Props) {
 
     setMessageIds((v) => v.concat(idValue));
 
-    onCleanup(() => {
+    return () => {
       setMessageIds((v) => v.filter((item) => item !== idValue));
-    });
+    };
   });
 
   const element = useRenderElement('p', componentProps, {

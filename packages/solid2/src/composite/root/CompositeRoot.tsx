@@ -1,4 +1,3 @@
-import { batch } from 'solid-js';
 import { useDirection } from '../../direction-provider/DirectionContext';
 import { access, splitComponentProps, type MaybeAccessor } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
@@ -36,10 +35,8 @@ export function CompositeRoot<Metadata extends {}>(componentProps: CompositeRoot
   function onMapChange(
     newMap: Array<{ element: Element; metadata: CompositeMetadata<Metadata> | null }>,
   ) {
-    batch(() => {
-      local.onMapChange?.(newMap);
-      compositeRoot.onMapChange(newMap);
-    });
+    local.onMapChange?.(newMap);
+    compositeRoot.onMapChange(newMap);
   }
 
   const contextValue: CompositeRootContext = {
