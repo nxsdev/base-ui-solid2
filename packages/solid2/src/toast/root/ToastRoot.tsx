@@ -1,4 +1,11 @@
-import { createEffect, createMemo, createSignal, on, onCleanup, onSettled, type JSX } from 'solid-js';
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  createTrackedEffect,
+  onSettled,
+  type JSX,
+} from 'solid-js';
 import { createStore } from 'solid-js';
 import type { Accessorify } from '../../floating-ui-solid';
 import { activeElement, contains, getTarget } from '../../floating-ui-solid/utils';
@@ -156,21 +163,26 @@ export function ToastRoot(componentProps: ToastRoot.Props) {
     if (typeof ResizeObserver === 'function' && refs.rootRef) {
       const resizeObserver = new ResizeObserver(setHeights);
       resizeObserver.observe(refs.rootRef);
-      onCleanup(() => {
+      return () => {
         resizeObserver.disconnect();
-      });
-      return;
+      };
     }
 
     setHeights();
+    return undefined;
   });
 
   function setHeights() {
     const height = refs.rootRef?.offsetHeight;
-    setToasts('list', (item) => item.id === local.toast.id, {
-      ref: refs.rootRef,
-      height,
-      transitionStatus: undefined,
+    setToasts((state) => {
+      const toast = state.list.find((item) => item.id === local.toast.id);
+      if (!toast) {
+        return;
+      }
+
+      toast.ref = refs.rootRef;
+      toast.height = height;
+      toast.transitionStatus = undefined;
     });
   }
 
@@ -446,7 +458,7 @@ export function ToastRoot(componentProps: ToastRoot.Props) {
     }
   }
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const element = refs.rootRef;
     if (!element) {
       return;
@@ -459,9 +471,9 @@ export function ToastRoot(componentProps: ToastRoot.Props) {
     }
 
     element.addEventListener('touchmove', preventDefaultTouchStart, { passive: false });
-    onCleanup(() => {
+    return () => {
       element.removeEventListener('touchmove', preventDefaultTouchStart);
-    });
+    };
   });
 
   // macOS Safari needs some time to pass after the status node has been
@@ -562,24 +574,22 @@ export function ToastRoot(componentProps: ToastRoot.Props) {
     },
   };
 
-  createEffect(
-    on(
-      [() => toastRoot.codependentRefs.title, () => toastRoot.codependentRefs.description],
-      ([title, description]) => {
-        if (title) {
-          setTitleId(title.explicitId());
-        }
-        if (description) {
-          setDescriptionId(description.explicitId());
-        }
+  createTrackedEffect(() => {
+    const title = toastRoot.codependentRefs.title;
+    const description = toastRoot.codependentRefs.description;
 
-        onCleanup(() => {
-          setTitleId(undefined);
-          setDescriptionId(undefined);
-        });
-      },
-    ),
-  );
+    if (title) {
+      setTitleId(title.explicitId());
+    }
+    if (description) {
+      setDescriptionId(description.explicitId());
+    }
+
+    return () => {
+      setTitleId(undefined);
+      setDescriptionId(undefined);
+    };
+  });
 
   const element = useRenderElement('div', componentProps, {
     state,
@@ -593,19 +603,27 @@ export function ToastRoot(componentProps: ToastRoot.Props) {
         <>
           {componentProps.children}
           {!focused() && (
-            <div
-              style={visuallyHidden}
-              {...(local.toast.priority === 'high'
-                ? { role: 'alert', 'aria-atomic': true }
-                : { role: 'status', 'aria-live': 'polite' })}
-            >
-              {toastRoot.renderScreenReaderContent() && (
-                <>
-                  {local.toast.title && <div>{local.toast.title}</div>}
-                  {local.toast.description && <div>{local.toast.description}</div>}
-                </>
+            <>
+              {local.toast.priority === 'high' ? (
+                <div role="alert" aria-atomic="true" style={visuallyHidden}>
+                  {toastRoot.renderScreenReaderContent() && (
+                    <>
+                      {local.toast.title && <div>{local.toast.title}</div>}
+                      {local.toast.description && <div>{local.toast.description}</div>}
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div role="status" aria-live="polite" style={visuallyHidden}>
+                  {toastRoot.renderScreenReaderContent() && (
+                    <>
+                      {local.toast.title && <div>{local.toast.title}</div>}
+                      {local.toast.description && <div>{local.toast.description}</div>}
+                    </>
+                  )}
+                </div>
               )}
-            </div>
+            </>
           )}
         </>
       );

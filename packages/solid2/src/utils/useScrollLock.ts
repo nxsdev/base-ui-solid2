@@ -1,4 +1,4 @@
-import { createEffect, onCleanup } from 'solid-js';
+import { createTrackedEffect } from 'solid-js';
 import { access, type MaybeAccessor } from '../solid-helpers';
 import { isIOS, isWebKit } from './detectBrowser';
 import { NOOP } from './noop';
@@ -223,7 +223,7 @@ export function useScrollLock(params: {
   const referenceElement = () => access(params.referenceElement) ?? null;
 
   // https://github.com/mui/base-ui/issues/1135
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isWebKit && mounted() && !open()) {
       const doc = ownerDocument(referenceElement());
       const originalUserSelect = doc.body.style.userSelect;
@@ -231,18 +231,18 @@ export function useScrollLock(params: {
       doc.body.style.userSelect = 'none';
       doc.body.style.webkitUserSelect = 'none';
 
-      onCleanup(() => {
+      return () => {
         doc.body.style.userSelect = originalUserSelect;
         doc.body.style.webkitUserSelect = originalWebkitUserSelect;
-      });
+      };
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!enabled()) {
       return;
     }
 
-    onCleanup(SCROLL_LOCKER.acquire(referenceElement()));
+    return SCROLL_LOCKER.acquire(referenceElement());
   });
 }

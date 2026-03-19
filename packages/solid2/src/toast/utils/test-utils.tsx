@@ -34,7 +34,7 @@ export function List() {
   return (
     <For each={toasts()}>
       {(toastItem) => (
-        <Toast.Root toast={toastItem} data-testid="root">
+        <Toast.Root toast={toastItem()} data-testid="root">
           <Toast.Title data-testid="title" />
           <Toast.Description data-testid="description" />
           <Toast.Close aria-label="close-press" />

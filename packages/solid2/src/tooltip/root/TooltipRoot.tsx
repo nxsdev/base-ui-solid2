@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal, onSettled, type JSX } from 'solid-js';
+import { createSignal, createTrackedEffect, onSettled, type JSX } from 'solid-js';
 import {
   safePolygon,
   useClientPoint,
@@ -59,10 +59,8 @@ export function TooltipRoot(props: TooltipRoot.Props) {
     const isDismissClose = !nextOpen && (reason === 'trigger-press' || reason === 'escape-key');
 
     function changeState() {
-      batch(() => {
-        props.onOpenChange?.(nextOpen, event, reason);
-        setOpenUnwrapped(nextOpen);
-      });
+      props.onOpenChange?.(nextOpen, event, reason);
+      setOpenUnwrapped(nextOpen);
     }
 
     if (isHover) {
@@ -80,7 +78,7 @@ export function TooltipRoot(props: TooltipRoot.Props) {
     }
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (openState() && disabled()) {
       setOpen(false, undefined, 'disabled');
     }
@@ -89,10 +87,8 @@ export function TooltipRoot(props: TooltipRoot.Props) {
   const { mounted, setMounted, transitionStatus } = useTransitionStatus(openState);
 
   const handleUnmount = () => {
-    batch(() => {
-      setMounted(false);
-      props.onOpenChangeComplete?.(false);
-    });
+    setMounted(false);
+    props.onOpenChangeComplete?.(false);
   };
 
   useOpenChangeComplete({

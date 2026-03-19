@@ -1,4 +1,4 @@
-import { batch, createMemo, Show } from 'solid-js';
+import { createMemo, Show } from 'solid-js';
 import { CompositeRoot } from '../composite/root/CompositeRoot';
 import { access, splitComponentProps, type MaybeAccessor } from '../solid-helpers';
 import { useToolbarRootContext } from '../toolbar/root/ToolbarRootContext';
@@ -32,7 +32,7 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
     'toggleMultiple',
     'value',
   ]);
-  const disabledProp = () => local.disabled ?? false;
+  const disabledProp = () => Boolean(local.disabled);
   const loop = () => local.loop ?? true;
   const orientation = () => local.orientation ?? 'horizontal';
   const toggleMultiple = () => local.toggleMultiple ?? false;
@@ -69,10 +69,8 @@ export function ToggleGroup(componentProps: ToggleGroup.Props) {
       newGroupValue = nextPressed ? [newValue] : [];
     }
     if (Array.isArray(newGroupValue)) {
-      batch(() => {
-        setValueState(newGroupValue);
-        local.onValueChange?.(newGroupValue, event);
-      });
+      setValueState(newGroupValue);
+      local.onValueChange?.(newGroupValue, event);
     }
   };
 

@@ -18,7 +18,7 @@ export function ToastAction(componentProps: ToastAction.Props) {
   const { toast } = useToastRootContext();
 
   const { getButtonProps, buttonRef } = useButton({
-    disabled: () => local.disabled,
+    disabled: () => local.disabled === true || local.disabled === '',
     native: nativeButton,
   });
 

@@ -1,4 +1,4 @@
-import { batch, createMemo, type JSX } from 'solid-js';
+import { createMemo, type JSX } from 'solid-js';
 import {
   ARROW_DOWN,
   ARROW_LEFT,
@@ -176,33 +176,29 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
         return id();
       },
       onFocus() {
-        batch(() => {
-          setActive(index());
-          setFocused(true);
-        });
+        setActive(index());
+        setFocused(true);
       },
       onBlur() {
         if (!thumbRef) {
           return;
         }
-        batch(() => {
-          setActive(-1);
-          setTouched(true);
-          setFocused(false);
+        setActive(-1);
+        setTouched(true);
+        setFocused(false);
 
-          if (validationMode() === 'onBlur') {
-            fieldControlValidation.commitValidation(
-              getSliderValue(
-                thumbValue(),
-                index(),
-                min(),
-                max(),
-                sliderValues().length > 1,
-                sliderValues(),
-              ),
-            );
-          }
-        });
+        if (validationMode() === 'onBlur') {
+          fieldControlValidation.commitValidation(
+            getSliderValue(
+              thumbValue(),
+              index(),
+              min(),
+              max(),
+              sliderValues().length > 1,
+              sliderValues(),
+            ),
+          );
+        }
       },
       onKeyDown(event: KeyboardEvent) {
         if (!ALL_KEYS.has(event.key)) {

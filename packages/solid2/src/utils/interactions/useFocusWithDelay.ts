@@ -1,6 +1,5 @@
-
 import { getWindow, isHTMLElement } from '@floating-ui/utils/dom';
-import { createEffect, createMemo, onCleanup, type Accessor } from 'solid-js';
+import { createMemo, createTrackedEffect, type Accessor } from 'solid-js';
 import type { ElementProps, FloatingRootContext } from '../../floating-ui-solid';
 import { activeElement, contains, getDocument } from '../../floating-ui-solid/utils';
 import { useTimeout } from '../useTimeout';
@@ -19,7 +18,7 @@ export function useFocusWithDelay(
   const timeout = useTimeout();
   let blockFocusRef = false;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const domReference = context.elements.domReference();
     const win = getWindow(domReference);
 
@@ -36,9 +35,9 @@ export function useFocusWithDelay(
     }
 
     win.addEventListener('blur', handleBlur);
-    onCleanup(() => {
+    return () => {
       win.removeEventListener('blur', handleBlur);
-    });
+    };
   });
 
   const reference = createMemo<ElementProps['reference']>(() => ({

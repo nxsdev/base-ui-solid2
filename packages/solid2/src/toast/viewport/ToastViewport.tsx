@@ -1,10 +1,11 @@
-import { createEffect, onCleanup, type JSX } from 'solid-js';
+import { createTrackedEffect, type JSX } from 'solid-js';
 import { activeElement, contains, getTarget } from '../../floating-ui-solid/utils';
 import { splitComponentProps } from '../../solid-helpers';
 import { FocusGuard } from '../../utils/FocusGuard';
 import { ownerDocument, ownerWindow } from '../../utils/owner';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useRenderElement } from '../../utils/useRenderElement';
+import { useTimeout } from '../../utils/useTimeout';
 import { useToastContext } from '../provider/ToastProviderContext';
 import { isFocusVisible } from '../utils/focusVisible';
 import { ToastViewportContext } from './ToastViewportContext';
@@ -34,9 +35,10 @@ export function ToastViewport(componentProps: ToastViewport.Props) {
 
   let handlingFocusGuardRef = false;
   const numToasts = () => toasts.list.length;
+  const windowFocusTimeout = useTimeout();
 
   // Listen globally for F6 so we can force-focus the viewport.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!refs.viewportRef) {
       return;
     }
@@ -59,12 +61,12 @@ export function ToastViewport(componentProps: ToastViewport.Props) {
 
     win.addEventListener('keydown', handleGlobalKeyDown);
 
-    onCleanup(() => {
+    return () => {
       win.removeEventListener('keydown', handleGlobalKeyDown);
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!refs.viewportRef || !numToasts()) {
       return;
     }
@@ -92,7 +94,7 @@ export function ToastViewport(componentProps: ToastViewport.Props) {
       }
 
       // Wait for the `handleFocus` event to fire.
-      setTimeout(() => {
+      windowFocusTimeout.start(0, () => {
         refs.windowFocusedRef = true;
       });
     }
@@ -100,10 +102,10 @@ export function ToastViewport(componentProps: ToastViewport.Props) {
     win.addEventListener('blur', handleWindowBlur, true);
     win.addEventListener('focus', handleWindowFocus, true);
 
-    onCleanup(() => {
+    return () => {
       win.removeEventListener('blur', handleWindowBlur, true);
       win.removeEventListener('focus', handleWindowFocus, true);
-    });
+    };
   });
 
   function handleFocusGuard(event: FocusEvent) {

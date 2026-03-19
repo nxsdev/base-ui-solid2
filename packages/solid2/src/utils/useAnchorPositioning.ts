@@ -3,6 +3,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  createTrackedEffect,
   onCleanup,
   type Accessor,
   type JSX,
@@ -370,7 +371,7 @@ export function useAnchorPositioning(
 
   let registeredPositionReferenceRef: Element | VirtualElement | null = null;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!mounted()) {
       return;
     }
@@ -385,7 +386,7 @@ export function useAnchorPositioning(
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!mounted()) {
       return;
     }
@@ -403,12 +404,11 @@ export function useAnchorPositioning(
     }
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const domReference = elements.domReference();
     const floating = elements.floating();
     if (keepMounted() && mounted() && domReference && floating) {
-      const cleanup = autoUpdate(domReference, floating, update, autoUpdateOptions());
-      onCleanup(cleanup);
+      return autoUpdate(domReference, floating, update, autoUpdateOptions());
     }
   });
 

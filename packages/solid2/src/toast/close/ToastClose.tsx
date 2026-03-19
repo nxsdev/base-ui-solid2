@@ -19,7 +19,7 @@ export function ToastClose(componentProps: ToastClose.Props) {
   const { toast } = useToastRootContext();
 
   const { getButtonProps, buttonRef } = useButton({
-    disabled: () => local.disabled,
+    disabled: () => local.disabled === true || local.disabled === '',
     native: nativeButton,
   });
 

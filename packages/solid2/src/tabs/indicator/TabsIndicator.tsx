@@ -1,8 +1,7 @@
 import {
-  createEffect,
   createMemo,
   createSignal,
-  onCleanup,
+  createTrackedEffect,
   onSettled,
   Show,
   type JSX,
@@ -60,7 +59,7 @@ export function TabsIndicator(componentProps: TabsIndicator.Props) {
     setIsMounted(true);
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (value() != null && refs.tabsListRef != null && typeof ResizeObserver !== 'undefined') {
       const resizeObserver = new ResizeObserver(() => {
         setMeta((prev) => {
@@ -97,12 +96,10 @@ export function TabsIndicator(componentProps: TabsIndicator.Props) {
 
       resizeObserver.observe(refs.tabsListRef);
 
-      onCleanup(() => {
+      return () => {
         resizeObserver.disconnect();
-      });
+      };
     }
-
-    return;
   });
 
   const selectedTabPosition = createMemo(() =>

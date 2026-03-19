@@ -1,4 +1,4 @@
-import { batch, Show } from 'solid-js';
+import { Show } from 'solid-js';
 import { CompositeItem } from '../composite/item/CompositeItem';
 import { splitComponentProps } from '../solid-helpers';
 import { useToggleGroupContext } from '../toggle-group/ToggleGroupContext';
@@ -25,8 +25,8 @@ export function Toggle(componentProps: Toggle.Props) {
     'nativeButton',
   ]);
   const defaultPressedProp = () => local.defaultPressed ?? false;
-  const disabledProp = () => local.disabled ?? false;
-  const value = () => local.value ?? '';
+  const disabledProp = () => Boolean(local.disabled);
+  const value = () => (typeof local.value === 'string' ? local.value : '');
   const nativeButton = () => local.nativeButton ?? true;
 
   const groupContext = useToggleGroupContext();
@@ -46,10 +46,8 @@ export function Toggle(componentProps: Toggle.Props) {
   });
 
   const onPressedChange = (nextPressed: boolean, event: Event) => {
-    batch(() => {
-      groupContext?.setGroupValue?.(value(), nextPressed, event);
-      local.onPressedChange?.(nextPressed, event);
-    });
+    groupContext?.setGroupValue?.(value(), nextPressed, event);
+    local.onPressedChange?.(nextPressed, event);
   };
 
   const { getButtonProps, buttonRef } = useButton({
@@ -72,14 +70,12 @@ export function Toggle(componentProps: Toggle.Props) {
     props: [
       {
         get 'aria-pressed'() {
-          return pressed();
+          return pressed() ? 'true' : 'false';
         },
         onClick(event) {
           const nextPressed = !pressed();
-          batch(() => {
-            setPressedState(nextPressed);
-            onPressedChange(nextPressed, event);
-          });
+          setPressedState(nextPressed);
+          onPressedChange(nextPressed, event);
         },
       },
       elementProps,

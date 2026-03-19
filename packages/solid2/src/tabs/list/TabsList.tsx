@@ -1,4 +1,4 @@
-import { createEffect, createSignal, type Accessor } from 'solid-js';
+import { createSignal, createTrackedEffect, type Accessor } from 'solid-js';
 import { CompositeRoot } from '../../composite/root/CompositeRoot';
 import { splitComponentProps } from '../../solid-helpers';
 import { BaseUIComponentProps } from '../../utils/types';
@@ -121,7 +121,7 @@ function useActivationDirectionDetector(
 ): (newValue: any) => TabsTab.ActivationDirection {
   let previousTabEdge = null as number | null;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     const ref = tabsListRef();
     // Whenever orientation changes, reset the state.
     if (selectedTabValue() == null || ref == null) {

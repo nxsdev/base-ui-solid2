@@ -1,5 +1,5 @@
-import { batch, createEffect, createMemo, createSignal, onCleanup, type JSX } from 'solid-js';
-import { createStore, produce } from 'solid-js';
+import { createEffect, createMemo, createSignal, createTrackedEffect, type JSX } from 'solid-js';
+import { createStore } from 'solid-js';
 import { activeElement, contains } from '../../floating-ui-solid/utils';
 import { generateId } from '../../utils/generateId';
 import { ownerDocument } from '../../utils/owner';
@@ -34,9 +34,10 @@ export function ToastProvider(props: ToastProvider.Props) {
     null,
   );
 
-  createEffect(() => {
-    if (toasts.list.length === 0) {
-      batch(() => {
+  createEffect(
+    () => toasts.list.length === 0,
+    (empty) => {
+      if (empty) {
         if (hovering()) {
           setHovering(false);
         }
@@ -44,9 +45,9 @@ export function ToastProvider(props: ToastProvider.Props) {
         if (focused()) {
           setFocused(false);
         }
-      });
-    }
-  });
+      }
+    },
+  );
 
   // It's not possible to stack a smaller height toast onto a larger height toast, but
   // the reverse is possible. For simplicity, we'll enforce the expanded state if the
@@ -134,57 +135,52 @@ export function ToastProvider(props: ToastProvider.Props) {
   };
 
   const close = (toastId: string) => {
-    batch(() => {
-      setToasts(
-        'list',
-        produce((prevToasts) => {
-          for (const toast of prevToasts) {
-            if (toast.id === toastId) {
-              toast.transitionStatus = 'ending';
-              toast.height = 0;
-            }
-          }
-
-          const activeToasts = prevToasts.filter((t) => t.transitionStatus !== 'ending');
-
-          for (const toast of prevToasts) {
-            if (toast.transitionStatus === 'ending') {
-              continue;
-            }
-            const isActiveToastLimited = activeToasts.indexOf(toast) >= limit();
-            toast.limited = isActiveToastLimited;
-          }
-        }),
-      );
-
-      const timer = timersRef.get(toastId);
-      if (timer && timer.timeout) {
-        timer.timeout.clear();
-        timersRef.delete(toastId);
+    setToasts((state) => {
+      for (const toast of state.list) {
+        if (toast.id === toastId) {
+          toast.transitionStatus = 'ending';
+          toast.height = 0;
+        }
       }
 
-      const toast = toasts.list.find((t) => t.id === toastId);
-      toast?.onClose?.();
+      const activeToasts = state.list.filter((toast) => toast.transitionStatus !== 'ending');
 
-      handleFocusManagement(toastId);
+      for (const toast of state.list) {
+        if (toast.transitionStatus === 'ending') {
+          continue;
+        }
 
-      if (toasts.list.length === 1) {
-        setHovering(false);
-        setFocused(false);
+        toast.limited = activeToasts.indexOf(toast) >= limit();
       }
     });
+
+    const timer = timersRef.get(toastId);
+    if (timer?.timeout) {
+      timer.timeout.clear();
+      timersRef.delete(toastId);
+    }
+
+    const toast = toasts.list.find((item) => item.id === toastId);
+    toast?.onClose?.();
+
+    handleFocusManagement(toastId);
+
+    if (toasts.list.length === 1) {
+      setHovering(false);
+      setFocused(false);
+    }
   };
 
   const remove = (toastId: string) => {
     let onRemoveCallback: (() => void) | undefined;
-    setToasts('list', (prev) =>
-      prev.filter((toast) => {
-        if (toast.id === toastId) {
-          onRemoveCallback = toast.onRemove;
-        }
-        return toast.id !== toastId;
-      }),
-    );
+    const nextList = toasts.list.filter((toast) => {
+      if (toast.id === toastId) {
+        onRemoveCallback = toast.onRemove;
+      }
+      return toast.id !== toastId;
+    });
+
+    setToasts(() => ({ list: nextList }));
     onRemoveCallback?.();
   };
 
@@ -216,29 +212,26 @@ export function ToastProvider(props: ToastProvider.Props) {
       id,
       transitionStatus: 'starting',
     };
-    setToasts(
-      'list',
-      produce((prev) => {
-        prev.unshift(toastToAdd);
-        const activeToasts = prev.filter((t) => t.transitionStatus !== 'ending');
+    setToasts((state) => {
+      state.list.unshift(toastToAdd as ToastObject<any>);
+      const activeToasts = state.list.filter((toast) => toast.transitionStatus !== 'ending');
 
-        // Mark oldest toasts for removal when over limit
-        if (activeToasts.length > limit()) {
-          const excessCount = activeToasts.length - limit();
-          const oldestActiveToasts = activeToasts.slice(-excessCount);
+      // Mark oldest toasts for removal when over limit
+      if (activeToasts.length > limit()) {
+        const excessCount = activeToasts.length - limit();
+        const oldestActiveToasts = activeToasts.slice(-excessCount);
 
-          for (const t of prev) {
-            t.limited = oldestActiveToasts.some((old) => old.id === t.id);
-          }
-
-          return;
+        for (const toast of state.list) {
+          toast.limited = oldestActiveToasts.some((old) => old.id === toast.id);
         }
 
-        for (const t of prev) {
-          t.limited = false;
-        }
-      }),
-    );
+        return;
+      }
+
+      for (const toast of state.list) {
+        toast.limited = false;
+      }
+    });
 
     const duration = toastToAdd.timeout ?? timeout();
     if (toastToAdd.type !== 'loading' && duration > 0) {
@@ -256,16 +249,19 @@ export function ToastProvider(props: ToastProvider.Props) {
     id: string,
     updates: useToastManager.UpdateOptions<Data>,
   ) => {
-    setToasts(
-      'list',
-      (item) => item.id === id,
-      produce((toast) => {
-        // eslint-disable-next-line guard-for-in
-        for (const key in updates) {
-          toast[key as K] = (updates as any)[key];
-        }
-      }),
-    );
+    const nextUpdates = updates as Partial<ToastObject<Data>>;
+
+    setToasts((state) => {
+      const toast = state.list.find((item) => item.id === id) as ToastObject<Data> | undefined;
+      if (!toast) {
+        return;
+      }
+
+      // eslint-disable-next-line guard-for-in
+      for (const key in nextUpdates) {
+        toast[key as K] = nextUpdates[key as K] as ToastObject<Data>[K];
+      }
+    });
   };
 
   const promise = <Value, Data extends object>(
@@ -282,33 +278,29 @@ export function ToastProvider(props: ToastProvider.Props) {
     const cb = () => close(id);
 
     const onSuccess = (result: Value) => {
-      batch(() => {
-        update(id, {
-          ...resolvePromiseOptions(options.success, result),
-          type: 'success',
-        });
-
-        scheduleTimer(id, timeout(), cb);
-
-        if (hovering() || focused() || !refs.windowFocusedRef) {
-          pauseTimers();
-        }
+      update(id, {
+        ...resolvePromiseOptions(options.success, result),
+        type: 'success',
       });
+
+      scheduleTimer(id, timeout(), cb);
+
+      if (hovering() || focused() || !refs.windowFocusedRef) {
+        pauseTimers();
+      }
       return result;
     };
     const onError = (error: any) => {
-      batch(() => {
-        update(id, {
-          ...resolvePromiseOptions(options.error, error),
-          type: 'error',
-        });
-
-        scheduleTimer(id, timeout(), cb);
-
-        if (hovering() || focused() || !refs.windowFocusedRef) {
-          pauseTimers();
-        }
+      update(id, {
+        ...resolvePromiseOptions(options.error, error),
+        type: 'error',
       });
+
+      scheduleTimer(id, timeout(), cb);
+
+      if (hovering() || focused() || !refs.windowFocusedRef) {
+        pauseTimers();
+      }
       return Promise.reject(error);
     };
 
@@ -337,13 +329,14 @@ export function ToastProvider(props: ToastProvider.Props) {
     }
   };
 
-  createEffect(function subscribeToToastManager() {
-    if (!props.toastManager) {
+  createTrackedEffect(function subscribeToToastManager() {
+    const toastManager = props.toastManager;
+
+    if (!toastManager) {
       return;
     }
 
-    const unsubscribe = props.toastManager[' subscribe'](onUnsubscribe);
-    onCleanup(unsubscribe);
+    return toastManager[' subscribe'](onUnsubscribe);
   });
 
   const contextValue: ToastContext<any> = {

@@ -1,4 +1,4 @@
-import { createEffect, onCleanup } from 'solid-js';
+import { createTrackedEffect } from 'solid-js';
 import { useDirection } from '../../direction-provider/DirectionContext';
 import { activeElement } from '../../floating-ui-solid/utils';
 import { splitComponentProps } from '../../solid-helpers';
@@ -319,24 +319,23 @@ export function SliderControl(componentProps: SliderControl.Props) {
     doc.removeEventListener('touchend', handleTouchEnd);
   };
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!controlRef) {
-      onCleanup(() => stopListening());
-      return;
+      return () => stopListening();
     }
 
     controlRef.addEventListener('touchstart', handleTouchStart, {
       passive: true,
     });
 
-    onCleanup(() => {
+    return () => {
       controlRef?.removeEventListener('touchstart', handleTouchStart);
 
       stopListening();
-    });
+    };
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (disabled()) {
       stopListening();
     }

@@ -1,4 +1,4 @@
-import { createEffect, createMemo } from 'solid-js';
+import { createMemo, createTrackedEffect } from 'solid-js';
 import { ACTIVE_COMPOSITE_ITEM } from '../../composite/constants';
 import { useCompositeItem } from '../../composite/item/useCompositeItem';
 import { splitComponentProps } from '../../solid-helpers';
@@ -24,7 +24,7 @@ export function TabsTab(componentProps: TabsTab.Props) {
     'id',
     'nativeButton',
   ]);
-  const disabled = () => local.disabled ?? false;
+  const disabled = () => local.disabled === true || local.disabled === '';
   const nativeButton = () => local.nativeButton ?? true;
 
   const {
@@ -68,7 +68,7 @@ export function TabsTab(componentProps: TabsTab.Props) {
 
   // Keep the highlighted item in sync with the currently selected tab
   // when the value prop changes externally (controlled mode)
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isNavigatingRef) {
       isNavigatingRef = false;
       return;
@@ -165,7 +165,7 @@ export function TabsTab(componentProps: TabsTab.Props) {
           return tabPanelId();
         },
         get 'aria-selected'() {
-          return selected();
+          return selected() ? 'true' : 'false';
         },
         get id() {
           return id();

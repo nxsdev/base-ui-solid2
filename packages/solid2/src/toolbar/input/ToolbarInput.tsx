@@ -22,7 +22,7 @@ export function ToolbarInput(componentProps: ToolbarInput.Props) {
     'disabled',
   ]);
   const focusableWhenDisabled = () => local.focusableWhenDisabled ?? true;
-  const disabledProp = () => local.disabled ?? false;
+  const disabledProp = () => local.disabled === true || local.disabled === '';
 
   const { disabled: toolbarDisabled, orientation } = useToolbarRootContext();
 

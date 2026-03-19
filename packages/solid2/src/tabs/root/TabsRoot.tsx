@@ -1,4 +1,4 @@
-import { batch, createSignal } from 'solid-js';
+import { createSignal } from 'solid-js';
 import type { CompositeMetadata } from '../../composite/list/CompositeList';
 import { CompositeList } from '../../composite/list/CompositeList';
 import { useDirection } from '../../direction-provider/DirectionContext';
@@ -52,11 +52,9 @@ export function TabsRoot(componentProps: TabsRoot.Props) {
     activationDirection: TabsTab.ActivationDirection,
     event: Event | undefined,
   ) => {
-    batch(() => {
-      setValue(newValue);
-      setTabActivationDirection(activationDirection);
-      local.onValueChange?.(newValue, event);
-    });
+    setValue(newValue);
+    setTabActivationDirection(activationDirection);
+    local.onValueChange?.(newValue, event);
   };
 
   // get the `id` attribute of <Tabs.Panel> to set as the value of `aria-controls` on <Tabs.Tab>
