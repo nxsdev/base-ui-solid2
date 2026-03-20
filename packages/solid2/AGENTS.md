@@ -29,6 +29,8 @@ This directory is the Solid 2 beta port of Base UI.
 - Do not mechanically replace every legacy effect with `createTrackedEffect`. Use it narrowly for listener registration, imperative DOM synchronization, or cleanup-heavy bridges where a single tracked callback is still the clearest migration step.
 - Prefer split `createEffect(compute, apply)` for value synchronization and store/context updates, and prefer `onSettled` for mount/settle timing. Reduce temporary `createTrackedEffect` usage as files stabilize.
 - Do not write signals or stores from `createMemo`; derive values instead.
+- Prefer `satisfies` over `as` assertions when validating Solid 2 prop objects, render objects, and helper return shapes.
+- Use `as` only when `satisfies`, narrowing, or a local typed helper cannot express the boundary correctly, and keep the assertion narrow, local, and justified by the surrounding API boundary.
 
 ## Porting workflow
 

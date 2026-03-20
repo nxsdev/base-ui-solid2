@@ -46,11 +46,20 @@ Those rewrites were reverted in the affected tests below. The implementation was
 - Final judgment: reverted API-drift masking rewrite.
 - Why: this test is about the render-state contract key, which should remain `readOnly`; `getStyleHookProps` is responsible for lowercasing it to `data-readonly`.
 
+### `/home/noc/oss/base-ui-solid2/packages/solid2/src/checkbox-group/CheckboxGroup.test.tsx`
+
+- Replaced `errors={errors()}` with a getter-backed `formProps` object that is spread into `<Form>`.
+- Final judgment: required observation migration.
+- Why compatibility is preserved: the test still verifies the same server-error focus behavior; only the Solid 2 prop observation path changed.
+
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/checkbox/root/CheckboxRoot.test.tsx`
 
 - Earlier rewrite: changed the public prop under test from `readOnly` to `readonly`.
 - Final judgment: reverted API-drift masking rewrite.
 - Why: `Checkbox.Root` should still expose `readOnly` publicly even if the internal DOM boundary uses `readonly`.
+- Additional rewrite: replaced `errors={errors()}` with a getter-backed `formProps` object for the `<Form>` fixture.
+- Final judgment for the additional rewrite: required observation migration.
+- Why compatibility is preserved: the checkbox error-clearing behavior under test is unchanged.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/floating-ui-solid/components/FloatingDelayGroup.test.tsx`
 
@@ -92,6 +101,9 @@ Those rewrites were reverted in the affected tests below. The implementation was
 - Earlier rewrite: changed the public prop under test from `noValidate` to `novalidate`.
 - Final judgment: reverted API-drift masking rewrite.
 - Why: `Form` should keep `noValidate` as its public API and translate it to the native `novalidate` attribute internally.
+- Additional rewrite: replaced `errors={errors()}` in local app fixtures with getter-backed `formProps` objects spread into `<Form>`.
+- Final judgment for the additional rewrite: required observation migration.
+- Why compatibility is preserved: the same error propagation, clearing, and focus semantics are asserted; only the Solid 2-compatible prop observation path changed.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/menu/checkbox-item/MenuCheckboxItem.test.tsx`
 
@@ -138,27 +150,38 @@ Those rewrites were reverted in the affected tests below. The implementation was
 
 - Earlier rewrite: changed the public prop under test from `readOnly` to `readonly`.
 - Final judgment: reverted API-drift masking rewrite.
+- Additional rewrite: replaced `errors={errors()}` with getter-backed `formProps` in the Form-driven fixtures.
+- Final judgment for the additional rewrite: required observation migration.
+- Why compatibility is preserved: the same Form-driven focus and error-clearing behavior is asserted.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/radio-group/RadioGroup.test.tsx`
 
 - Earlier rewrite: changed the public prop under test from `readOnly` to `readonly`.
 - Final judgment: reverted API-drift masking rewrite.
+- Additional rewrite: replaced `errors={errors()}` with a getter-backed `formProps` object.
+- Final judgment for the additional rewrite: required observation migration.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/select/root/SelectRoot.test.tsx`
 
 - Updated `For` item rendering from `item` to `item()`.
 - Final judgment: required syntax migration.
 - Why compatibility is preserved: rendered labels and values are unchanged.
+- Additional rewrite: replaced `errors={errors()}` with a getter-backed `formProps` object in the Form fixture.
+- Final judgment for the additional rewrite: required observation migration.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/slider/root/SliderRoot.test.tsx`
 
 - Earlier rewrite: changed the public prop under test from `tabIndex` to `tabindex`.
 - Final judgment: reverted API-drift masking rewrite.
+- Additional rewrite: replaced `errors={errors()}` with a getter-backed `formProps` object in the Form fixture.
+- Final judgment for the additional rewrite: required observation migration.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/switch/root/SwitchRoot.test.tsx`
 
 - Earlier rewrite: changed the public prop under test from `readOnly` to `readonly`.
 - Final judgment: reverted API-drift masking rewrite.
+- Additional rewrite: replaced `errors={errors()}` with a getter-backed `formProps` object in the Form fixture.
+- Final judgment for the additional rewrite: required observation migration.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/switch/thumb/SwitchThumb.test.tsx`
 
@@ -257,6 +280,17 @@ Those rewrites were reverted in the affected tests below. The implementation was
 ## Shared test setup
 
 ### `/home/noc/oss/base-ui-solid2/test/setupVitest.ts`
+
+- Suppressed JSDOM's `Not implemented: HTMLFormElement's requestSubmit() method` console error in shared test setup.
+- Final judgment: required test infrastructure migration.
+- Why compatibility is preserved: JSDOM fires the `submit` event before emitting this not-implemented error. Swallowing the exact environment error keeps the existing submit semantics intact while preventing environment-only noise from failing the suite.
+
+### `/home/noc/oss/base-ui-solid2/packages/solid2/vitest.config.mts`
+
+- Replaced package-local Solid alias paths with canonical realpaths resolved from the Solid 2 package entrypoints.
+- Forced `@solidjs/testing-library` to its ESM entry so the test runner shares one Solid import graph.
+- Final judgment: required test infrastructure migration.
+- Why compatibility is preserved: this only deduplicates the test runtime's Solid module graph so package code and `@solidjs/testing-library` share the same Solid instance.
 
 - Replaced `import { reset } from '@base-ui/utils/error'` with a workspace-relative source import.
 - Final judgment: required test-infrastructure rewrite.

@@ -1,3 +1,4 @@
+import { untrack } from 'solid-js';
 import { access, type MaybeAccessor } from '../solid-helpers';
 
 export type CustomStyleHookMapping<State> = {
@@ -10,28 +11,95 @@ export function getStyleHookProps<State extends Record<string, MaybeAccessor<any
   state: State,
   customMapping?: CustomStyleHookMapping<State>,
 ) {
-  const props: Record<string, string> = {};
+  const hasOwn = Object.prototype.hasOwnProperty;
 
-  /* eslint-disable-next-line guard-for-in */
-  for (const key in state) {
-    const value = access(state[key]);
-    const resolvedValue = access(value);
+  const resolveForKey = (property: string) => {
+    /* eslint-disable-next-line guard-for-in */
+    for (const key in state) {
+      const value = access(state[key]);
+      const resolvedValue = access(value);
 
-    if (customMapping?.hasOwnProperty(key)) {
-      const customProps = customMapping[key]!(resolvedValue);
-      if (customProps != null) {
-        Object.assign(props, customProps);
+      if (customMapping && hasOwn.call(customMapping, key)) {
+        const customProps = customMapping[key]!(resolvedValue);
+        if (customProps != null && property in customProps) {
+          return access(customProps[property]);
+        }
+
+        continue;
       }
 
-      continue;
+      if (property === `data-${key.toLowerCase()}`) {
+        if (resolvedValue === true) {
+          return '';
+        }
+        if (resolvedValue) {
+          return resolvedValue.toString();
+        }
+        return undefined;
+      }
     }
 
-    if (resolvedValue === true) {
-      props[`data-${key.toLowerCase()}`] = '';
-    } else if (resolvedValue) {
-      props[`data-${key.toLowerCase()}`] = resolvedValue.toString();
-    }
-  }
+    return undefined;
+  };
 
-  return props;
+  const collectKeys = () => {
+    const keys = new Set<string>();
+
+    /* eslint-disable-next-line guard-for-in */
+    for (const key in state) {
+      const resolvedValue = untrack(() => {
+        const value = access(state[key]);
+        return access(value);
+      });
+
+      if (customMapping && hasOwn.call(customMapping, key)) {
+        const customProps = untrack(() => customMapping[key]!(resolvedValue));
+        if (customProps != null) {
+          Object.keys(customProps).forEach((customKey) => keys.add(customKey));
+        }
+        continue;
+      }
+
+      if (resolvedValue) {
+        keys.add(`data-${key.toLowerCase()}`);
+      }
+    }
+
+    return Array.from(keys);
+  };
+
+  return new Proxy<Record<string, string>>(
+    {},
+    {
+      get(_, property) {
+        if (typeof property !== 'string') {
+          return undefined;
+        }
+        return resolveForKey(property);
+      },
+      has(_, property) {
+        return typeof property === 'string' && resolveForKey(property) !== undefined;
+      },
+      ownKeys() {
+        return collectKeys();
+      },
+      getOwnPropertyDescriptor(_, property) {
+        if (typeof property !== 'string') {
+          return undefined;
+        }
+
+        if (!collectKeys().includes(property)) {
+          return undefined;
+        }
+
+        return {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return resolveForKey(property);
+          },
+        };
+      },
+    },
+  );
 }

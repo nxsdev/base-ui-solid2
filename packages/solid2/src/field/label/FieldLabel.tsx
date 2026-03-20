@@ -1,4 +1,3 @@
-import { onSettled } from 'solid-js';
 import { getTarget } from '../../floating-ui-solid/utils';
 import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
@@ -23,20 +22,17 @@ export function FieldLabel(componentProps: FieldLabel.Props) {
   const htmlFor = () => controlId() ?? undefined;
   let ref: HTMLElement;
 
-  onSettled(() => {
-    setCodependentRefs((refs) => {
-      refs.label = {
-        explicitId: id,
-        ref: () => ref,
-        id: () => normalizeOptionalId(local.id),
-      };
-    });
-  });
-
   const element = useRenderElement('label', componentProps, {
     state,
     ref: (el) => {
       ref = el;
+      setCodependentRefs((refs) => {
+        refs.label = {
+          explicitId: id,
+          ref: () => ref,
+          id: () => normalizeOptionalId(local.id),
+        };
+      });
     },
     customStyleHookMapping: fieldValidityMapping,
     props: [

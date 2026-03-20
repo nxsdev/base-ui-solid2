@@ -526,8 +526,14 @@ describe('<RadioGroup />', () => {
           const [errors, setErrors] = createSignal<Record<string, string | string[]>>({
             test: 'test',
           });
+          const formProps = {
+            get errors() {
+              return errors();
+            },
+            onClearErrors: setErrors,
+          } satisfies Pick<Form.Props, 'errors' | 'onClearErrors'>;
           return (
-            <Form errors={errors()} onClearErrors={setErrors}>
+            <Form {...formProps}>
               <Field.Root name="test" data-testid="field">
                 <RadioGroup data-testid="radio-group">
                   <Radio.Root value="a" data-testid="item-a" />

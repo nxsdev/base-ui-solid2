@@ -1,4 +1,11 @@
-import { createMemo, createSignal, createTrackedEffect, type Accessor, type Signal } from 'solid-js';
+import {
+  createMemo,
+  createSignal,
+  createTrackedEffect,
+  untrack,
+  type Accessor,
+  type Signal,
+} from 'solid-js';
 import { access } from '../solid-helpers';
 
 // TODO: uncomment once we enable eslint-plugin-react-compiler // eslint-disable-next-line react-compiler/react-compiler -- process.env never changes, dependency arrays are intentionally ignored
@@ -27,10 +34,10 @@ export function useControlled<T = unknown>(props: UseControlledProps<T>): Signal
   const defaultProp = createMemo(() => access(props.default));
 
   // eslint-disable-next-line solid/reactivity
-  const isControlled = controlledProp() !== undefined;
-  // eslint-disable-next-line solid/reactivity
+  const isControlled = untrack(() => controlledProp() !== undefined);
+  const initialDefaultValue = untrack(defaultProp);
   const [valueState, setValue] = createSignal<T | undefined>(
-    defaultProp() as Exclude<T, Function> | undefined,
+    initialDefaultValue as Exclude<T, Function> | undefined,
   );
   const value = createMemo(() => (isControlled ? controlledProp() : valueState()));
   const state = createMemo(() => props.state ?? 'value');
@@ -54,7 +61,7 @@ export function useControlled<T = unknown>(props: UseControlledProps<T>): Signal
     });
 
     // eslint-disable-next-line solid/reactivity
-    const defaultValue = defaultProp();
+    const defaultValue = initialDefaultValue;
 
     createTrackedEffect(() => {
       // Object.is() is not equivalent to the === operator.

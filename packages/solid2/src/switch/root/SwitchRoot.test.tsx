@@ -296,8 +296,14 @@ describe('<Switch.Root />', () => {
         const [errors, setErrors] = createSignal<Record<string, string | string[]>>({
           test: 'test',
         });
+        const formProps = {
+          get errors() {
+            return errors();
+          },
+          onClearErrors: setErrors,
+        } satisfies Pick<Form.Props, 'errors' | 'onClearErrors'>;
         return (
-          <Form errors={errors()} onClearErrors={setErrors}>
+          <Form {...formProps}>
             <Field.Root name="test" data-testid="field">
               <Switch.Root data-testid="switch" />
               <Field.Error data-testid="error" />

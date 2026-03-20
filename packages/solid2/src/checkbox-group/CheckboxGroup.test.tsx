@@ -434,10 +434,15 @@ describe('<CheckboxGroup />', () => {
     it('focuses the first checkbox when the field receives an error from Form', async () => {
       function App() {
         const [errors, setErrors] = createSignal<MaybeAccessorValue<Form.Props['errors']>>({});
+        const formProps = {
+          get errors() {
+            return errors();
+          },
+          onClearErrors: setErrors,
+        } satisfies Pick<Form.Props, 'errors' | 'onClearErrors'>;
         return (
           <Form
-            errors={errors()}
-            onClearErrors={setErrors}
+            {...formProps}
             onSubmit={(event) => {
               event.preventDefault();
               setErrors({ group: 'server error' });

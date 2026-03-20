@@ -35,8 +35,9 @@ export interface FieldRootContext {
     value: unknown,
     formValues: Record<string, unknown>,
   ) => string | string[] | null | Promise<string | string[] | null>;
-  validationMode: Accessor<'onBlur' | 'onChange'>;
+  validationMode: Accessor<'onSubmit' | 'onBlur' | 'onChange'>;
   validationDebounceTime: Accessor<number>;
+  shouldValidateOnChange: Accessor<boolean>;
   state: FieldRoot.State;
   refs: {
     markedDirtyRef: boolean;
@@ -72,8 +73,9 @@ export const FieldRootContext = createContext<FieldRootContext>({
   focused: () => false,
   setFocused: NOOP as Setter<any>,
   validate: () => null,
-  validationMode: () => 'onBlur' as const,
+  validationMode: () => 'onSubmit' as const,
   validationDebounceTime: () => 0,
+  shouldValidateOnChange: () => false,
   state: {
     disabled: false,
     valid: null,

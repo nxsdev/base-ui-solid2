@@ -18,72 +18,107 @@ export function useRenderElement<
   componentProps: RenderElement.ComponentProps<State, RenderedElementType, RenderFnElement>,
   params: RenderElement.Parameters<State, RenderedElementType, TagName, Enabled>,
 ): (props?: HTMLProps) => Enabled extends false ? null : JSX.Element {
+  type DynamicRenderProps = Omit<DynamicProps<ValidComponent>, 'component'>;
+
+  const renderDynamic = (
+    component: ValidComponent,
+    props: DynamicRenderProps,
+  ) => {
+    return <Dynamic component={component} {...props} />;
+  };
+
   const Component = (props: HTMLProps) => {
+    const renderProps =
+      componentProps.render &&
+      typeof componentProps.render === 'object' &&
+      'component' in componentProps.render
+        ? componentProps.render
+        : undefined;
+
+    const mergedProps = mergeProps([
+      props,
+
+      {
+        ref: (el: any) => {
+          if (typeof componentProps.ref === 'function') {
+            componentProps.ref(el);
+          } else {
+            componentProps.ref = el;
+          }
+
+          if (typeof params.ref === 'function') {
+            params.ref(el);
+          } else {
+            params.ref = el;
+          }
+        },
+      },
+
+      renderProps
+        ? ({
+            ...renderProps,
+            component: undefined,
+          } as object)
+        : undefined,
+
+      params.disableStyleHooks !== true
+        ? getStyleHookProps(params.state ?? EMPTY_OBJECT, params.customStyleHookMapping)
+        : undefined,
+
+      mergeProps(params.props),
+
+      {
+        get class() {
+          return resolveClassName(componentProps.class, params.state);
+        },
+      },
+    ]);
+
+    const renderPropsWithChildren = () => {
+      const children = params.children ?? componentProps.children;
+      if (children === undefined) {
+        return mergedProps;
+      }
+
+      return mergeProps([
+        mergedProps,
+        {
+          get children() {
+            return children;
+          },
+        },
+      ]);
+    };
+
     return (
       <Show when={access(params.enabled) ?? true}>
-        <Dynamic
-          component={(p: any) => {
-            if (typeof componentProps.render === 'function') {
-              return componentProps.render(p, params.state ?? (EMPTY_OBJECT as State));
-            }
-
-            if (
-              componentProps.render &&
-              typeof componentProps.render === 'object' &&
-              'component' in componentProps.render
-            ) {
-              return <Dynamic {...p} component={componentProps.render.component} />;
-            }
-
-            return (
-              <Dynamic
-                component={
-                  typeof componentProps.render === 'string'
-                    ? componentProps.render
-                    : access(element)
-                }
-                {...(access(element) === 'button' ? { type: 'button' } : {})}
-                {...(access(element) === 'img' ? { alt: '' } : {})}
-                {...p}
-              />
+        {(() => {
+          if (typeof componentProps.render === 'function') {
+            return componentProps.render(
+              renderPropsWithChildren(),
+              params.state ?? (EMPTY_OBJECT as State),
             );
-          }}
-          {...mergeProps([
-            props,
+          }
 
-            {
-              ref: (el: any) => {
-                if (typeof componentProps.ref === 'function') {
-                  componentProps.ref(el);
-                } else {
-                  componentProps.ref = el;
-                }
+          if (renderProps) {
+            return renderDynamic(
+              renderProps.component as ValidComponent,
+              renderPropsWithChildren() as DynamicRenderProps,
+            );
+          }
 
-                if (typeof params.ref === 'function') {
-                  params.ref(el);
-                } else {
-                  params.ref = el;
-                }
-              },
-            },
+          const resolvedElement =
+            typeof componentProps.render === 'string' ? componentProps.render : access(element);
 
-            typeof componentProps.render === 'object' ? (componentProps.render as object) : {},
-
-            params.disableStyleHooks !== true
-              ? getStyleHookProps(params.state ?? EMPTY_OBJECT, params.customStyleHookMapping)
-              : undefined,
-
-            mergeProps(params.props),
-
-            {
-              get class() {
-                return resolveClassName(componentProps.class, params.state);
-              },
-            },
-          ])}
-        >
-          {params.children ?? componentProps.children}
-        </Dynamic>
+          return (
+            <Dynamic
+              component={resolvedElement}
+              {...(resolvedElement === 'button' ? { type: 'button' } : {})}
+              {...(resolvedElement === 'img' ? { alt: '' } : {})}
+              {...renderPropsWithChildren()}
+            />
+          );
+        })()}
       </Show>
     );
   };

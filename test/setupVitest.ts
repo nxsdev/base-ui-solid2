@@ -13,6 +13,18 @@ declare global {
 
 setupVitest();
 
+const originalConsoleError = console.error.bind(console);
+console.error = (...args: Parameters<typeof console.error>) => {
+  if (
+    typeof args[0] === 'string' &&
+    args[0].includes("Not implemented: HTMLFormElement's requestSubmit() method")
+  ) {
+    return;
+  }
+
+  originalConsoleError(...args);
+};
+
 afterEach(() => {
   vi.resetAllMocks();
   reset();
@@ -25,4 +37,24 @@ if (typeof window !== 'undefined' && window?.navigator?.userAgent?.includes('jsd
     setTimeout(() => cb(0), 0);
     return 0;
   };
+
+  const virtualConsole = (window as typeof window & {
+    _virtualConsole?: { emit: (...args: any[]) => unknown };
+  })._virtualConsole;
+
+  if (virtualConsole?.emit) {
+    const originalEmit = virtualConsole.emit.bind(virtualConsole);
+    virtualConsole.emit = (...args: any[]) => {
+      const [type, error] = args;
+      if (
+        type === 'jsdomError' &&
+        error instanceof Error &&
+        error.message.includes("Not implemented: HTMLFormElement's requestSubmit() method")
+      ) {
+        return undefined;
+      }
+
+      return originalEmit(...args);
+    };
+  }
 }

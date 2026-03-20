@@ -1,4 +1,4 @@
-import { createTrackedEffect, onSettled, merge as solidMergeProps, type JSX } from 'solid-js';
+import { createTrackedEffect, merge as solidMergeProps, type JSX } from 'solid-js';
 import { mergeProps } from '../../merge-props';
 import { normalizeOptionalId, splitComponentProps } from '../../solid-helpers';
 import { useControlled } from '../../utils';
@@ -53,16 +53,6 @@ export function FieldControl(componentProps: FieldControl.Props) {
 
   const id = useBaseUiId(() => local.id);
 
-  onSettled(() => {
-    setChildRefs((childRefs) => {
-      childRefs.control = {
-        explicitId: id,
-        ref: () => refs.inputRef,
-        id: () => normalizeOptionalId(local.id),
-      };
-    });
-  });
-
   createTrackedEffect(() => {
     const explicitValue = typeof local.value === 'string' ? local.value : undefined;
     const hasExternalValue = explicitValue != null;
@@ -104,6 +94,13 @@ export function FieldControl(componentProps: FieldControl.Props) {
     state: controlState,
     ref: (el) => {
       refs.inputRef = el;
+      setChildRefs((childRefs) => {
+        childRefs.control = {
+          explicitId: id,
+          ref: () => refs.inputRef,
+          id: () => normalizeOptionalId(local.id),
+        };
+      });
     },
     customStyleHookMapping: fieldValidityMapping,
     props: [

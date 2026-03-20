@@ -17,6 +17,8 @@ import { FieldRootContext, type FieldRootChildRefs } from './FieldRootContext';
 export function FieldRoot(componentProps: FieldRoot.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, [
     'disabled',
+    'dirty',
+    'touched',
     'name',
     'validate',
     'validationDebounceTime',
@@ -24,12 +26,10 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
     'invalid',
   ]);
   const validationDebounceTime = () => local.validationDebounceTime ?? 0;
-  const validationMode = () => local.validationMode ?? 'onBlur';
+  const { errors, validationMode: formValidationMode, submitAttempted } = useFormContext();
+  const validationMode = () => local.validationMode ?? formValidationMode();
   const disabledProp = () => local.disabled ?? false;
-
   const { disabled: disabledFieldset } = useFieldsetRootContext();
-
-  const { errors } = useFormContext();
 
   const validate = (...args: Args<FieldRoot.Props['validate']>) =>
     local.validate?.(...args) ?? null;
@@ -42,7 +42,7 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
 
   const [childRefs, setChildRefs] = createStore<FieldRootChildRefs>({});
 
-  const [touched, setTouched] = createSignal(false);
+  const [touchedState, setTouchedUnwrapped] = createSignal(false);
   const [dirty, setDirtyUnwrapped] = createSignal(false);
   const [filled, setFilled] = createSignal(false);
   const [focused, setFocused] = createSignal(false);
@@ -51,11 +51,25 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
     markedDirtyRef: false,
   };
 
+  const touched = () => local.touched ?? touchedState();
+
   const setDirty: typeof setDirtyUnwrapped = (value) => {
+    if (local.dirty !== undefined) {
+      return;
+    }
+
     if (value) {
       refs.markedDirtyRef = true;
     }
     setDirtyUnwrapped(value);
+  };
+
+  const setTouched: typeof setTouchedUnwrapped = (value) => {
+    if (local.touched !== undefined) {
+      return;
+    }
+
+    setTouchedUnwrapped(value);
   };
 
   const invalid = () => {
@@ -75,6 +89,8 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
   });
 
   const valid = () => !invalid() && validityData.state.valid;
+  const shouldValidateOnChange = () =>
+    validationMode() === 'onChange' || (validationMode() === 'onSubmit' && submitAttempted());
 
   const state: FieldRoot.State = {
     get disabled() {
@@ -122,29 +138,42 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
     validate,
     validationMode,
     validationDebounceTime,
+    shouldValidateOnChange,
     state,
     refs,
   };
 
   createEffect(
-    () => [childRefs.control, childRefs.label] as const,
-    ([control, label]) => {
+    () => {
+      const control = childRefs.control;
+      const label = childRefs.label;
       let nextControlId: string | null | undefined;
       let nextLabelId: string | undefined;
 
       if (control) {
-        if (control.ref()?.closest('label') != null) {
-          nextControlId = control.id() ?? null;
+        const controlRef = control.ref();
+        const controlIdValue = control.id();
+        const explicitControlId = control.explicitId();
+
+        if (controlRef?.closest('label') != null) {
+          nextControlId = controlIdValue ?? null;
         } else {
-          nextControlId = control.explicitId();
+          nextControlId = explicitControlId;
         }
       }
 
       if (label) {
-        if (nextControlId != null || label.id() != null) {
-          nextLabelId = label.explicitId();
+        const labelIdValue = label.id();
+        const explicitLabelId = label.explicitId();
+
+        if (nextControlId != null || labelIdValue != null) {
+          nextLabelId = explicitLabelId;
         }
       }
+
+      return { nextControlId, nextLabelId };
+    },
+    ({ nextControlId, nextLabelId }) => {
 
       setControlId(nextControlId);
       setLabelId(nextLabelId);
@@ -220,12 +249,14 @@ export namespace FieldRoot {
     ) => string | string[] | null | Promise<string | string[] | null>;
     /**
      * Determines when the field should be validated.
+     * This takes precedence over the `validationMode` prop on `<Form>`.
      *
-     * - **onBlur** triggers validation when the control loses focus
-     * - **onChange** triggers validation on every change to the control value
-     * @default 'onBlur'
+     * - **onSubmit** triggers validation when the form is submitted, and re-validates on change after submission.
+     * - **onBlur** triggers validation when the control loses focus.
+     * - **onChange** triggers validation on every change to the control value.
+     * @default 'onSubmit'
      */
-    validationMode?: 'onBlur' | 'onChange';
+    validationMode?: 'onSubmit' | 'onBlur' | 'onChange';
     /**
      * How long to wait between `validate` callbacks if
      * `validationMode="onChange"` is used. Specified in milliseconds.
@@ -236,5 +267,15 @@ export namespace FieldRoot {
      * Whether the field is forcefully marked as invalid.
      */
     invalid?: boolean;
+    /**
+     * Whether the field's value has been changed from its initial value.
+     * Useful when the field state is controlled by an external library.
+     */
+    dirty?: boolean;
+    /**
+     * Whether the field has been touched.
+     * Useful when the field state is controlled by an external library.
+     */
+    touched?: boolean;
   }
 }

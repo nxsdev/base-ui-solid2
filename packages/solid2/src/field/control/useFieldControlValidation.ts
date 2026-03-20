@@ -1,4 +1,4 @@
-import { useFormContext } from '../../form/FormContext';
+import { useFormContext, type RegisteredFormField } from '../../form/FormContext';
 import { mergeProps } from '../../merge-props';
 import type { BaseUIHTMLProps, HTMLProps } from '../../utils/types';
 import { useTimeout } from '../../utils/useTimeout';
@@ -36,13 +36,13 @@ export function useFieldControlValidation() {
     validate,
     messageIds,
     validityData,
-    validationMode,
     validationDebounceTime,
     invalid,
     refs: fieldRootRefs,
     controlId,
     state,
     name,
+    shouldValidateOnChange,
   } = useFieldRootContext();
 
   const { formRef, setFormRef, clearErrors } = useFormContext();
@@ -78,10 +78,10 @@ export function useFieldControlValidation() {
         };
         element.setCustomValidity('');
 
-        const controlIdValue = controlId();
-        if (controlIdValue) {
+        const fieldKey = refs.inputRef?.id || controlId();
+        if (fieldKey) {
           setFormRef((formRef) => {
-            const field = formRef.fields[controlIdValue];
+            const field = formRef.fields[fieldKey];
             if (!field) {
               return;
             }
@@ -158,7 +158,7 @@ export function useFieldControlValidation() {
       defaultValidationMessage = element.validationMessage;
       validationErrors = [element.validationMessage];
     } else {
-      const formValues = Object.values(formRef.fields).reduce(
+      const formValues = (Object.values(formRef.fields) as RegisteredFormField[]).reduce(
         (acc, field) => {
           if (field.name && field.getValueRef) {
             acc[field.name] = field.getValueRef();
@@ -201,10 +201,10 @@ export function useFieldControlValidation() {
       initialValue: validityData.initialValue,
     };
 
-    const controlIdValue = controlId();
-    if (controlIdValue) {
+    const fieldKey = refs.inputRef?.id || controlId();
+    if (fieldKey) {
       setFormRef((formRef) => {
-        const field = formRef.fields[controlIdValue];
+        const field = formRef.fields[fieldKey];
         if (!field) {
           return;
         }
@@ -242,7 +242,7 @@ export function useFieldControlValidation() {
 
           clearErrors(name());
 
-          if (validationMode() !== 'onChange') {
+          if (!shouldValidateOnChange()) {
             commitValidation(event.currentTarget.value, true);
             return;
           }

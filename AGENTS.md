@@ -55,6 +55,8 @@ This repository now contains the upstream React implementation of Base UI and an
 ## Linting, typechecking, and formatting
 
 - Do not add casts such as `as any` unless a verified type issue requires them.
+- Prefer `satisfies` over `as` assertions when the goal is to validate shape without widening or erasing types.
+- Use `as` only when `satisfies`, narrowing, overloads, or local helper typing cannot express the boundary correctly, and keep those assertions as narrow and local as possible.
 - Run `pnpm typescript` to verify project references.
 - Run `pnpm eslint`.
 - Run `pnpm stylelint` when styles change.

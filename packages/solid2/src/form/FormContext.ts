@@ -5,6 +5,8 @@ import type { MaybeAccessor } from '../solid-helpers';
 import { NOOP } from '../utils/noop';
 
 export type Errors = Record<string, string | string[]>;
+export type FormValidationMode = 'onSubmit' | 'onBlur' | 'onChange';
+const EMPTY_ERRORS: Errors = {};
 
 type FormRef = {
   fields: Record<
@@ -19,22 +21,36 @@ type FormRef = {
   >;
 };
 
+export type RegisteredFormField = FormRef['fields'][string];
+
 export interface FormContext {
   errors: Accessor<Errors>;
   clearErrors: (name: string | undefined) => void;
   formRef: Store<FormRef>;
   setFormRef: StoreSetter<FormRef>;
+  validationMode: Accessor<FormValidationMode>;
+  submitAttempted: Accessor<boolean>;
 }
 
-export const FormContext = createContext<FormContext>({
+const DEFAULT_FORM_CONTEXT = {
   formRef: {
     fields: {},
   },
   setFormRef: NOOP,
-  errors: () => ({}),
+  errors: () => EMPTY_ERRORS,
   clearErrors: NOOP,
-});
+  validationMode: () => 'onSubmit' as const,
+  submitAttempted: () => false,
+} satisfies FormContext;
+
+export const FormContext = createContext<FormContext>(DEFAULT_FORM_CONTEXT);
 
 export function useFormContext() {
-  return useContext(FormContext);
+  const context = useContext(FormContext);
+
+  if (!context) {
+    throw new Error('Base UI: FormContext is missing. Form parts must be placed within <Form>.');
+  }
+
+  return context;
 }

@@ -544,10 +544,15 @@ describe('<NumberField />', () => {
     it('focuses the input when the field receives an error from Form', async () => {
       function App() {
         const [errors, setErrors] = createSignal<Form.Props['errors']>({});
+        const formProps = {
+          get errors() {
+            return errors();
+          },
+          onClearErrors: setErrors,
+        } satisfies Pick<Form.Props, 'errors' | 'onClearErrors'>;
         return (
           <Form
-            errors={errors()}
-            onClearErrors={setErrors}
+            {...formProps}
             onSubmit={(event) => {
               event.preventDefault();
               setErrors({ quantity: 'server error' });
@@ -576,8 +581,14 @@ describe('<NumberField />', () => {
     it('clears errors on change', async () => {
       function App() {
         const [errors, setErrors] = createSignal({ test: 'test' });
+        const formProps = {
+          get errors() {
+            return errors();
+          },
+          onClearErrors: setErrors,
+        } satisfies Pick<Form.Props, 'errors' | 'onClearErrors'>;
         return (
-          <Form errors={errors()} onClearErrors={setErrors}>
+          <Form {...formProps}>
             <Field.Root name="test" data-testid="field">
               <NumberField defaultValue={1} />
               <Field.Error data-testid="error" />
