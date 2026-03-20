@@ -55,11 +55,11 @@ export interface TabsRootContext {
 /**
  * @internal
  */
-export const TabsRootContext = createContext<TabsRootContext | undefined>(undefined);
+export const TabsRootContext = createContext<TabsRootContext | null>(null);
 
 export function useTabsRootContext() {
   const context = useContext(TabsRootContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: TabsRootContext is missing. Tabs parts must be placed within <Tabs.Root>.',
     );

@@ -6,11 +6,11 @@ export interface AvatarRootContext {
   setImageLoadingStatus: (status: ImageLoadingStatus) => void;
 }
 
-export const AvatarRootContext = createContext<AvatarRootContext | undefined>(undefined);
+export const AvatarRootContext = createContext<AvatarRootContext | null>(null);
 
 export function useAvatarRootContext() {
   const context = useContext(AvatarRootContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: AvatarRootContext is missing. Avatar parts must be placed within <Avatar.Root>.',
     );

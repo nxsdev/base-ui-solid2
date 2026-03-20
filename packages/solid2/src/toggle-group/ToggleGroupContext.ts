@@ -8,15 +8,15 @@ export interface ToggleGroupContext {
   orientation: Accessor<Orientation>;
 }
 
-export const ToggleGroupContext = createContext<ToggleGroupContext | undefined>(undefined);
+export const ToggleGroupContext = createContext<ToggleGroupContext | null>(null);
 
 export function useToggleGroupContext(optional = true) {
   const context = useContext(ToggleGroupContext);
-  if (context === undefined && !optional) {
+  if (context == null && !optional) {
     throw new Error(
       'Base UI: ToggleGroupContext is missing. ToggleGroup parts must be placed within <ToggleGroup>.',
     );
   }
 
-  return context;
+  return context ?? undefined;
 }

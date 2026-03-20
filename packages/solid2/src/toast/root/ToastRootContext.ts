@@ -17,7 +17,7 @@ export interface ToastRootContext {
   setCodependentRefs: StoreSetter<CodependentRefs<['title', 'description']>>;
 }
 
-export const ToastRootContext = createContext<ToastRootContext | undefined>(undefined);
+export const ToastRootContext = createContext<ToastRootContext | null>(null);
 
 export function useToastRootContext(): ToastRootContext {
   const context = useContext(ToastRootContext);

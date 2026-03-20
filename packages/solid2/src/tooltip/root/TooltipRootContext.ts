@@ -33,11 +33,11 @@ export interface TooltipRootContext {
   hoverable: Accessor<boolean>;
 }
 
-export const TooltipRootContext = createContext<TooltipRootContext | undefined>(undefined);
+export const TooltipRootContext = createContext<TooltipRootContext | null>(null);
 
 export function useTooltipRootContext() {
   const context = useContext(TooltipRootContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: TooltipRootContext is missing. Tooltip parts must be placed within <Tooltip.Root>.',
     );

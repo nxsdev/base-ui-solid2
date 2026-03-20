@@ -80,11 +80,11 @@ export interface SliderRootContext {
   values: Accessor<readonly number[]>;
 }
 
-export const SliderRootContext = createContext<SliderRootContext | undefined>(undefined);
+export const SliderRootContext = createContext<SliderRootContext | null>(null);
 
 export function useSliderRootContext() {
   const context = useContext(SliderRootContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: SliderRootContext is missing. Slider parts must be placed within <Slider.Root>.',
     );

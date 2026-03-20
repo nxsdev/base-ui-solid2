@@ -11,11 +11,11 @@ export interface TabsListContext {
   value: Accessor<any>;
 }
 
-export const TabsListContext = createContext<TabsListContext | undefined>(undefined);
+export const TabsListContext = createContext<TabsListContext | null>(null);
 
 export function useTabsListContext() {
   const context = useContext(TabsListContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: TabsListContext is missing. TabsList parts must be placed within <Tabs.List>.',
     );

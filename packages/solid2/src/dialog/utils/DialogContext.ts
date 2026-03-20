@@ -15,8 +15,15 @@ export interface DialogContext extends useDialogRoot.ReturnValue {
   onOpenChangeComplete?: (open: boolean) => void;
 }
 
-export const DialogContext = createContext<DialogContext | undefined>(undefined);
+export const DialogContext = createContext<DialogContext | null>(null);
 
 export function useDialogContext() {
-  return useContext(DialogContext);
+  const context = useContext(DialogContext);
+  if (!context) {
+    throw new Error(
+      'Base UI: DialogContext is missing. Dialog parts must be placed within <Dialog.Root>.',
+    );
+  }
+
+  return context;
 }

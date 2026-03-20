@@ -25,11 +25,11 @@ export interface PreviewCardRootContext {
   onOpenChangeComplete: ((open: boolean) => void) | undefined;
 }
 
-export const PreviewCardRootContext = createContext<PreviewCardRootContext | undefined>(undefined);
+export const PreviewCardRootContext = createContext<PreviewCardRootContext | null>(null);
 
 export function usePreviewCardRootContext() {
   const context = useContext(PreviewCardRootContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: PreviewCardRootContext is missing. PreviewCard parts must be placed within <PreviewCard.Root>.',
     );

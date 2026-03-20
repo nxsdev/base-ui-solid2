@@ -5,8 +5,8 @@ export interface TooltipProviderContext {
   closeDelay: Accessor<number | undefined>;
 }
 
-export const TooltipProviderContext = createContext<TooltipProviderContext | undefined>(undefined);
+export const TooltipProviderContext = createContext<TooltipProviderContext | null>(null);
 
 export function useTooltipProviderContext(): TooltipProviderContext | undefined {
-  return useContext(TooltipProviderContext);
+  return useContext(TooltipProviderContext) ?? undefined;
 }

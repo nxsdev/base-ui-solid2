@@ -43,16 +43,16 @@ export interface PopoverRootContext {
   setCodependentRefs: StoreSetter<CodependentRefs<['title', 'description']>>;
 }
 
-export const PopoverRootContext = createContext<PopoverRootContext | undefined>(undefined);
+export const PopoverRootContext = createContext<PopoverRootContext | null>(null);
 
 export function usePopoverRootContext(optional?: false): PopoverRootContext;
 export function usePopoverRootContext(optional: true): PopoverRootContext | undefined;
 export function usePopoverRootContext(optional?: boolean) {
   const context = useContext(PopoverRootContext);
-  if (context === undefined && !optional) {
+  if (context == null && !optional) {
     throw new Error(
       'Base UI: PopoverRootContext is missing. Popover parts must be placed within <Popover.Root>.',
     );
   }
-  return context;
+  return context ?? undefined;
 }

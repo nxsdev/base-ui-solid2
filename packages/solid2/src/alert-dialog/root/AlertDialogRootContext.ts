@@ -5,7 +5,7 @@ export { DialogContext as AlertDialogRootContext };
 
 export function useAlertDialogRootContext() {
   const context = useContext(DialogContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: AlertDialogRootContext is missing. AlertDialog parts must be placed within <AlertDialog.Root>.',
     );

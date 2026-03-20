@@ -29,11 +29,11 @@ export type ProgressRootContext = {
 /**
  * @internal
  */
-export const ProgressRootContext = createContext<ProgressRootContext | undefined>(undefined);
+export const ProgressRootContext = createContext<ProgressRootContext | null>(null);
 
 export function useProgressRootContext() {
   const context = useContext(ProgressRootContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: ProgressRootContext is missing. Progress parts must be placed within <Progress.Root>.',
     );

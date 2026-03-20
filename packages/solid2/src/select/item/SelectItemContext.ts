@@ -8,7 +8,7 @@ export interface SelectItemContext {
   };
 }
 
-export const SelectItemContext = createContext<SelectItemContext | undefined>(undefined);
+export const SelectItemContext = createContext<SelectItemContext | null>(null);
 
 export function useSelectItemContext() {
   const context = useContext(SelectItemContext);

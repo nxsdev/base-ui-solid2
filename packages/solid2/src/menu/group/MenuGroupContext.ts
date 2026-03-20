@@ -4,11 +4,11 @@ export interface MenuGroupContext {
   setLabelId: Setter<string | undefined>;
 }
 
-export const MenuGroupContext = createContext<MenuGroupContext | undefined>(undefined);
+export const MenuGroupContext = createContext<MenuGroupContext | null>(null);
 
 export function useMenuGroupRootContext() {
   const context = useContext(MenuGroupContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error(
       'Base UI: MenuGroupRootContext is missing. Menu group parts must be used within <Menu.Group>.',
     );

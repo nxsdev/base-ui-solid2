@@ -6,7 +6,7 @@ export interface ToastViewportContext {
   };
 }
 
-export const ToastViewportContext = createContext<ToastViewportContext | undefined>(undefined);
+export const ToastViewportContext = createContext<ToastViewportContext | null>(null);
 
 export function useToastViewportContext() {
   const context = useContext(ToastViewportContext);

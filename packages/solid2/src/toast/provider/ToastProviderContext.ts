@@ -31,7 +31,7 @@ export interface ToastContextValue<Data extends object> {
 
 export type ToastContext<Data extends object> = ToastContextValue<Data>;
 
-export const ToastContext = createContext<ToastContext<any> | undefined>(undefined);
+export const ToastContext = createContext<ToastContext<any> | null>(null);
 
 export function useToastContext() {
   const context = useContext(ToastContext);

@@ -8,13 +8,13 @@ export interface DialogRootContext {
   dismissible: Accessor<boolean>;
 }
 
-export const DialogRootContext = createContext<DialogRootContext>();
+export const DialogRootContext = createContext<DialogRootContext | null>(null);
 
 export function useOptionalDialogRootContext() {
   const dialogRootContext = useContext(DialogRootContext);
   const dialogContext = useContext(DialogContext);
 
-  if (dialogContext === undefined && dialogRootContext === undefined) {
+  if (dialogContext == null && dialogRootContext == null) {
     return undefined;
   }
 
@@ -28,7 +28,7 @@ export function useDialogRootContext() {
   const dialogRootContext = useContext(DialogRootContext);
   const dialogContext = useContext(DialogContext);
 
-  if (dialogContext === undefined) {
+  if (!dialogContext) {
     throw new Error(
       'Base UI: DialogRootContext is missing. Dialog parts must be placed within <Dialog.Root>.',
     );
