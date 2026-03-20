@@ -5,7 +5,7 @@
 import { flushMicrotasks } from '#test-utils';
 import { fireEvent, render, screen, waitFor, within } from '@solidjs/testing-library';
 import userEvent from '@testing-library/user-event';
-import { batch, createSignal, onSettled, Show, type Component, type JSX } from 'solid-js';
+import { createSignal, onSettled, Show, type Component, type JSX } from 'solid-js';
 import { Dynamic } from '@solidjs/web';
 import { test } from 'vitest';
 import { Main as MenuVirtual } from '../../../test/floating-ui-tests/MenuVirtual';
@@ -166,7 +166,7 @@ describe.skipIf(!isJSDOM)('FloatingFocusManager', () => {
     test('respects autoFocus with directive (only for Solid)', async () => {
       render(() => (
         <App>
-          <input autofocus use:autofocus data-testid="input" />
+          <input autofocus ref={(el) => autofocus(el, () => true)} data-testid="input" />
         </App>
       ));
       fireEvent.click(screen.getByTestId('reference'));
@@ -1803,10 +1803,8 @@ describe.skipIf(!isJSDOM)('FloatingFocusManager', () => {
                 <button
                   data-testid="parent-floating-reference"
                   onClick={() => {
-                    batch(() => {
-                      setIsDrawerOpen(true);
-                      setIsOpen(false);
-                    });
+                    setIsDrawerOpen(true);
+                    setIsOpen(false);
                   }}
                 />
               </div>

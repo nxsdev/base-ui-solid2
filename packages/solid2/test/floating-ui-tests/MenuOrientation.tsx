@@ -1,13 +1,10 @@
 import c from 'clsx';
 import {
-  batch,
   createContext,
-  createEffect,
   createSignal,
-  on,
+  createTrackedEffect,
   onCleanup,
   Show,
-  splitProps,
   useContext,
   type Accessor,
   type JSX,
@@ -76,14 +73,8 @@ export function MenuComponent(
   // { children, label, keepMounted = false, cols, orientation: orientationOption, ...props },
   props: MenuProps & JSX.HTMLAttributes<HTMLButtonElement>,
 ) {
-  const [local, elementProps] = splitProps(props, [
-    'children',
-    'label',
-    'keepMounted',
-    'cols',
-    'orientation',
-  ]);
-  const keepMounted = () => local.keepMounted ?? false;
+  const { children, label, keepMounted: keepMountedProp, cols, orientation: orientationProp, ...elementProps } = props;
+  const keepMounted = () => keepMountedProp ?? false;
   const [isOpen, setIsOpen] = createSignal(false);
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
   const [allowHover, setAllowHover] = createSignal(false);
@@ -98,7 +89,7 @@ export function MenuComponent(
   const nodeId = useFloatingNodeId();
   const parentId = useFloatingParentNodeId();
   const isNested = parentId != null;
-  const orientation = () => local.orientation ?? (local.cols ? 'both' : 'vertical');
+  const orientation = () => orientationProp ?? (cols ? 'both' : 'vertical');
 
   const parent = useContext(MenuContext);
   const item = useCompositeListItem();
@@ -135,7 +126,7 @@ export function MenuComponent(
     onNavigate: setActiveIndex,
     orientation,
     // eslint-disable-next-line solid/reactivity
-    cols: local.cols,
+    cols,
   });
   const typeahead = useTypeahead(context, {
     listRef: compositeListRefs.labels,
@@ -155,7 +146,7 @@ export function MenuComponent(
   // Event emitter allows you to communicate across tree components.
   // This effect closes all menus when an item gets clicked anywhere
   // in the tree.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!tree) {
       return;
     }
@@ -179,7 +170,7 @@ export function MenuComponent(
     });
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isOpen() && tree) {
       tree.events.emit('menuopen', { parentId, nodeId: nodeId() });
     }
@@ -188,31 +179,31 @@ export function MenuComponent(
   // Determine if "hover" logic can run based on the modality of input. This
   // prevents unwanted focus synchronization as menus open and close with
   // keyboard navigation and the cursor is resting on the menu.
-  createEffect(
-    on(allowHover, () => {
-      function onPointerMove({ pointerType }: PointerEvent) {
-        if (pointerType !== 'touch') {
-          setAllowHover(true);
-        }
-      }
+  createTrackedEffect(() => {
+    allowHover();
 
-      function onKeyDown() {
-        setAllowHover(false);
+    function onPointerMove({ pointerType }: PointerEvent) {
+      if (pointerType !== 'touch') {
+        setAllowHover(true);
       }
+    }
 
-      window.addEventListener('pointermove', onPointerMove, {
-        once: true,
+    function onKeyDown() {
+      setAllowHover(false);
+    }
+
+    window.addEventListener('pointermove', onPointerMove, {
+      once: true,
+      capture: true,
+    });
+    window.addEventListener('keydown', onKeyDown, true);
+    onCleanup(() => {
+      window.removeEventListener('pointermove', onPointerMove, {
         capture: true,
       });
-      window.addEventListener('keydown', onKeyDown, true);
-      onCleanup(() => {
-        window.removeEventListener('pointermove', onPointerMove, {
-          capture: true,
-        });
-        window.removeEventListener('keydown', onKeyDown, true);
-      });
-    }),
-  );
+      window.removeEventListener('keydown', onKeyDown, true);
+    });
+  });
 
   return (
     <FloatingNode id={nodeId()}>
@@ -240,26 +231,22 @@ export function MenuComponent(
           parent.getItemProps<HTMLButtonElement>({
             ...elementProps,
             onFocus(event) {
-              batch(() => {
-                callEventHandler(props.onFocus, event);
-                setHasFocusInside(false);
-                parent.setHasFocusInside(true);
-              });
+              callEventHandler(props.onFocus, event);
+              setHasFocusInside(false);
+              parent.setHasFocusInside(true);
             },
             onMouseEnter(event) {
-              batch(() => {
-                callEventHandler(props.onMouseEnter, event);
-                if (parent.allowHover() && parent.isOpen()) {
-                  parent.setActiveIndex(item.index());
-                }
-              });
+              callEventHandler(props.onMouseEnter, event);
+              if (parent.allowHover() && parent.isOpen()) {
+                parent.setActiveIndex(item.index());
+              }
             },
           }),
         )}
       >
-        {props.label}
+        {label}
         {isNested && (
-          <span aria-hidden class="ml-4">
+          <span aria-hidden="true" class="ml-4">
             Icon
           </span>
         )}
@@ -291,25 +278,25 @@ export function MenuComponent(
                   class={c(
                     'border-slate-900/10 rounded border bg-white bg-clip-padding p-1 shadow-lg outline-none',
                     {
-                      'flex flex-col': !local.cols && orientation() !== 'horizontal',
+                      'flex flex-col': !cols && orientation() !== 'horizontal',
                     },
                     {
                       'flex flex-row': orientation() === 'horizontal',
                     },
                     {
-                      [`grid grid-cols-[repeat(var(--cols),_minmax(0,_1fr))] gap-3`]: local.cols,
+                      [`grid grid-cols-[repeat(var(--cols),_minmax(0,_1fr))] gap-3`]: cols,
                     },
                   )}
                   style={{
                     ...floatingStyles(),
-                    '--cols': local.cols,
+                    '--cols': cols,
                     // eslint-disable-next-line no-nested-ternary
                     visibility: !keepMounted() ? undefined : isOpen() ? 'visible' : 'hidden',
                   }}
-                  aria-hidden={!isOpen()}
+                  aria-hidden={isOpen() ? 'false' : 'true'}
                   {...getFloatingProps({})}
                 >
-                  {local.children}
+                  {children}
                 </div>
               </FloatingFocusManager>
             </FloatingPortal>
@@ -327,9 +314,9 @@ interface MenuItemProps {
 
 /** @internal */
 export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLButtonElement>) {
-  const [local, elementProps] = splitProps(props, ['label', 'disabled']);
+  const { label, disabled, ...elementProps } = props;
   const menu = useContext(MenuContext);
-  const item = useCompositeListItem({ label: () => (local.disabled ? null : local.label) });
+  const item = useCompositeListItem({ label: () => (disabled ? null : label) });
   const tree = useFloatingTree();
   const isActive = () => item.index() === menu.activeIndex();
 
@@ -343,10 +330,10 @@ export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLButtonEle
       }}
       type="button"
       role="menuitem"
-      disabled={local.disabled}
+      disabled={disabled}
       tabindex={isActive() ? 0 : -1}
       class={c('focus:bg-blue-500 flex rounded px-2 py-1 text-left outline-none focus:text-white', {
-        'opacity-40': local.disabled,
+        'opacity-40': disabled,
       })}
       {...menu.getItemProps<HTMLButtonElement>({
         active: isActive(),
@@ -355,10 +342,8 @@ export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLButtonEle
           tree?.events.emit('click');
         },
         onFocus(event) {
-          batch(() => {
-            callEventHandler(props.onFocus, event);
-            menu.setHasFocusInside(true);
-          });
+          callEventHandler(props.onFocus, event);
+          menu.setHasFocusInside(true);
         },
         onMouseEnter(event) {
           callEventHandler(props.onMouseEnter, event);
@@ -384,7 +369,7 @@ export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLButtonEle
         },
       })}
     >
-      {local.label}
+      {label}
     </button>
   );
 }

@@ -51,7 +51,7 @@ function App(props: Omit<Partial<UseListNavigationProps>, 'listRef'>) {
                 // eslint-disable-next-line
                 <li
                   data-testid={`item-${index()}`}
-                  aria-selected={activeIndex() === index()}
+                  aria-selected={activeIndex() === index() ? 'true' : 'false'}
                   tabindex={-1}
                   {...getItemProps<HTMLLIElement>({
                     ref(node) {
@@ -228,7 +228,7 @@ describe('useListNavigation', () => {
                         },
                       })}
                     >
-                      {item}
+                      {item()}
                     </li>
                   )}
                 </For>
@@ -1221,7 +1221,7 @@ describe('useListNavigation', () => {
                     // eslint-disable-next-line jsx-a11y/role-supports-aria-props
                     <li
                       data-testid={`item-${index()}`}
-                      aria-selected={activeIndex() === index()}
+                      aria-selected={activeIndex() === index() ? 'true' : 'false'}
                       tabindex={-1}
                       {...getItemProps({
                         ref(node) {
@@ -1229,7 +1229,7 @@ describe('useListNavigation', () => {
                         },
                       })}
                     >
-                      {string}
+                      {string()}
                     </li>
                   )}
                 </For>

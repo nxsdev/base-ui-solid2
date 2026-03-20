@@ -1,7 +1,7 @@
 import { flushMicrotasks } from '#test-utils';
 import { cleanup, fireEvent, render, screen, waitFor } from '@solidjs/testing-library';
 import userEvent from '@testing-library/user-event';
-import { createSignal, Show, splitProps, type Accessor, type JSX } from 'solid-js';
+import { createSignal, Show, type Accessor, type JSX } from 'solid-js';
 import { vi } from 'vitest';
 import { access } from '../../solid-helpers';
 
@@ -357,7 +357,7 @@ describe.skipIf(!isJSDOM)('useDismiss', () => {
 
   describe('bubbles', () => {
     function Dialog(props: UseDismissProps & { testId: string; children: JSX.Element }) {
-      const [local, others] = splitProps(props, ['testId', 'children']);
+      const dismissProps = props as UseDismissProps;
       const [open, setOpen] = createSignal(true);
       const nodeId = useFloatingNodeId();
 
@@ -367,7 +367,7 @@ describe.skipIf(!isJSDOM)('useDismiss', () => {
         nodeId,
       });
 
-      const dismiss = useDismiss(context, others);
+      const dismiss = useDismiss(context, dismissProps);
       const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
       return (
@@ -375,8 +375,8 @@ describe.skipIf(!isJSDOM)('useDismiss', () => {
           <button {...getReferenceProps({ ref: refs.setReference })} />
           {open() && (
             <FloatingFocusManager context={context}>
-              <div {...getFloatingProps({ ref: refs.setFloating })} data-testid={local.testId}>
-                {local.children}
+              <div {...getFloatingProps({ ref: refs.setFloating })} data-testid={props.testId}>
+                {props.children}
               </div>
             </FloatingFocusManager>
           )}
@@ -718,7 +718,7 @@ describe.skipIf(!isJSDOM)('useDismiss', () => {
     }
 
     function Dialog(props: UseDismissProps & { id: string; children: JSX.Element }) {
-      const [local, others] = splitProps(props, ['id', 'children']);
+      const dismissProps = props as UseDismissProps;
       const [open, setOpen] = createSignal(true);
       const nodeId = useFloatingNodeId();
 
@@ -728,7 +728,7 @@ describe.skipIf(!isJSDOM)('useDismiss', () => {
         nodeId,
       });
 
-      const dismiss = useDismiss(context, others);
+      const dismiss = useDismiss(context, dismissProps);
       const { getReferenceProps, getFloatingProps } = useInteractions([dismiss]);
 
       return (
@@ -738,8 +738,8 @@ describe.skipIf(!isJSDOM)('useDismiss', () => {
             <FloatingPortal>
               <FloatingFocusManager context={context}>
                 <div {...getFloatingProps({ ref: refs.setFloating })}>
-                  <span>{local.id}</span>
-                  {local.children}
+                  <span>{props.id}</span>
+                  {props.children}
                 </div>
               </FloatingFocusManager>
             </FloatingPortal>

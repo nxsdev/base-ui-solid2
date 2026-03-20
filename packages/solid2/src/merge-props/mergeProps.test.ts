@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { spy } from 'sinon';
-import { createMemo, createRoot, createSignal } from 'solid-js';
+import { createMemo, createRoot, createSignal, runWithOwner, type JSX } from 'solid-js';
 import { callEventHandler } from '../solid-helpers';
 import type { BaseUIEvent } from '../utils/types';
 import { mergeProps } from './mergeProps';
@@ -268,10 +268,8 @@ describe('mergeProps', () => {
       );
 
       expect(propsGetter.calledOnce).to.equal(true);
-      expect(observedProps).to.deep.equal({
-        role: 'tab',
-        className: 'test-class',
-      });
+      expect(observedProps.role).to.equal('tab');
+      expect(observedProps.className).to.equal('test-class');
     });
 
     it('calls the props getter with an empty object if no props are defined after it', () => {
@@ -323,7 +321,7 @@ describe('mergeProps', () => {
         const refB = spy();
 
         const mergedProps = mergeProps<'div'>(
-          {
+          ({
             get class() {
               classGetterCalls += 1;
               return isOn() ? 'on' : 'off';
@@ -344,16 +342,16 @@ describe('mergeProps', () => {
               tabIndexGetterCalls += 1;
               return mode() === 'a' ? 0 : -1;
             },
-          },
+          }) as JSX.HTMLAttributes<HTMLDivElement> & { classList: Record<string, boolean> },
           {
             class: 'static-class',
             style: { padding: '1px' },
             classList: { staticKey: true },
             ref: refA,
             id: 'static-id',
-          },
+          } as JSX.HTMLAttributes<HTMLDivElement> & { classList: Record<string, boolean> },
           { ref: refB },
-        );
+        ) as JSX.HTMLAttributes<HTMLDivElement> & { classList: Record<string, boolean> };
 
         // Getters should be evaluated lazily, not during mergeProps() call.
         expect(classGetterCalls).to.equal(0);
@@ -389,11 +387,13 @@ describe('mergeProps', () => {
         expect(refA.calledWith(element)).to.equal(true);
         expect(refB.calledWith(element)).to.equal(true);
 
-        setIsOn(true);
-        setColor('red');
-        setIsEnabled(true);
-        setCount(1);
-        setMode('b');
+        runWithOwner(null, () => {
+          setIsOn(true);
+          setColor('red');
+          setIsEnabled(true);
+          setCount(1);
+          setMode('b');
+        });
 
         expect(classValue()).to.equal('on static-class');
         expect(styleValue()).to.deep.equal({ color: 'red', padding: '1px' });

@@ -1,11 +1,10 @@
 import c from 'clsx';
 import {
-  createEffect,
   createSignal,
+  createTrackedEffect,
   For,
   Match,
   onCleanup,
-  splitProps,
   Switch,
   type JSX,
 } from 'solid-js';
@@ -75,7 +74,7 @@ type OptionProps = JSX.HTMLAttributes<HTMLButtonElement> & {
 
 /** @internal */
 function Option(props: OptionProps) {
-  const [local, others] = splitProps(props, ['name', 'active', 'selected', 'children']);
+  const { name, active, selected, children, ...others } = props;
   const id = useId();
   return (
     <button
@@ -83,18 +82,18 @@ function Option(props: OptionProps) {
       id={id()}
       role="option"
       class={c('aspect-square cursor-default rounded text-center text-3xl select-none', {
-        'bg-cyan-100': local.selected && !local.active,
-        'bg-cyan-200': local.active,
-        'opacity-40': local.name === 'orange',
+        'bg-cyan-100': selected && !active,
+        'bg-cyan-200': active,
+        'opacity-40': name === 'orange',
       })}
-      aria-selected={local.selected}
-      disabled={local.name === 'orange'}
-      aria-label={local.name}
+      aria-selected={selected ? 'true' : 'false'}
+      disabled={name === 'orange'}
+      aria-label={name}
       tabindex={-1}
-      data-active={local.active ? '' : undefined}
+      data-active={active ? '' : undefined}
       type="button"
     >
-      {local.children}
+      {children}
     </button>
   );
 }
@@ -161,7 +160,7 @@ export function Main() {
     getItemProps,
   } = useInteractions([listNavigation]);
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (open()) {
       setPlacement(resultantPlacement());
     } else {

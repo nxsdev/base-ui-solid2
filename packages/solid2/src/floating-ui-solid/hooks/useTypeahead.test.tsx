@@ -170,9 +170,9 @@ describe('useTypeahead', () => {
                 <div
                   role="option"
                   tabindex={i() === activeIndex() ? 0 : -1}
-                  aria-selected={i() === activeIndex()}
+                  aria-selected={i() === activeIndex() ? 'true' : 'false'}
                 >
-                  {value}
+                  {value()}
                 </div>
               )}
             </For>

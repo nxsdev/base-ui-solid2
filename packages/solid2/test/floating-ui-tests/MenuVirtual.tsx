@@ -2,14 +2,12 @@ import c from 'clsx';
 import {
   type Accessor,
   createContext,
-  createEffect,
   createSignal,
+  createTrackedEffect,
   createUniqueId,
   type JSX,
-  on,
   onCleanup,
   Show,
-  splitProps,
   useContext,
 } from 'solid-js';
 import { CompositeList } from '../../src/composite/list/CompositeList';
@@ -69,7 +67,7 @@ interface MenuProps {
 
 /** @internal */
 export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>) {
-  const [local, elementProps] = splitProps(props, ['children', 'label', 'refs']);
+  const { children, label, refs: localRefs, ...elementProps } = props;
   const [isOpen, setIsOpen] = createSignal(false);
   const [activeIndex, setActiveIndex] = createSignal<number | null>(null);
   const [allowHover, setAllowHover] = createSignal(false);
@@ -115,7 +113,7 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
     onNavigate: setActiveIndex,
     virtual: true,
     // eslint-disable-next-line solid/reactivity
-    refs: props.refs,
+    refs: localRefs,
   });
 
   const { getReferenceProps, getFloatingProps, getItemProps } = useInteractions([
@@ -128,7 +126,7 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
   // Event emitter allows you to communicate across tree components.
   // This effect closes all menus when an item gets clicked anywhere
   // in the tree.
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (!tree) {
       return;
     }
@@ -152,7 +150,7 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
     });
   });
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     if (isOpen() && tree) {
       tree.events.emit('menuopen', { parentId, nodeId: nodeId() });
     }
@@ -161,31 +159,31 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
   // Determine if "hover" logic can run based on the modality of input. This
   // prevents unwanted focus synchronization as menus open and close with
   // keyboard navigation and the cursor is resting on the menu.
-  createEffect(
-    on(allowHover, () => {
-      function onPointerMove({ pointerType }: PointerEvent) {
-        if (pointerType !== 'touch') {
-          setAllowHover(true);
-        }
-      }
+  createTrackedEffect(() => {
+    allowHover();
 
-      function onKeyDown() {
-        setAllowHover(false);
+    function onPointerMove({ pointerType }: PointerEvent) {
+      if (pointerType !== 'touch') {
+        setAllowHover(true);
       }
+    }
 
-      window.addEventListener('pointermove', onPointerMove, {
-        once: true,
+    function onKeyDown() {
+      setAllowHover(false);
+    }
+
+    window.addEventListener('pointermove', onPointerMove, {
+      once: true,
+      capture: true,
+    });
+    window.addEventListener('keydown', onKeyDown, true);
+    onCleanup(() => {
+      window.removeEventListener('pointermove', onPointerMove, {
         capture: true,
       });
-      window.addEventListener('keydown', onKeyDown, true);
-      onCleanup(() => {
-        window.removeEventListener('pointermove', onPointerMove, {
-          capture: true,
-        });
-        window.removeEventListener('keydown', onKeyDown, true);
-      });
-    }),
-  );
+      window.removeEventListener('keydown', onKeyDown, true);
+    });
+  });
 
   const id = createUniqueId();
 
@@ -235,9 +233,9 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
             }),
           })}
         >
-          {local.label}
+          {label}
           {isNested && (
-            <span aria-hidden class="ml-4">
+            <span aria-hidden="true" class="ml-4">
               Icon
             </span>
           )}
@@ -292,7 +290,7 @@ export function MenuComponent(props: MenuProps & JSX.HTMLAttributes<HTMLElement>
                   style={floatingStyles()}
                   {...getFloatingProps({})}
                 >
-                  {local.children}
+                  {children}
                 </div>
               </FloatingFocusManager>
             </FloatingPortal>
@@ -310,10 +308,10 @@ interface MenuItemProps {
 
 /** @internal */
 export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLElement>) {
-  const [local, elementProps] = splitProps(props, ['label', 'disabled']);
+  const { label, disabled, ...elementProps } = props;
 
   const menu = useContext(MenuContext);
-  const item = useCompositeListItem({ label: () => (local.disabled ? null : local.label) });
+  const item = useCompositeListItem({ label: () => (disabled ? null : label) });
   const tree = useFloatingTree();
   const isActive = () => item.index() === menu.activeIndex();
   const id = createUniqueId();
@@ -332,10 +330,10 @@ export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLElement>)
       }}
       role="option"
       tabindex={-1}
-      aria-selected={isActive()}
-      aria-disabled={local.disabled}
+      aria-selected={isActive() ? 'true' : 'false'}
+      aria-disabled={disabled ? 'true' : undefined}
       class={c('focus:bg-red-500 flex cursor-default rounded px-2 py-1 text-left outline-none', {
-        'opacity-40': local.disabled,
+        'opacity-40': disabled,
         'bg-red-500 text-white': isActive(),
       })}
       {...menu.getItemProps({
@@ -371,7 +369,7 @@ export function MenuItem(props: MenuItemProps & JSX.HTMLAttributes<HTMLElement>)
         },
       })}
     >
-      {local.label}
+      {label}
     </div>
   );
 }

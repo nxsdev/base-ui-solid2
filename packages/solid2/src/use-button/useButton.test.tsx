@@ -4,7 +4,6 @@ import { userEvent } from '@testing-library/user-event';
 import { expect } from 'chai';
 import { spy } from 'sinon';
 import type { JSX } from 'solid-js';
-import { splitProps } from 'solid-js';
 import { useButton } from './useButton';
 
 vi.mock('/web', { spy: true });
@@ -13,13 +12,12 @@ describe('useButton', () => {
   describe('param: focusableWhenDisabled', () => {
     it('allows disabled buttons to be focused', async () => {
       function TestButton(props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) {
-        const [local, otherProps] = splitProps(props, ['disabled']);
         const { getButtonProps } = useButton({
-          disabled: () => local.disabled,
+          disabled: () => Boolean(props.disabled),
           focusableWhenDisabled: true,
         });
 
-        return <button {...getButtonProps(otherProps)} />;
+        return <button {...getButtonProps(props)} />;
       }
       render(() => <TestButton disabled />);
       const button = screen.getByRole('button');
@@ -35,14 +33,13 @@ describe('useButton', () => {
       const handleBlur = spy();
 
       function TestButton(props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) {
-        const [local, otherProps] = splitProps(props, ['disabled']);
         const { getButtonProps } = useButton({
-          disabled: () => local.disabled,
+          disabled: () => Boolean(props.disabled),
           focusableWhenDisabled: true,
           native: false,
         });
 
-        return <span {...getButtonProps(otherProps)} />;
+        return <span {...getButtonProps(props)} />;
       }
 
       render(() => (
@@ -188,10 +185,9 @@ describe('useButton', () => {
   describe.skipIf(isJSDOM)('server-side rendering', () => {
     it('should server-side render', async () => {
       function TestButton(props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) {
-        const [local, otherProps] = splitProps(props, ['disabled']);
-        const { getButtonProps } = useButton({ disabled: () => local.disabled, native: false });
+        const { getButtonProps } = useButton({ disabled: () => Boolean(props.disabled), native: false });
 
-        return <span {...getButtonProps(otherProps)} />;
+        return <span {...getButtonProps(props)} />;
       }
 
       const { container } = render(() => <TestButton disabled />);
@@ -200,9 +196,8 @@ describe('useButton', () => {
 
     it('adds disabled attribute', async () => {
       function TestButton(props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) {
-        const [local, otherProps] = splitProps(props, ['disabled']);
-        const { getButtonProps } = useButton({ disabled: () => local.disabled });
-        return <button {...getButtonProps(otherProps)} />;
+        const { getButtonProps } = useButton({ disabled: () => Boolean(props.disabled) });
+        return <button {...getButtonProps(props)} />;
       }
 
       const { container } = render(() => <TestButton disabled>Submit</TestButton>);

@@ -1,4 +1,4 @@
-import { createSignal, splitProps, type JSX } from 'solid-js';
+import { createSignal, type JSX } from 'solid-js';
 import {
   flip,
   FloatingFocusManager,
@@ -22,10 +22,10 @@ interface SubItemProps {
 
 /** @internal */
 export function NavigationSubItem(props: SubItemProps & JSX.HTMLAttributes<HTMLAnchorElement>) {
-  const [local, elementProps] = splitProps(props, ['label']);
+  const { label, ...elementProps } = props;
   return (
     <a {...elementProps} class="NavigationItem">
-      {local.label}
+      {label}
     </a>
   );
 }
@@ -38,9 +38,9 @@ interface ItemProps {
 
 /** @internal */
 export function NavigationItem(props: ItemProps & JSX.HTMLAttributes<HTMLAnchorElement>) {
-  const [local, elementProps] = splitProps(props, ['children', 'label', 'href']);
+  const { children, label, href, ...elementProps } = props;
   const [open, setOpen] = createSignal(false);
-  const hasChildren = () => !!local.children;
+  const hasChildren = () => !!children;
 
   const nodeId = useFloatingNodeId();
 
@@ -69,7 +69,7 @@ export function NavigationItem(props: ItemProps & JSX.HTMLAttributes<HTMLAnchorE
     <FloatingNode id={nodeId()}>
       <li>
         <a
-          href={local.href}
+          href={href}
           ref={(el) => {
             if (typeof elementProps.ref === 'function') {
               elementProps.ref(el);
@@ -81,7 +81,7 @@ export function NavigationItem(props: ItemProps & JSX.HTMLAttributes<HTMLAnchorE
           class="bg-slate-100 my-1 flex w-48 items-center justify-between rounded p-2"
           {...getReferenceProps(elementProps as any)}
         >
-          {local.label}
+          {label}
         </a>
       </li>
       <FloatingPortal>
@@ -97,7 +97,7 @@ export function NavigationItem(props: ItemProps & JSX.HTMLAttributes<HTMLAnchorE
               <button type="button" onClick={() => setOpen(false)}>
                 Close
               </button>
-              <ul class="flex flex-col">{local.children}</ul>
+              <ul class="flex flex-col">{children}</ul>
             </div>
           </FloatingFocusManager>
         )}

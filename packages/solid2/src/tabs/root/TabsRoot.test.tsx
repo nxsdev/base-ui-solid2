@@ -59,13 +59,13 @@ describe('<Tabs.Root />', () => {
         </Tabs.Root>
       ));
 
-      expect(screen.getAllByRole('tab').map((tab) => tab.tabindex)).to.have.ordered.members([
+      expect(screen.getAllByRole('tab').map((tab) => tab.tabIndex)).to.have.ordered.members([
         -1, 0,
       ]);
 
       setValue(0);
 
-      expect(screen.getAllByRole('tab').map((tab) => tab.tabindex)).to.have.ordered.members([
+      expect(screen.getAllByRole('tab').map((tab) => tab.tabIndex)).to.have.ordered.members([
         0, -1,
       ]);
     });
@@ -1115,20 +1115,20 @@ describe('<Tabs.Root />', () => {
 
     const [firstTab, secondTab, thirdTab] = screen.getAllByRole('tab');
 
-    expect(firstTab.tabindex).to.equal(0);
+    expect(firstTab.tabIndex).to.equal(0);
 
     setValue(2);
     await flushMicrotasks();
 
-    expect(firstTab.tabindex).to.equal(-1);
-    expect(secondTab.tabindex).to.equal(-1);
-    expect(thirdTab.tabindex).to.equal(0);
+    expect(firstTab.tabIndex).to.equal(-1);
+    expect(secondTab.tabIndex).to.equal(-1);
+    expect(thirdTab.tabIndex).to.equal(0);
 
     setValue(1);
     await flushMicrotasks();
 
-    expect(firstTab.tabindex).to.equal(-1);
-    expect(secondTab.tabindex).to.equal(0);
-    expect(thirdTab.tabindex).to.equal(-1);
+    expect(firstTab.tabIndex).to.equal(-1);
+    expect(secondTab.tabIndex).to.equal(0);
+    expect(thirdTab.tabIndex).to.equal(-1);
   });
 });

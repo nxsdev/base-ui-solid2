@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import { flushMicrotasks } from '#test-utils';
 import { fireEvent, render, screen } from '@solidjs/testing-library';
-import { type Component, createEffect, createSignal } from 'solid-js';
+import { type Component, createSignal, createTrackedEffect } from 'solid-js';
 import { Dynamic } from '@solidjs/web';
 import { vi } from 'vitest';
 
@@ -36,7 +36,7 @@ function Tooltip(props: Props) {
   let renderCount = 0;
   let renderCountRef: HTMLSpanElement | undefined;
 
-  createEffect(() => {
+  createTrackedEffect(() => {
     // eslint-disable-next-line no-plusplus
     renderCount++;
     if (renderCountRef) {

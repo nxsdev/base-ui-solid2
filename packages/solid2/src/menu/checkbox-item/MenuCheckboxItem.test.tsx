@@ -3,7 +3,6 @@ import { Menu } from '@base-ui/solid2/menu';
 import { fireEvent, screen, waitFor } from '@solidjs/testing-library';
 import { expect } from 'chai';
 import { spy } from 'sinon';
-import { splitProps } from 'solid-js';
 
 describe('<Menu.CheckboxItem />', () => {
   const { render, clock } = createRenderer({
@@ -30,9 +29,9 @@ describe('<Menu.CheckboxItem />', () => {
     const renderItem4Spy = spy();
 
     function LoggingRoot(props: any & { renderSpy: () => void }) {
-      const [local, other] = splitProps(props, ['renderSpy', 'state']);
       // eslint-disable-next-line solid/reactivity
-      local.renderSpy();
+      props.renderSpy();
+      const { renderSpy: _renderSpy, state: _state, ...other } = props;
       return <li {...other} ref={props.ref} />;
     }
 

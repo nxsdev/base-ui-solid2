@@ -98,8 +98,8 @@ describe('useToast', () => {
           return (
             <For each={toasts()}>
               {(t) => (
-                <Toast.Root toast={t} data-testid="root">
-                  <Toast.Title data-testid="title">{t.title}</Toast.Title>
+                <Toast.Root toast={t()} data-testid="root">
+                  <Toast.Title data-testid="title">{t().title}</Toast.Title>
                 </Toast.Root>
               )}
             </For>
@@ -145,8 +145,8 @@ describe('useToast', () => {
           return (
             <For each={toasts()}>
               {(t) => (
-                <Toast.Root toast={t} data-testid="root">
-                  <Toast.Description data-testid="description">{t.description}</Toast.Description>
+                <Toast.Root toast={t()} data-testid="root">
+                  <Toast.Description data-testid="description">{t().description}</Toast.Description>
                 </Toast.Root>
               )}
             </For>
@@ -181,9 +181,9 @@ describe('useToast', () => {
           return (
             <For each={toasts()}>
               {(t) => (
-                <Toast.Root toast={t} data-testid="root">
-                  <Toast.Title data-testid="title">{t.title}</Toast.Title>
-                  <span>{t.type}</span>
+                <Toast.Root toast={t()} data-testid="root">
+                  <Toast.Title data-testid="title">{t().title}</Toast.Title>
+                  <span>{t().type}</span>
                 </Toast.Root>
               )}
             </For>
@@ -413,10 +413,10 @@ describe('useToast', () => {
       return (
         <For each={toasts()}>
           {(t) => (
-            <Toast.Root toast={t} data-testid="root">
-              <Toast.Title data-testid="title">{t.title}</Toast.Title>
-              <Toast.Description data-testid="description">{t.description}</Toast.Description>
-              <span>{t.type}</span>
+            <Toast.Root toast={t()} data-testid="root">
+              <Toast.Title data-testid="title">{t().title}</Toast.Title>
+              <Toast.Description data-testid="description">{t().description}</Toast.Description>
+              <span>{t().type}</span>
             </Toast.Root>
           )}
         </For>
@@ -658,8 +658,8 @@ describe('useToast', () => {
       return (
         <For each={toasts()}>
           {(t) => (
-            <Toast.Root toast={t} data-testid="root">
-              <Toast.Title data-testid="title">{t.title}</Toast.Title>
+            <Toast.Root toast={t()} data-testid="root">
+              <Toast.Title data-testid="title">{t().title}</Toast.Title>
             </Toast.Root>
           )}
         </For>
@@ -725,8 +725,8 @@ describe('useToast', () => {
       return (
         <For each={toasts()}>
           {(t) => (
-            <Toast.Root toast={t} data-testid="root">
-              <Toast.Title data-testid="title">{t.title}</Toast.Title>
+            <Toast.Root toast={t()} data-testid="root">
+              <Toast.Title data-testid="title">{t().title}</Toast.Title>
             </Toast.Root>
           )}
         </For>
@@ -793,8 +793,8 @@ describe('useToast', () => {
         <>
           <For each={toasts()}>
             {(t) => (
-              <Toast.Root toast={t} data-testid={t.title}>
-                <Toast.Close data-testid={`close-${t.title}`} />
+              <Toast.Root toast={t()} data-testid={t().title}>
+                <Toast.Close data-testid={`close-${t().title}`} />
               </Toast.Root>
             )}
           </For>

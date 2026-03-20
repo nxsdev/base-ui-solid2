@@ -1431,7 +1431,7 @@ describe('<Select.Root />', () => {
                 <Select.Positioner>
                   <Select.Popup>
                     <For each={items()}>
-                      {(item) => <Select.Item value={item}>{item}</Select.Item>}
+                      {(item) => <Select.Item value={item()}>{item()}</Select.Item>}
                     </For>
                   </Select.Popup>
                 </Select.Positioner>

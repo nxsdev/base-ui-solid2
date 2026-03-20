@@ -72,10 +72,10 @@ describe('<Toast.Root />', () => {
       return (
         <For each={Toast.useToastManager().toasts()}>
           {(toastItem) => (
-            <Toast.Root toast={toastItem} data-testid="root">
-              <Toast.Title>{toastItem.title}</Toast.Title>
+            <Toast.Root toast={toastItem()} data-testid="root">
+              <Toast.Title>{toastItem().title}</Toast.Title>
               <Toast.Description data-testid="description">
-                {toastItem.description}
+                {toastItem().description}
               </Toast.Description>
               <Toast.Close aria-label="close" />
             </Toast.Root>
@@ -127,12 +127,12 @@ describe('<Toast.Root />', () => {
         <For each={Toast.useToastManager().toasts()}>
           {(toastItem) => (
             <Toast.Root
-              toast={toastItem}
+              toast={toastItem()}
               data-testid="toast-root"
               swipeDirection={props.swipeDirection}
             >
-              <Toast.Title>{toastItem.title}</Toast.Title>
-              <Toast.Description>{toastItem.description}</Toast.Description>
+              <Toast.Title>{toastItem().title}</Toast.Title>
+              <Toast.Description>{toastItem().description}</Toast.Description>
             </Toast.Root>
           )}
         </For>

@@ -1,7 +1,7 @@
 /* eslint-disable testing-library/render-result-naming-convention */
 import { createRenderer } from '#test-utils';
 import { expect } from 'chai';
-import { splitProps, type ComponentProps } from 'solid-js';
+import type { ComponentProps } from 'solid-js';
 import { useRender } from './useRender';
 
 describe('useRender', () => {
@@ -38,11 +38,11 @@ describe('useRender', () => {
         class?: string;
       } & ComponentProps<'span'>,
     ) {
-      const [local, otherProps] = splitProps(props, ['render']);
+      const { render, ...otherProps } = props;
 
       const element = useRender({
         // eslint-disable-next-line solid/reactivity
-        render: local.render,
+        render,
         ref: (el: HTMLElement) => {
           refs[0] = el;
           refs[1] = el;

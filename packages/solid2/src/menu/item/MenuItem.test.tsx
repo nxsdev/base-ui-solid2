@@ -4,7 +4,6 @@ import { A, Route, Router, useLocation } from '@solidjs/router';
 import { fireEvent, screen, waitFor } from '@solidjs/testing-library';
 import { expect } from 'chai';
 import { spy } from 'sinon';
-import { splitProps } from 'solid-js';
 
 describe('<Menu.Item />', () => {
   const { render, clock } = createRenderer({
@@ -53,9 +52,9 @@ describe('<Menu.Item />', () => {
     const renderItem4Spy = spy();
 
     function LoggingRoot(props: any & { renderSpy: () => void }) {
-      const [local, other] = splitProps(props, ['renderSpy', 'state']);
       // eslint-disable-next-line solid/reactivity
-      local.renderSpy();
+      props.renderSpy();
+      const { renderSpy: _renderSpy, state: _state, ...other } = props;
       return <li {...other} ref={props.ref} />;
     }
 
