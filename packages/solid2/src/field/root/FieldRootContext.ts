@@ -1,11 +1,11 @@
 import { createContext, useContext, type Accessor, type Setter } from 'solid-js';
-import { type StoreSetter, type Store } from 'solid-js';
 import type { CodependentRefs } from '../../solid-helpers';
 import { NOOP } from '../../utils/noop';
 import { DEFAULT_VALIDITY_STATE } from '../utils/constants';
 import type { FieldRoot, FieldValidityData } from './FieldRoot';
 
 export type FieldRootChildRefs = CodependentRefs<['label', 'control']>;
+export type SetFieldRootChildRefs = (update: (refs: FieldRootChildRefs) => void) => void;
 
 export interface FieldRootContext {
   invalid: Accessor<boolean | undefined>;
@@ -20,8 +20,8 @@ export interface FieldRootContext {
   messageIds: Accessor<string[]>;
   setMessageIds: Setter<string[]>;
   name: Accessor<string | undefined>;
-  validityData: Store<FieldValidityData>;
-  setValidityData: StoreSetter<FieldValidityData>;
+  validityData: FieldValidityData;
+  setValidityData: (update: (state: FieldValidityData) => void) => void;
   disabled: Accessor<boolean | undefined>;
   touched: Accessor<boolean>;
   setTouched: Setter<boolean>;
@@ -42,8 +42,8 @@ export interface FieldRootContext {
   refs: {
     markedDirtyRef: boolean;
   };
-  codependentRefs: Store<FieldRootChildRefs>;
-  setCodependentRefs: StoreSetter<FieldRootChildRefs>;
+  codependentRefs: Accessor<FieldRootChildRefs>;
+  setCodependentRefs: SetFieldRootChildRefs;
 }
 
 export const FieldRootContext = createContext<FieldRootContext>({
@@ -62,7 +62,7 @@ export const FieldRootContext = createContext<FieldRootContext>({
     value: '',
     initialValue: null,
   },
-  setValidityData: NOOP,
+  setValidityData: NOOP as FieldRootContext['setValidityData'],
   disabled: () => undefined,
   touched: () => false,
   setTouched: NOOP as Setter<any>,
@@ -87,8 +87,8 @@ export const FieldRootContext = createContext<FieldRootContext>({
   refs: {
     markedDirtyRef: false,
   },
-  codependentRefs: {},
-  setCodependentRefs: NOOP as StoreSetter<FieldRootChildRefs>,
+  codependentRefs: () => ({}),
+  setCodependentRefs: NOOP as SetFieldRootChildRefs,
 });
 
 export function useFieldRootContext(optional = true) {

@@ -1,4 +1,4 @@
-import { createMemo, createTrackedEffect, For, omit } from 'solid-js';
+import { createEffect, createMemo, For, omit } from 'solid-js';
 import { useFormContext } from '../../form/FormContext';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useBaseUiId } from '../../utils/useBaseUiId';
@@ -36,18 +36,20 @@ export function FieldError(componentProps: FieldError.Props) {
     return isRendered;
   });
 
-  createTrackedEffect(() => {
-    const idValue = id();
-    if (!rendered() || !idValue) {
-      return;
-    }
+  createEffect(
+    () => ({ id: id(), rendered: rendered() }),
+    ({ id: idValue, rendered: isRendered }) => {
+      if (!isRendered || !idValue) {
+        return;
+      }
 
-    setMessageIds((v) => v.concat(idValue));
+      setMessageIds((v) => (v.includes(idValue) ? v : v.concat(idValue)));
 
-    return () => {
-      setMessageIds((v) => v.filter((item) => item !== idValue));
-    };
-  });
+      return () => {
+        setMessageIds((v) => v.filter((item) => item !== idValue));
+      };
+    },
+  );
 
   const element = useRenderElement('div', componentProps, {
     state,

@@ -73,6 +73,7 @@ This repository now contains the upstream React implementation of Base UI and an
 - Use Vitest APIs only: `expect()`, `vi.fn()`, and `@testing-library/jest-dom` matchers.
 - If a test needs layout measurement or browser-only behavior, keep it in a browser-capable environment rather than forcing it into JSDOM.
 - If you rewrite a `packages/solid2` test, test fixture, or shared test setup file, you MUST document the rewrite in `packages/solid2/TEST_REWRITE_NOTES.md` before committing. Record what changed, which cases/helpers were touched, whether it was syntax-only, observation-only, infrastructure-only, or a reverted change, and why the React/Base UI public contract is still unchanged.
+- Do not leave long-running test, build, watch, or dev-server processes running in the background. After focused verification, explicitly stop lingering `vitest`, `tsc --watch`, `vite`, or similar processes before continuing. If a command hangs or outlives its purpose, terminate it and note that it was stopped.
 
 ## Commit guidelines
 

@@ -14,9 +14,10 @@ export function useId(
   idOverride?: MaybeAccessor<string | JSX.RemoveAttribute | undefined>,
   prefix: string = 'mui',
 ): Accessor<string> {
+  const fallbackId = `${prefix}-${createUniqueId()}`;
   const id = createMemo(() => {
     const override = access(idOverride);
-    return typeof override === 'string' ? override : `${prefix}-${createUniqueId()}`;
+    return typeof override === 'string' ? override : fallbackId;
   });
   return id;
 }

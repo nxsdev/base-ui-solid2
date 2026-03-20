@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, createTrackedEffect } from 'solid-js';
+import { createEffect, createMemo, createSignal, createTrackedEffect, flush } from 'solid-js';
 import { createStore } from 'solid-js';
 import { access, callEventHandler, splitComponentProps } from '../solid-helpers';
 import type { BaseUIComponentProps } from '../utils/types';
@@ -23,9 +23,12 @@ export function Form(componentProps: Form.Props) {
     'validationMode',
   ]);
   const [formRef, setFormRef] = createStore<FormContext['formRef']>({ fields: {} });
-  const [errors, setErrors] = createSignal<Form.Props['errors']>();
+  const [errorsOverride, setErrorsOverride] = createSignal<Form.Props['errors']>(undefined, {
+    pureWrite: true,
+  });
   const [submitAttempted, setSubmitAttempted] = createSignal(false);
   let submitted = false;
+  let syncedExternalErrors = false;
   const validationMode = () => local.validationMode ?? 'onSubmit';
 
   const focusControl = (control: HTMLElement) => {
@@ -53,8 +56,12 @@ export function Form(componentProps: Form.Props) {
 
   createEffect(
     () => local.errors,
-    (nextErrors) => {
-      setErrors(() => nextErrors);
+    () => {
+      if (syncedExternalErrors) {
+        setErrorsOverride(undefined);
+      } else {
+        syncedExternalErrors = true;
+      }
     },
   );
 
@@ -75,19 +82,20 @@ export function Form(componentProps: Form.Props) {
   });
 
   const clearErrors = (name: string | undefined) => {
-    const err = errors();
+    const err = errorsOverride() ?? local.errors;
     if (name && err && EMPTY_STATE.hasOwnProperty.call(err, name)) {
       const nextErrors = { ...err };
       delete nextErrors[name];
-      setErrors(nextErrors);
+      setErrorsOverride(nextErrors);
       local.onClearErrors?.(nextErrors);
+      flush();
     }
   };
 
   const contextValue: FormContext = {
     formRef,
     setFormRef,
-    errors: () => errors() ?? EMPTY_ERRORS,
+    errors: () => errorsOverride() ?? local.errors ?? EMPTY_ERRORS,
     clearErrors,
     validationMode,
     submitAttempted,

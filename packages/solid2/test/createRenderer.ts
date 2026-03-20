@@ -44,14 +44,14 @@ export function createRenderer(globalOptions: CreateRendererOptions = {}): BaseU
   return {
     clock: createClock(clock, clockConfig, clockOptions, vi),
     render(element, elementProps = {}, options = {}) {
+      const RenderedElement: Component = () => createComponent(element, elementProps);
+      const ui = () => createComponent(RenderedElement, {});
+
       return {
-        ...(testingLibraryRender(
-          () => createComponent(element as any, elementProps),
-          {
-            ...options,
-            queries: { ...queries, ...customQueries },
-          },
-        ) as any),
+        ...(testingLibraryRender(ui, {
+          ...options,
+          queries: { ...queries, ...customQueries },
+        }) as any),
         user: userEvent.setup(),
       };
     },

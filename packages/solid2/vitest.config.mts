@@ -16,8 +16,10 @@ const resolvePackageRoot = (specifier: string) => {
 const SOLID_JS_ROOT = resolvePackageRoot('solid-js');
 const SOLID_WEB_ROOT = resolvePackageRoot('@solidjs/web');
 const SOLID_UNIVERSAL_ROOT = resolvePackageRoot('@solidjs/universal');
+const SOLID_SIGNALS_ROOT = resolvePackageRoot('@solidjs/signals');
 const SOLID_JS_DEV = resolve(SOLID_JS_ROOT, 'dist/dev.js');
 const SOLID_WEB_DEV = resolve(SOLID_WEB_ROOT, 'dist/dev.js');
+const SOLID_SIGNALS_DEV = resolve(SOLID_SIGNALS_ROOT, 'dist/dev.js');
 const SOLID_TESTING_LIBRARY_ESM = resolve(
   PACKAGE_ROOT,
   '../../node_modules/.pnpm/@solidjs+testing-library@0.8.10_@solidjs+router@0.15.4_solid-js@2.0.0-beta.3__solid-js@2.0.0-beta.3/node_modules/@solidjs/testing-library/dist/index.js',
@@ -38,11 +40,13 @@ export default mergeConfig(
     define: {
       'process.env.NODE_ENV': JSON.stringify('test'),
     },
-    plugins: [solidPlugin() as any],
+    plugins: [solidPlugin({ hot: false }) as any],
     resolve: {
+      conditions: ['browser', 'development'],
       alias: [
         { find: /^solid-js\/web$/, replacement: SOLID_WEB_DEV },
         { find: /^solid-js\/universal$/, replacement: SOLID_UNIVERSAL_ROOT },
+        { find: /^@solidjs\/signals$/, replacement: SOLID_SIGNALS_DEV },
         { find: /^@solidjs\/web$/, replacement: SOLID_WEB_DEV },
         { find: /^@solidjs\/universal$/, replacement: SOLID_UNIVERSAL_ROOT },
         { find: /^solid-js$/, replacement: SOLID_JS_DEV },
@@ -53,10 +57,12 @@ export default mergeConfig(
           replacement,
         })),
       ],
-      dedupe: ['solid-js', '@solidjs/web', '@solidjs/universal', '@solidjs/h'],
+      dedupe: ['solid-js', '@solidjs/signals', '@solidjs/web', '@solidjs/universal', '@solidjs/h'],
     },
     test: {
       ...sharedConfig.test,
+      isolate: false,
+      pool: 'threads',
       // browser: {
       //   enabled: true,
       //   provider: 'playwright',
@@ -66,7 +72,20 @@ export default mergeConfig(
       // },
       server: {
         deps: {
-          inline: ['@solidjs/testing-library', '@solid-primitives/props', '@solid-primitives/utils', 'solid-js'],
+          inline: [
+            '@solidjs/testing-library',
+            '@solidjs/signals',
+            '@solid-primitives/props',
+            '@solid-primitives/utils',
+            'solid-js',
+          ],
+        },
+      },
+      deps: {
+        optimizer: {
+          web: {
+            enabled: true,
+          },
         },
       },
     },

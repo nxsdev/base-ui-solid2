@@ -52,6 +52,11 @@ export function FieldControl(componentProps: FieldControl.Props) {
     useFieldControlValidation();
 
   const id = useBaseUiId(() => local.id);
+  const controlCodependentRef = {
+    explicitId: id,
+    ref: () => refs.inputRef,
+    id: () => normalizeOptionalId(local.id),
+  };
 
   createTrackedEffect(() => {
     const explicitValue = typeof local.value === 'string' ? local.value : undefined;
@@ -95,11 +100,9 @@ export function FieldControl(componentProps: FieldControl.Props) {
     ref: (el) => {
       refs.inputRef = el;
       setChildRefs((childRefs) => {
-        childRefs.control = {
-          explicitId: id,
-          ref: () => refs.inputRef,
-          id: () => normalizeOptionalId(local.id),
-        };
+        if (childRefs.control !== controlCodependentRef) {
+          childRefs.control = controlCodependentRef;
+        }
       });
     },
     customStyleHookMapping: fieldValidityMapping,

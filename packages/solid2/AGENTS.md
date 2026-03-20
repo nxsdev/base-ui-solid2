@@ -45,3 +45,4 @@ This directory is the Solid 2 beta port of Base UI.
 - Run focused tests for `packages/solid2` when possible.
 - If you touch docs or demos under `docs-solid2`, verify the site still starts.
 - If you rewrite a `packages/solid2` test, test fixture, or shared test setup file, you MUST update `packages/solid2/TEST_REWRITE_NOTES.md` before committing. Include the affected cases, the exact nature of the rewrite, whether it was syntax-only, observation-only, infrastructure-only, or a reverted change, and why public React/Base UI compatibility is still preserved.
+- Do not leave long-running `vitest`, `tsc --watch`, `vite`, or similar processes running in the background. After each focused verification step, stop lingering processes before continuing. If a verification command hangs, terminate it and record that it was stopped.

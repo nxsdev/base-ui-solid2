@@ -6,7 +6,11 @@ import { splitComponentProps, type Args } from '../../solid-helpers';
 import { BaseUIComponentProps } from '../../utils/types';
 import { useRenderElement } from '../../utils/useRenderElement';
 import { DEFAULT_VALIDITY_STATE, fieldValidityMapping } from '../utils/constants';
-import { FieldRootContext, type FieldRootChildRefs } from './FieldRootContext';
+import {
+  FieldRootContext,
+  type FieldRootChildRefs,
+  type SetFieldRootChildRefs,
+} from './FieldRootContext';
 
 /**
  * Groups all parts of the field.
@@ -36,15 +40,25 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
 
   const disabled = () => disabledFieldset() || disabledProp();
 
-  const [controlId, setControlId] = createSignal<string | null | undefined>();
-  const [labelId, setLabelId] = createSignal<string | undefined>();
-  const [messageIds, setMessageIds] = createSignal<string[]>([]);
+  const [controlId, setControlId] = createSignal<string | null | undefined>(undefined, {
+    pureWrite: true,
+  });
+  const [labelId, setLabelId] = createSignal<string | undefined>(undefined, { pureWrite: true });
+  const [messageIds, setMessageIds] = createSignal<string[]>([], { pureWrite: true });
 
-  const [childRefs, setChildRefs] = createStore<FieldRootChildRefs>({});
+  const [childRefs, setChildRefsState] = createSignal<FieldRootChildRefs>({}, {
+    equals: false,
+    pureWrite: true,
+  });
+  const setChildRefs: SetFieldRootChildRefs = (update) => {
+    const nextRefs = { ...childRefs() };
+    update(nextRefs);
+    setChildRefsState(nextRefs);
+  };
 
   const [touchedState, setTouchedUnwrapped] = createSignal(false);
   const [dirty, setDirtyUnwrapped] = createSignal(false);
-  const [filled, setFilled] = createSignal(false);
+  const [filled, setFilled] = createSignal(false, { pureWrite: true });
   const [focused, setFocused] = createSignal(false);
 
   const refs = {
@@ -145,8 +159,9 @@ export function FieldRoot(componentProps: FieldRoot.Props) {
 
   createEffect(
     () => {
-      const control = childRefs.control;
-      const label = childRefs.label;
+      const refs = childRefs();
+      const control = refs.control;
+      const label = refs.label;
       let nextControlId: string | null | undefined;
       let nextLabelId: string | undefined;
 

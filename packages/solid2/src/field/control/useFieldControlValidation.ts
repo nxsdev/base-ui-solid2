@@ -1,3 +1,4 @@
+import { flush } from 'solid-js';
 import { useFormContext, type RegisteredFormField } from '../../form/FormContext';
 import { mergeProps } from '../../merge-props';
 import type { BaseUIHTMLProps, HTMLProps } from '../../utils/types';
@@ -244,6 +245,7 @@ export function useFieldControlValidation() {
 
           if (!shouldValidateOnChange()) {
             commitValidation(event.currentTarget.value, true);
+            flush();
             return;
           }
 
@@ -256,6 +258,7 @@ export function useFieldControlValidation() {
           if (element.value === '') {
             // Ignore the debounce time for empty values.
             commitValidation(element.value);
+            flush();
             return;
           }
 
@@ -267,6 +270,7 @@ export function useFieldControlValidation() {
             });
           } else {
             commitValidation(element.value);
+            flush();
           }
         },
       },

@@ -104,6 +104,9 @@ Those rewrites were reverted in the affected tests below. The implementation was
 - Additional rewrite: replaced `errors={errors()}` in local app fixtures with getter-backed `formProps` objects spread into `<Form>`.
 - Final judgment for the additional rewrite: required observation migration.
 - Why compatibility is preserved: the same error propagation, clearing, and focus semantics are asserted; only the Solid 2-compatible prop observation path changed.
+- Follow-up correction: the `prop: onClearErrors` fixture was moved back to direct JSX props (`errors={errors()}` / `onClearErrors={setErrors}`).
+- Final judgment for the follow-up correction: reverted over-generalized observation rewrite.
+- Why: getter-backed spread objects are not a blanket replacement for every controlled-prop fixture in Solid 2. For this specific test, direct JSX props keep the controlled error-clearing scenario closer to the original intent and avoid masking a remaining implementation issue.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/menu/checkbox-item/MenuCheckboxItem.test.tsx`
 
@@ -284,6 +287,12 @@ Those rewrites were reverted in the affected tests below. The implementation was
 - Suppressed JSDOM's `Not implemented: HTMLFormElement's requestSubmit() method` console error in shared test setup.
 - Final judgment: required test infrastructure migration.
 - Why compatibility is preserved: JSDOM fires the `submit` event before emitting this not-implemented error. Swallowing the exact environment error keeps the existing submit semantics intact while preventing environment-only noise from failing the suite.
+
+### `/home/noc/oss/base-ui-solid2/packages/solid2/test/createRenderer.ts`
+
+- Reverted the shared test renderer from a `createComponent(...)` wrapper back to a `createDynamic(...)` wrapper.
+- Final judgment: required test infrastructure migration.
+- Why compatibility is preserved: this changes only how the test harness mounts component factories for `@solidjs/testing-library`; it does not alter Base UI public props, rendered semantics, or assertion intent.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/vitest.config.mts`
 
