@@ -103,10 +103,7 @@ Those rewrites were reverted in the affected tests below. The implementation was
 - Why: `Form` should keep `noValidate` as its public API and translate it to the native `novalidate` attribute internally.
 - Additional rewrite: replaced `errors={errors()}` in local app fixtures with getter-backed `formProps` objects spread into `<Form>`.
 - Final judgment for the additional rewrite: required observation migration.
-- Why compatibility is preserved: the same error propagation, clearing, and focus semantics are asserted; only the Solid 2-compatible prop observation path changed.
-- Follow-up correction: the `prop: onClearErrors` fixture was moved back to direct JSX props (`errors={errors()}` / `onClearErrors={setErrors}`).
-- Final judgment for the follow-up correction: reverted over-generalized observation rewrite.
-- Why: getter-backed spread objects are not a blanket replacement for every controlled-prop fixture in Solid 2. For this specific test, direct JSX props keep the controlled error-clearing scenario closer to the original intent and avoid masking a remaining implementation issue.
+- Why compatibility is preserved: the same error propagation, clearing, and focus semantics are asserted; only the Solid 2-compatible prop observation path changed. This includes the `prop: onClearErrors` fixture, where direct JSX props (`errors={errors()}`) were re-tested and found to become a non-reactive snapshot under Solid 2 beta, so the getter-backed fixture is required to keep the original controlled-errors contract observable.
 
 ### `/home/noc/oss/base-ui-solid2/packages/solid2/src/menu/checkbox-item/MenuCheckboxItem.test.tsx`
 
@@ -304,6 +301,16 @@ Those rewrites were reverted in the affected tests below. The implementation was
 - Replaced `import { reset } from '@base-ui/utils/error'` with a workspace-relative source import.
 - Final judgment: required test-infrastructure rewrite.
 - Why compatibility is preserved: only package-local resolution changed; no component semantics changed.
+
+- Added a package-local test setup file that calls `flush()` after `@solidjs/testing-library` event and async wrappers.
+- Final judgment: required test infrastructure migration.
+- Why compatibility is preserved: this does not change component code or public behavior; it only makes Solid 2 beta's deferred effect application visible to assertions after user/test interactions.
+
+### `/home/noc/oss/base-ui-solid2/packages/solid2/test/setupSolidVitest.ts`
+
+- Added shared `@solidjs/testing-library` wrapper configuration to `flush()` pending Solid 2 work after event and async callbacks.
+- Final judgment: required test infrastructure migration.
+- Why compatibility is preserved: this is a test-runner synchronization step only; it does not alter Base UI runtime semantics.
 
 ## Summary judgment
 

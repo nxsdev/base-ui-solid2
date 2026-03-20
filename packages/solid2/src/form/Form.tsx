@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createSignal, createTrackedEffect, flush } from 'solid-js';
+import { createEffect, createMemo, createSignal, createTrackedEffect } from 'solid-js';
 import { createStore } from 'solid-js';
 import { access, callEventHandler, splitComponentProps } from '../solid-helpers';
 import type { BaseUIComponentProps } from '../utils/types';
@@ -23,12 +23,14 @@ export function Form(componentProps: Form.Props) {
     'validationMode',
   ]);
   const [formRef, setFormRef] = createStore<FormContext['formRef']>({ fields: {} });
-  const [errorsOverride, setErrorsOverride] = createSignal<Form.Props['errors']>(undefined, {
-    pureWrite: true,
-  });
+  const [clearedErrors, setClearedErrors] = createSignal<Form.Props['errors'] | undefined>(
+    undefined,
+    {
+      pureWrite: true,
+    },
+  );
   const [submitAttempted, setSubmitAttempted] = createSignal(false);
   let submitted = false;
-  let syncedExternalErrors = false;
   const validationMode = () => local.validationMode ?? 'onSubmit';
 
   const focusControl = (control: HTMLElement) => {
@@ -54,16 +56,11 @@ export function Form(componentProps: Form.Props) {
 
   const invalidFields = createMemo(() => getInvalidFields());
 
-  createEffect(
-    () => local.errors,
-    () => {
-      if (syncedExternalErrors) {
-        setErrorsOverride(undefined);
-      } else {
-        syncedExternalErrors = true;
-      }
-    },
-  );
+  const errors = createMemo(() => clearedErrors() ?? local.errors ?? EMPTY_ERRORS);
+
+  createEffect(() => local.errors, () => {
+    setClearedErrors(undefined);
+  });
 
   createTrackedEffect(() => {
     const fields = invalidFields();
@@ -82,20 +79,19 @@ export function Form(componentProps: Form.Props) {
   });
 
   const clearErrors = (name: string | undefined) => {
-    const err = errorsOverride() ?? local.errors;
+    const err = errors();
     if (name && err && EMPTY_STATE.hasOwnProperty.call(err, name)) {
       const nextErrors = { ...err };
       delete nextErrors[name];
-      setErrorsOverride(nextErrors);
+      setClearedErrors(nextErrors);
       local.onClearErrors?.(nextErrors);
-      flush();
     }
   };
 
   const contextValue: FormContext = {
     formRef,
     setFormRef,
-    errors: () => errorsOverride() ?? local.errors ?? EMPTY_ERRORS,
+    errors: () => errors() ?? EMPTY_ERRORS,
     clearErrors,
     validationMode,
     submitAttempted,

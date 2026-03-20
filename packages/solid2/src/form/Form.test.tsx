@@ -203,8 +203,15 @@ describe('<Form />', () => {
         const [errors, setErrors] = createSignal<Form.Props['errors']>({
           foo: 'bar',
         });
+        const formProps = {
+          get errors() {
+            return errors();
+          },
+          onClearErrors: setErrors,
+        } satisfies Pick<Form.Props, 'errors' | 'onClearErrors'>;
+
         return (
-          <Form errors={errors()} onClearErrors={setErrors}>
+          <Form {...formProps}>
             <Field.Root name="foo">
               <Field.Control />
               <Field.Error data-testid="error" />
