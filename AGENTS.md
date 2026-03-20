@@ -70,6 +70,7 @@ This repository now contains the upstream React implementation of Base UI and an
 - Follow existing test naming conventions: `PascalCase.test.tsx` for components and `camelCase.test.ts` for utilities.
 - Use Vitest APIs only: `expect()`, `vi.fn()`, and `@testing-library/jest-dom` matchers.
 - If a test needs layout measurement or browser-only behavior, keep it in a browser-capable environment rather than forcing it into JSDOM.
+- If you rewrite a `packages/solid2` test, test fixture, or shared test setup file, document the rewrite in `packages/solid2/TEST_REWRITE_NOTES.md`, including what changed, which cases/helpers were touched, and why the React/Base UI public contract is still unchanged.
 
 ## Commit guidelines
 

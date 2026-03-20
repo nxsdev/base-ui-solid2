@@ -42,3 +42,4 @@ This directory is the Solid 2 beta port of Base UI.
 - Run `pnpm typescript` after meaningful changes.
 - Run focused tests for `packages/solid2` when possible.
 - If you touch docs or demos under `docs-solid2`, verify the site still starts.
+- If you rewrite a `packages/solid2` test, test fixture, or shared test setup file, record the rewrite in `packages/solid2/TEST_REWRITE_NOTES.md` with the affected cases, the exact nature of the rewrite, and why public React/Base UI compatibility is still preserved.

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { spy } from 'sinon';
-import { createMemo, createRoot, createSignal, runWithOwner, type JSX } from 'solid-js';
+import { createRoot, createSignal, runWithOwner, type JSX } from 'solid-js';
 import { callEventHandler } from '../solid-helpers';
 import type { BaseUIEvent } from '../utils/types';
 import { mergeProps } from './mergeProps';
@@ -247,7 +247,7 @@ describe('mergeProps', () => {
     });
 
     it('calls the props getter with merged props defined after it', () => {
-      let observedProps;
+      let observedProps: Record<string, unknown> | undefined;
       const propsGetter = spy((props) => {
         observedProps = { ...props };
         return props;
@@ -268,8 +268,9 @@ describe('mergeProps', () => {
       );
 
       expect(propsGetter.calledOnce).to.equal(true);
-      expect(observedProps.role).to.equal('tab');
-      expect(observedProps.className).to.equal('test-class');
+      expect(observedProps).to.not.equal(undefined);
+      expect(observedProps!.role).to.equal('tab');
+      expect(observedProps!.className).to.equal('test-class');
     });
 
     it('calls the props getter with an empty object if no props are defined after it', () => {
@@ -303,8 +304,10 @@ describe('mergeProps', () => {
       });
     });
 
-    it('properly merges native object getters in a reactive way (class/style/ref/classList + other dynamic props)', () => {
-      createRoot((dispose) => {
+    it('properly merges native object getters in a reactive way (class/style/ref/classList + other dynamic props)', async () => {
+      await new Promise<void>((resolve, reject) => {
+        createRoot((dispose) => {
+          try {
         const [isOn, setIsOn] = createSignal(false);
         const [color, setColor] = createSignal<'blue' | 'red'>('blue');
         const [isEnabled, setIsEnabled] = createSignal(false);
@@ -360,19 +363,12 @@ describe('mergeProps', () => {
         expect(titleGetterCalls).to.equal(0);
         expect(tabIndexGetterCalls).to.equal(0);
 
-        const classValue = createMemo(() => mergedProps.class);
-        const styleValue = createMemo(() => mergedProps.style);
-        const classListValue = createMemo(() => mergedProps.classList);
-        const titleValue = createMemo(() => mergedProps.title);
-        const tabIndexValue = createMemo(() => mergedProps.tabindex);
-        const staticValue = createMemo(() => mergedProps.id);
-
-        expect(classValue()).to.equal('off static-class');
-        expect(styleValue()).to.deep.equal({ color: 'blue', padding: '1px' });
-        expect(classListValue()).to.deep.equal({ enabled: false, staticKey: true });
-        expect(titleValue()).to.equal('title-0');
-        expect(tabIndexValue()).to.equal(0);
-        expect(staticValue()).to.equal('static-id');
+        expect(mergedProps.class).to.equal('off static-class');
+        expect(mergedProps.style).to.deep.equal({ color: 'blue', padding: '1px' });
+        expect(mergedProps.classList).to.deep.equal({ enabled: false, staticKey: true });
+        expect(mergedProps.title).to.equal('title-0');
+        expect(mergedProps.tabindex).to.equal(0);
+        expect(mergedProps.id).to.equal('static-id');
 
         expect(classGetterCalls).to.equal(1);
         expect(styleGetterCalls).to.equal(1);
@@ -394,21 +390,34 @@ describe('mergeProps', () => {
           setCount(1);
           setMode('b');
         });
+        
+            Promise.resolve()
+              .then(() => {
+                expect(mergedProps.class).to.equal('on static-class');
+                expect(mergedProps.style).to.deep.equal({ color: 'red', padding: '1px' });
+                expect(mergedProps.classList).to.deep.equal({ enabled: true, staticKey: true });
+                expect(mergedProps.title).to.equal('title-1');
+                expect(mergedProps.tabindex).to.equal(-1);
+                expect(mergedProps.id).to.equal('static-id');
 
-        expect(classValue()).to.equal('on static-class');
-        expect(styleValue()).to.deep.equal({ color: 'red', padding: '1px' });
-        expect(classListValue()).to.deep.equal({ enabled: true, staticKey: true });
-        expect(titleValue()).to.equal('title-1');
-        expect(tabIndexValue()).to.equal(-1);
-        expect(staticValue()).to.equal('static-id');
+                expect(classGetterCalls).to.equal(2);
+                expect(styleGetterCalls).to.equal(2);
+                expect(classListGetterCalls).to.equal(2);
+                expect(titleGetterCalls).to.be.greaterThan(titleCallsBefore);
+                expect(tabIndexGetterCalls).to.be.greaterThan(tabIndexCallsBefore);
 
-        expect(classGetterCalls).to.equal(2);
-        expect(styleGetterCalls).to.equal(2);
-        expect(classListGetterCalls).to.equal(2);
-        expect(titleGetterCalls).to.be.greaterThan(titleCallsBefore);
-        expect(tabIndexGetterCalls).to.be.greaterThan(tabIndexCallsBefore);
-
-        dispose();
+                dispose();
+                resolve();
+              })
+              .catch((error) => {
+                dispose();
+                reject(error);
+              });
+          } catch (error) {
+            dispose();
+            reject(error);
+          }
+        });
       });
     });
   });
