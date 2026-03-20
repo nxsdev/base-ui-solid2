@@ -43,8 +43,8 @@ export function RadioIndicator(componentProps: RadioIndicator.Props) {
     get focused() {
       return rootState.focused();
     },
-    get readonly() {
-      return rootState.readonly();
+    get readOnly() {
+      return rootState.readOnly();
     },
     get checked() {
       return rootState.checked();

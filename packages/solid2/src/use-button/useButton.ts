@@ -8,9 +8,9 @@ import { useFocusableWhenDisabled } from '../utils/useFocusableWhenDisabled';
 
 export function useButton(parameters: useButton.Parameters = {}): useButton.ReturnValue {
   const disabled = () => access(parameters.disabled) ?? false;
-  const tabindex = () => {
-    const value = access(parameters.tabindex);
-    return value === undefined || value === false ? 0 : value;
+  const tabIndex = () => {
+    const value = access(parameters.tabIndex);
+    return value === undefined ? 0 : value;
   };
   const isNativeButton = () => access(parameters.native) ?? true;
   const focusableWhenDisabled = () => access(parameters.focusableWhenDisabled);
@@ -27,7 +27,7 @@ export function useButton(parameters: useButton.Parameters = {}): useButton.Retu
     focusableWhenDisabled,
     disabled,
     composite: isCompositeItem,
-    tabindex,
+    tabIndex,
     isNativeButton,
   });
 
@@ -44,7 +44,7 @@ export function useButton(parameters: useButton.Parameters = {}): useButton.Retu
     if (
       isCompositeItem() &&
       disabled() &&
-      focusableWhenDisabledProps().disabled === undefined &&
+      focusableWhenDisabledProps.disabled === undefined &&
       element.disabled
     ) {
       element.disabled = false;
@@ -64,6 +64,7 @@ export function useButton(parameters: useButton.Parameters = {}): useButton.Retu
 
     const otherExternalProps = omit(
       externalProps,
+      'disabled',
       'onClick',
       'onMouseDown',
       'onKeyUp',
@@ -144,7 +145,7 @@ export function useButton(parameters: useButton.Parameters = {}): useButton.Retu
           callEventHandler(externalOnPointerDown, event);
         },
       },
-      focusableWhenDisabledProps(),
+      focusableWhenDisabledProps,
       otherExternalProps,
       {
         get role() {
@@ -166,7 +167,7 @@ export function useButton(parameters: useButton.Parameters = {}): useButton.Retu
 }
 
 interface GenericButtonProps extends HTMLProps, AdditionalButtonProps {
-  tabindex?: number;
+  tabIndex?: number;
 }
 
 interface AdditionalButtonProps
@@ -174,7 +175,7 @@ interface AdditionalButtonProps
     'aria-disabled': JSX.AriaAttributes['aria-disabled'];
     disabled: boolean;
     role: JSX.AriaAttributes['role'];
-    tabindex?: number;
+    tabIndex?: number;
   }> {}
 
 export namespace useButton {
@@ -189,7 +190,7 @@ export namespace useButton {
      * @default false
      */
     focusableWhenDisabled?: MaybeAccessor<boolean | undefined>;
-    tabindex?: MaybeAccessor<NonNullable<JSX.HTMLAttributes<any>['tabindex']> | undefined>;
+    tabIndex?: MaybeAccessor<number | undefined>;
     /**
      * Whether the component is being rendered as a native button.
      * @default true

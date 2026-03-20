@@ -1,4 +1,4 @@
-import { onCleanup } from 'solid-js';
+import { getOwner, onCleanup } from 'solid-js';
 
 type TimeoutId = number;
 export type Timeout = ReturnType<typeof useTimeout>;
@@ -10,6 +10,7 @@ const EMPTY = 0 as TimeoutId;
  */
 export function useTimeout() {
   let currentId: TimeoutId = EMPTY;
+  const owner = getOwner();
 
   function start(delay: number, fn: Function) {
     clear();
@@ -30,9 +31,13 @@ export function useTimeout() {
     return currentId !== EMPTY;
   }
 
-  onCleanup(() => {
-    clear();
-  });
+  // Some Base UI helpers construct timers from imperative callbacks where there is no
+  // current owner in Solid 2. Only register automatic cleanup when an owner exists.
+  if (owner) {
+    onCleanup(() => {
+      clear();
+    });
+  }
 
   return { start, clear, isStarted };
 }

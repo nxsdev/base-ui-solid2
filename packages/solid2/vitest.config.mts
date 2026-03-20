@@ -10,6 +10,14 @@ export default mergeConfig(
       'process.env.NODE_ENV': JSON.stringify('test'),
     },
     plugins: [solidPlugin() as any],
+    resolve: {
+      alias: {
+        'solid-js/web': '@solidjs/web',
+        'solid-js/h': '@solidjs/h',
+        'solid-js/universal': '@solidjs/universal',
+      },
+      dedupe: ['solid-js', '@solidjs/web', '@solidjs/universal', '@solidjs/h'],
+    },
     test: {
       ...sharedConfig.test,
       // browser: {
@@ -21,7 +29,7 @@ export default mergeConfig(
       // },
       server: {
         deps: {
-          inline: ['@solidjs/testing-library', 'solid-js'],
+          inline: ['@solidjs/testing-library', '@solid-primitives/props', '@solid-primitives/utils', 'solid-js'],
         },
       },
     },

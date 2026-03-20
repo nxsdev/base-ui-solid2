@@ -1,4 +1,4 @@
-import { createSignal, createTrackedEffect, onCleanup } from 'solid-js';
+import { createSignal, createTrackedEffect } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import { BaseUIComponentProps } from '../../utils/types';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -24,9 +24,9 @@ export function AvatarFallback(componentProps: AvatarFallback.Props) {
     if (local.delay !== undefined) {
       timeout.start(local.delay, () => setDelayPassed(true));
     }
-    onCleanup(() => {
+    return () => {
       timeout.clear();
-    });
+    };
   });
 
   const state: AvatarRoot.State = {

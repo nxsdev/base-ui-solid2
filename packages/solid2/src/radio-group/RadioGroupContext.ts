@@ -4,7 +4,7 @@ import { NOOP } from '../utils/noop';
 
 export interface RadioGroupContext {
   disabled: Accessor<boolean | undefined>;
-  readonly: Accessor<boolean | undefined>;
+  readOnly: Accessor<boolean | undefined>;
   required: Accessor<boolean | undefined>;
   name: Accessor<string | undefined>;
   checkedValue: Accessor<unknown>;
@@ -18,7 +18,7 @@ export interface RadioGroupContext {
 
 export const RadioGroupContext = createContext<RadioGroupContext>({
   disabled: () => undefined,
-  readonly: () => undefined,
+  readOnly: () => undefined,
   required: () => undefined,
   name: () => undefined,
   checkedValue: () => '',

@@ -28,12 +28,12 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     'refs',
     'nativeButton',
     'onCheckedChange',
-    'readonly',
+    'readOnly',
     'required',
     'disabled',
   ]);
   const nativeButton = () => local.nativeButton ?? true;
-  const readonly = () => local.readonly ?? false;
+  const readOnly = () => local.readOnly ?? false;
   const required = () => local.required ?? false;
   const disabledProp = () => local.disabled === true || local.disabled === '';
 
@@ -114,7 +114,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
       return checked() ? 'true' : 'false';
     },
     get 'aria-readonly'() {
-      return readonly() ? 'true' : undefined;
+      return readOnly() ? 'true' : undefined;
     },
     get 'aria-labelledby'() {
       return labelId();
@@ -135,7 +135,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
       }
     },
     onClick(event) {
-      if (event.defaultPrevented || readonly()) {
+      if (event.defaultPrevented || readOnly()) {
         return;
       }
 
@@ -202,8 +202,8 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     get checked() {
       return checked();
     },
-    get readonly() {
-      return readonly();
+    get readOnly() {
+      return readOnly();
     },
     get required() {
       return required();
@@ -218,7 +218,7 @@ export function SwitchRoot(componentProps: SwitchRoot.Props) {
     focused: () => fieldState.focused,
     checked,
     disabled,
-    readonly,
+    readOnly,
     required,
   };
 
@@ -287,7 +287,7 @@ export namespace SwitchRoot {
      * Whether the user should be unable to activate or deactivate the switch.
      * @default false
      */
-    readonly?: boolean;
+    readOnly?: boolean;
     /**
      * Whether the user must activate the switch before submitting a form.
      * @default false
@@ -307,7 +307,7 @@ export namespace SwitchRoot {
     /**
      * Whether the user should be unable to activate or deactivate the switch.
      */
-    readonly: boolean;
+    readOnly: boolean;
     /**
      * Whether the user must activate the switch before submitting a form.
      */

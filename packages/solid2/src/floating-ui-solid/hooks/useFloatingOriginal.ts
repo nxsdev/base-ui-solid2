@@ -3,7 +3,6 @@ import {
   createMemo,
   createSignal,
   createTrackedEffect,
-  onCleanup,
   onSettled,
   type Accessor,
   type JSX,
@@ -127,10 +126,8 @@ export function useFloatingOriginal<RT extends ReferenceType = ReferenceType>(
   const [data, setData] = createStore<UsePositionData>({
     x: 0,
     y: 0,
-    // eslint-disable-next-line solid/reactivity
-    strategy: access(strategy()),
-    // eslint-disable-next-line solid/reactivity
-    placement: access(placement()),
+    strategy: access(options.strategy) ?? 'absolute',
+    placement: access(options.placement) ?? 'bottom',
     middlewareData: {},
     isPositioned: false,
   });
@@ -187,28 +184,26 @@ export function useFloatingOriginal<RT extends ReferenceType = ReferenceType>(
 
   onSettled(() => {
     isMountedRef = true;
-
-    onCleanup(() => {
+    return () => {
       isMountedRef = false;
-    });
+    };
   });
 
   createTrackedEffect(() => {
-    referenceEl();
-    floatingEl();
-    whileElementsMountedFn();
-    open();
-
     const r = referenceEl();
     const f = floatingEl();
-    if (r && f) {
-      const whileElementsMounted = whileElementsMountedFn();
-      if (whileElementsMounted) {
-        return whileElementsMounted(r, f, update);
-      }
+    const whileElementsMounted = whileElementsMountedFn();
+    open();
 
-      update();
+    if (!r || !f) {
+      return;
     }
+
+    if (whileElementsMounted) {
+      return whileElementsMounted(r, f, update);
+    }
+
+    update();
   });
 
   const refs = {

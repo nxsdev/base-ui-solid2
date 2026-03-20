@@ -1,4 +1,4 @@
-import { onCleanup, onSettled } from 'solid-js';
+import { onSettled } from 'solid-js';
 import { contains, getTarget, stopEvent } from '../../floating-ui-solid/utils';
 import { splitComponentProps } from '../../solid-helpers';
 import { ownerDocument } from '../../utils/owner';
@@ -122,9 +122,9 @@ export function ContextMenuTrigger(componentProps: ContextMenuTrigger.Props) {
   onSettled(() => {
     const doc = ownerDocument(triggerRef);
     doc.addEventListener('contextmenu', handleDocumentContextMenu);
-    onCleanup(() => {
+    return () => {
       doc.removeEventListener('contextmenu', handleDocumentContextMenu);
-    });
+    };
   });
 
   const element = useRenderElement('div', componentProps, {

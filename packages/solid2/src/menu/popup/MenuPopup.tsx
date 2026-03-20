@@ -1,4 +1,4 @@
-import { createMemo, onCleanup, onSettled, type JSX } from 'solid-js';
+import { createMemo, onSettled, type JSX } from 'solid-js';
 import { FloatingFocusManager, useFloatingTree } from '../../floating-ui-solid';
 import { splitComponentProps } from '../../solid-helpers';
 import { DISABLED_TRANSITIONS_STYLE } from '../../utils/constants';
@@ -65,9 +65,9 @@ export function MenuPopup(componentProps: MenuPopup.Props) {
 
   onSettled(() => {
     menuEvents.on('close', handleClose);
-    onCleanup(() => {
+    return () => {
       menuEvents.off('close', handleClose);
-    });
+    };
   });
 
   const state: MenuPopup.State = {

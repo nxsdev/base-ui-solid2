@@ -5,7 +5,7 @@ import { SwitchRootContext } from '../root/SwitchRootContext';
 const testContext: SwitchRootContext = {
   checked: () => false,
   disabled: () => false,
-  readonly: () => false,
+  readOnly: () => false,
   required: () => false,
   dirty: () => false,
   touched: () => false,

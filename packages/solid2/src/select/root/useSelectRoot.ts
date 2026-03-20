@@ -42,7 +42,7 @@ const EMPTY_ARRAY: never[] = [];
 export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelectRoot.ReturnValue {
   const idProp = () => access(params.id);
   const disabledProp = () => access(params.disabled) ?? false;
-  const readonly = () => access(params.readonly) ?? false;
+  const readOnly = () => access(params.readOnly) ?? false;
   const required = () => access(params.required) ?? false;
   const modal = () => access(params.modal) ?? false;
   const nameProp = () => access(params.name);
@@ -285,7 +285,7 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
   });
 
   const click = useClick(floatingContext, {
-    enabled: () => !readonly() && !disabled(),
+    enabled: () => !readOnly() && !disabled(),
     event: 'mousedown',
   });
 
@@ -299,7 +299,7 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
   });
 
   const listNavigation = useListNavigation(floatingContext, {
-    enabled: () => !readonly() && !disabled(),
+    enabled: () => !readOnly() && !disabled(),
     listRef: () => refs.listRef,
     activeIndex: () => store.activeIndex,
     selectedIndex: () => store.selectedIndex,
@@ -320,7 +320,7 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
   });
 
   const typeahead = useTypeahead(floatingContext, {
-    enabled: () => !readonly() && !disabled(),
+    enabled: () => !readOnly() && !disabled(),
     listRef: () => refs.labelsRef,
     activeIndex: () => store.activeIndex,
     selectedIndex: () => store.selectedIndex,
@@ -393,7 +393,7 @@ export function useSelectRoot<T>(params: useSelectRoot.Parameters<T>): useSelect
     name,
     required,
     disabled,
-    readonly,
+    readOnly,
     setValue,
     setOpen,
     refs,
@@ -431,7 +431,7 @@ export namespace useSelectRoot {
      * Whether the user should be unable to choose a different option from the select menu.
      * @default false
      */
-    readonly?: MaybeAccessor<boolean | undefined>;
+    readOnly?: MaybeAccessor<boolean | undefined>;
     /**
      * Whether the component should ignore user interaction.
      * @default false

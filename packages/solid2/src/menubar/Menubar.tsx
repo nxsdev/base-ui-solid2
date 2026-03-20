@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onSettled, type ParentProps } from 'solid-js';
+import { createSignal, onSettled, type ParentProps } from 'solid-js';
 import { CompositeRoot } from '../composite/root/CompositeRoot';
 import {
   FloatingNode,
@@ -123,9 +123,9 @@ function MenubarContent(props: ParentProps) {
 
   onSettled(() => {
     menuEvents.on('openchange', onSubmenuOpenChange);
-    onCleanup(() => {
+    return () => {
       menuEvents.off('openchange', onSubmenuOpenChange);
-    });
+    };
   });
 
   return <FloatingNode id={nodeId()}>{props.children}</FloatingNode>;

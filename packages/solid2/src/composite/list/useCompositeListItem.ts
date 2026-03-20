@@ -1,4 +1,4 @@
-import { createSignal, createTrackedEffect, onCleanup, type Accessor } from 'solid-js';
+import { createSignal, createTrackedEffect, type Accessor } from 'solid-js';
 import { access, type MaybeAccessor } from '../../solid-helpers';
 import type { CompositeMetadata } from './CompositeList';
 import { useCompositeListContext } from './CompositeListContext';
@@ -81,12 +81,12 @@ export function useCompositeListItem<Metadata>(
       context.subscribeMapChange(onMapChange);
     }
 
-    onCleanup(() => {
+    return () => {
       if (node) {
         context.unregister(node);
         context.unsubscribeMapChange(onMapChange);
       }
-    });
+    };
   });
 
   return {

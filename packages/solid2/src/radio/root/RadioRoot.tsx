@@ -29,7 +29,7 @@ import { RadioRootContext } from './RadioRootContext';
 export function RadioRoot(componentProps: RadioRoot.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, [
     'disabled',
-    'readonly',
+    'readOnly',
     'required',
     'value',
     'refs',
@@ -37,13 +37,13 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
   ]);
 
   const disabledProp = () => local.disabled ?? false;
-  const readOnlyProp = () => local.readonly ?? false;
+  const readOnlyProp = () => local.readOnly ?? false;
   const requiredProp = () => local.required ?? false;
   const nativeButton = () => local.nativeButton ?? true;
 
   const {
     disabled: disabledRoot,
-    readonly: readOnlyRoot,
+    readOnly: readOnlyRoot,
     required: requiredRoot,
     checkedValue,
     setCheckedValue,
@@ -57,7 +57,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
   const { state: fieldState, disabled: fieldDisabled } = useFieldRootContext();
 
   const disabled = () => fieldDisabled() || disabledRoot() || disabledProp();
-  const readonly = () => readOnlyRoot() || readOnlyProp();
+  const readOnly = () => readOnlyRoot() || readOnlyProp();
   const required = () => requiredRoot() || requiredProp();
 
   const { setDirty, validityData, setTouched: setFieldTouched, setFilled } = useFieldRootContext();
@@ -78,7 +78,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
       return disabled() ? 'true' : undefined;
     },
     get 'aria-readonly'() {
-      return readonly() ? 'true' : undefined;
+      return readOnly() ? 'true' : undefined;
     },
     get [ACTIVE_COMPOSITE_ITEM as string]() {
       return checked() ? '' : undefined;
@@ -92,7 +92,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
       }
     },
     onClick(event) {
-      if (event.defaultPrevented || disabled() || readonly()) {
+      if (event.defaultPrevented || disabled() || readOnly()) {
         return;
       }
 
@@ -101,7 +101,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
       inputRef()?.click();
     },
     onFocus(event) {
-      if (event.defaultPrevented || disabled() || readonly() || !touched()) {
+      if (event.defaultPrevented || disabled() || readOnly() || !touched()) {
         return;
       }
 
@@ -143,7 +143,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
       return required();
     },
     get readonly() {
-      return readonly();
+      return readOnly();
     },
     ref: (el) => {
       if (local.refs) {
@@ -157,7 +157,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
         return;
       }
 
-      if (disabled() || readonly() || local.value === undefined) {
+      if (disabled() || readOnly() || local.value === undefined) {
         return;
       }
 
@@ -176,8 +176,8 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
     get required() {
       return required();
     },
-    get readonly() {
-      return readonly();
+    get readOnly() {
+      return readOnly();
     },
     get checked() {
       return checked();
@@ -191,7 +191,7 @@ export function RadioRoot(componentProps: RadioRoot.Props) {
     focused: () => fieldState.focused,
     disabled,
     touched,
-    readonly,
+    readOnly,
     checked,
     required,
   };
@@ -242,7 +242,7 @@ export namespace RadioRoot {
      * Whether the user should be unable to select the radio button.
      * @default false
      */
-    readonly?: boolean;
+    readOnly?: boolean;
     refs?: {
       /**
        * A ref to access the hidden input element.
@@ -270,7 +270,7 @@ export namespace RadioRoot {
     /**
      * Whether the user should be unable to select the radio button.
      */
-    readonly: boolean;
+    readOnly: boolean;
     /**
      * Whether the user must choose a value before submitting a form.
      */

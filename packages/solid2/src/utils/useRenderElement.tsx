@@ -76,7 +76,6 @@ export function useRenderElement<
             mergeProps(params.props),
 
             {
-              component: undefined,
               get class() {
                 return resolveClassName(componentProps.class, params.state);
               },

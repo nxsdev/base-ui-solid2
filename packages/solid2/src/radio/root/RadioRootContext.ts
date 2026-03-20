@@ -4,7 +4,7 @@ import type { Accessorify } from '../../floating-ui-solid';
 
 export interface RadioRootContext extends Accessorify<FieldRoot.State> {
   disabled: Accessor<boolean>;
-  readonly: Accessor<boolean>;
+  readOnly: Accessor<boolean>;
   checked: Accessor<boolean>;
   required: Accessor<boolean>;
 }

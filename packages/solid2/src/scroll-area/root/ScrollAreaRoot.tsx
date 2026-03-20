@@ -202,11 +202,11 @@ export function ScrollAreaRoot(componentProps: ScrollAreaRoot.Props) {
     if (!document.head.getElementsByTagName('style').namedItem(STYLE_TAG_ID)) {
       const el = styleDisableScrollbar.element();
       document.head.appendChild(el);
-      onCleanup(() => {
+      return () => {
         if (document.head.getElementsByTagName('style').namedItem(STYLE_TAG_ID)) {
           document.head.removeChild(el);
         }
-      });
+      };
     }
   });
 

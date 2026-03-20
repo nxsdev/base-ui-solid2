@@ -1672,8 +1672,8 @@ describe.skipIf(typeof Touch === 'undefined')('<Slider.Root />', () => {
       });
 
       it('can be removed from the tab sequence', async () => {
-        render(() => <TestSlider tabindex={-1} value={30} />);
-        expect(screen.getByRole('slider')).to.have.property('tabindex', -1);
+        render(() => <TestSlider tabIndex={-1} value={30} />);
+        expect(screen.getByRole('slider')).to.have.property('tabIndex', -1);
       });
 
       it('keypresses should correct invalid values', async () => {

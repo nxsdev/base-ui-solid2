@@ -66,6 +66,7 @@ export function useFloatingPortalNode(props: UseFloatingPortalNodeProps = {}) {
   const uniqueId = useId();
   const [portalNode, setPortalNode] = createSignal<HTMLElement | null>(null);
   const portalContext = usePortalContext();
+  let cleanupPortalRef: (() => void) | undefined;
 
   const portalMount = createMemo(() => {
     const id = access(props.id);
@@ -102,6 +103,9 @@ export function useFloatingPortalNode(props: UseFloatingPortalNodeProps = {}) {
   });
 
   function portalRef(el: HTMLDivElement) {
+    cleanupPortalRef?.();
+    cleanupPortalRef = undefined;
+
     const uid = uniqueId();
     if (uid) {
       el.id = uid;
@@ -125,14 +129,18 @@ export function useFloatingPortalNode(props: UseFloatingPortalNodeProps = {}) {
       // trap elements onFocus prop is called.
       el.addEventListener('focusin', onFocus, true);
       el.addEventListener('focusout', onFocus, true);
-      onCleanup(() => {
+      cleanupPortalRef = () => {
         el.removeEventListener('focusin', onFocus, true);
         el.removeEventListener('focusout', onFocus, true);
-      });
+      };
 
       setPortalNode(el);
     }
   }
+
+  onCleanup(() => {
+    cleanupPortalRef?.();
+  });
 
   return { portalMount, portalRef, portalNode, uniqueId };
 }

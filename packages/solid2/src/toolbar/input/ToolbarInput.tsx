@@ -72,7 +72,7 @@ export function ToolbarInput(componentProps: ToolbarInput.Props) {
         },
       },
       elementProps,
-      (props) => mergeProps(props, focusableWhenDisabledProps()),
+      (props) => mergeProps(props, focusableWhenDisabledProps),
     ],
   });
 

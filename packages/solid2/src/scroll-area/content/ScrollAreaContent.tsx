@@ -1,4 +1,4 @@
-import { onCleanup, onSettled } from 'solid-js';
+import { onSettled } from 'solid-js';
 import { splitComponentProps } from '../../solid-helpers';
 import type { BaseUIComponentProps } from '../../utils/types';
 import { useRenderElement } from '../../utils/useRenderElement';
@@ -28,9 +28,9 @@ export function ScrollAreaContent(componentProps: ScrollAreaContent.Props) {
       ro.observe(contentWrapperRef);
     }
 
-    onCleanup(() => {
+    return () => {
       ro.disconnect();
-    });
+    };
   });
 
   const element = useRenderElement('div', componentProps, {

@@ -6,17 +6,17 @@ export interface CompositeRootContext {
   highlightItemOnHover: Accessor<boolean>;
 }
 
-export const CompositeRootContext = createContext<CompositeRootContext | undefined>(undefined);
+export const CompositeRootContext = createContext<CompositeRootContext | null>(null);
 
 export function useCompositeRootContext(optional: true): CompositeRootContext | undefined;
 export function useCompositeRootContext(optional?: false): CompositeRootContext;
 export function useCompositeRootContext(optional = false) {
   const context = useContext(CompositeRootContext);
-  if (context === undefined && !optional) {
+  if (context == null && !optional) {
     throw new Error(
       'Base UI: CompositeRootContext is missing. Composite parts must be placed within <Composite.Root>.',
     );
   }
 
-  return context;
+  return context ?? undefined;
 }

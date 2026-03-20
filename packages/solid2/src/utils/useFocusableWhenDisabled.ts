@@ -1,5 +1,4 @@
-
-import { type Accessor, createMemo, type JSX } from 'solid-js';
+import { type Accessor, type JSX } from 'solid-js';
 import { access, type MaybeAccessor } from '../solid-helpers';
 
 export function useFocusableWhenDisabled(
@@ -8,54 +7,57 @@ export function useFocusableWhenDisabled(
   const focusableWhenDisabled = () => access(parameters.focusableWhenDisabled);
   const disabled = () => access(parameters.disabled);
   const composite = () => access(parameters.composite) ?? false;
-  const tabIndexProp = () => access(parameters.tabindex) ?? 0;
+  const tabIndexProp = () => access(parameters.tabIndex) ?? 0;
   const isNativeButton = () => access(parameters.isNativeButton);
 
   const isFocusableComposite = () => composite?.() && focusableWhenDisabled?.() !== false;
   const isNonFocusableComposite = () => composite?.() && focusableWhenDisabled?.() === false;
 
-  // we can't explicitly assign `undefined` to any of these props because it
-  // would otherwise prevent subsequently merged props from setting them
-  const props = createMemo(() => {
-    const additionalProps = {
-      // allow Tabbing away from focusableWhenDisabled elements
-      onKeyDown(event: KeyboardEvent) {
-        if (disabled() && focusableWhenDisabled() && event.key !== 'Tab') {
-          event.preventDefault();
-        }
-      },
-    } as FocusableWhenDisabledProps;
-
-    if (!composite()) {
-      additionalProps.tabindex = tabIndexProp();
-
-      if (!isNativeButton() && disabled()) {
-        additionalProps.tabindex = focusableWhenDisabled() ? tabIndexProp()! : -1;
+  const props = {
+    // allow Tabbing away from focusableWhenDisabled elements
+    onKeyDown(event: KeyboardEvent) {
+      if (disabled() && focusableWhenDisabled() && event.key !== 'Tab') {
+        event.preventDefault();
       }
-    }
+    },
+    get tabIndex() {
+      if (!composite()) {
+        if (!isNativeButton() && disabled()) {
+          return focusableWhenDisabled() ? tabIndexProp() : -1;
+        }
 
-    if (
-      (isNativeButton() && (focusableWhenDisabled() || isFocusableComposite())) ||
-      (!isNativeButton() && disabled())
-    ) {
-      additionalProps['aria-disabled'] = disabled() ? 'true' : undefined;
-    }
+        return tabIndexProp();
+      }
 
-    if (isNativeButton() && (!focusableWhenDisabled() || isNonFocusableComposite())) {
-      additionalProps.disabled = disabled();
-    }
+      return undefined;
+    },
+    get 'aria-disabled'() {
+      if (
+        (isNativeButton() && (focusableWhenDisabled() || isFocusableComposite())) ||
+        (!isNativeButton() && disabled())
+      ) {
+        return disabled() ? 'true' : undefined;
+      }
 
-    return additionalProps;
-  });
+      return undefined;
+    },
+    get disabled() {
+      if (isNativeButton() && (!focusableWhenDisabled() || isNonFocusableComposite())) {
+        return disabled();
+      }
+
+      return undefined;
+    },
+  } satisfies FocusableWhenDisabledProps;
 
   return { props };
 }
 
-interface FocusableWhenDisabledProps {
+export interface FocusableWhenDisabledProps {
   'aria-disabled'?: JSX.AriaAttributes['aria-disabled'];
   disabled?: boolean;
   onKeyDown: (event: KeyboardEvent) => void;
-  tabindex: string | number;
+  tabIndex?: string | number;
 }
 
 export namespace useFocusableWhenDisabled {
@@ -77,7 +79,7 @@ export namespace useFocusableWhenDisabled {
     /**
      * @default 0
      */
-    tabindex?: MaybeAccessor<string | number | undefined>;
+    tabIndex?: MaybeAccessor<string | number | undefined>;
     /**
      * @default true
      */
@@ -85,6 +87,6 @@ export namespace useFocusableWhenDisabled {
   }
 
   export interface ReturnValue {
-    props: Accessor<FocusableWhenDisabledProps>;
+    props: FocusableWhenDisabledProps;
   }
 }

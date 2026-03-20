@@ -119,19 +119,19 @@ describe('<Switch.Root />', () => {
     });
   });
 
-  describe('prop: readonly', () => {
+  describe('prop: readOnly', () => {
     it('should have the `aria-readonly` attribute', async () => {
-      render(() => <Switch.Root readonly />);
+      render(() => <Switch.Root readOnly />);
       expect(screen.getByRole('switch')).to.have.attribute('aria-readonly', 'true');
     });
 
-    it('should not have the aria attribute when `readonly` is not set', async () => {
+    it('should not have the aria attribute when `readOnly` is not set', async () => {
       render(() => <Switch.Root />);
       expect(screen.getByRole('switch')).not.to.have.attribute('aria-readonly');
     });
 
     it('should not change its state when clicked', async () => {
-      render(() => <Switch.Root readonly />);
+      render(() => <Switch.Root readOnly />);
       const switchElement = screen.getByRole('switch');
 
       expect(switchElement).to.have.attribute('aria-checked', 'false');
@@ -154,9 +154,9 @@ describe('<Switch.Root />', () => {
 
   it('should place the style hooks on the root and the thumb', async () => {
     const [disabled, setDisabled] = createSignal(true);
-    const [readonly, setReadOnly] = createSignal(true);
+    const [readOnly, setReadOnly] = createSignal(true);
     render(() => (
-      <Switch.Root defaultChecked disabled={disabled()} readonly={readonly()} required>
+      <Switch.Root defaultChecked disabled={disabled()} readOnly={readOnly()} required>
         <Switch.Thumb data-testid="thumb" />
       </Switch.Root>
     ));

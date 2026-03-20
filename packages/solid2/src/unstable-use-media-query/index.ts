@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onSettled, type Accessor } from 'solid-js';
+import { createSignal, onSettled, type Accessor } from 'solid-js';
 import { isServer } from '@solidjs/web';
 import { access, type MaybeAccessor } from '../solid-helpers';
 
@@ -33,9 +33,9 @@ export function useMediaQuery(
 
     const mediaQueryList = matchMediaValue(safeQuery());
     mediaQueryList.addEventListener('change', notify);
-    onCleanup(() => {
+    return () => {
       mediaQueryList.removeEventListener('change', notify);
-    });
+    };
   });
 
   if (isServer) {

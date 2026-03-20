@@ -1,5 +1,5 @@
-import { combineProps } from '@solid-primitives/props';
 import { type Accessor, type JSX } from 'solid-js';
+import { mergeProps } from '../../merge-props/mergeProps';
 import type { ElementProps } from '../types';
 import { ACTIVE_KEY, FOCUSABLE_ATTRIBUTE, SELECTED_KEY } from '../utils/constants';
 
@@ -41,7 +41,7 @@ export function useInteractions(
         referenceList.push(userProps);
       }
 
-      const combined = combineProps(referenceList);
+      const combined = mergeProps(referenceList);
 
       return Object.assign({}, combined);
     },
@@ -56,7 +56,7 @@ export function useInteractions(
         list.push(userProps);
       }
 
-      const combined = combineProps(list);
+      const combined = mergeProps(list);
 
       return Object.assign({}, combined);
     },
@@ -72,7 +72,7 @@ export function useInteractions(
 
       list = list.map((item) => (typeof item === 'function' ? item(userProps ?? {}) : item));
 
-      const combined = combineProps(list);
+      const combined = mergeProps(list);
 
       return Object.assign({}, combined);
     },

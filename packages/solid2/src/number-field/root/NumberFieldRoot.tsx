@@ -41,7 +41,7 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
     'largeStep',
     'required',
     'disabled',
-    'readonly',
+    'readOnly',
     'name',
     'defaultValue',
     'value',
@@ -57,7 +57,7 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
   const largeStep = () => local.largeStep ?? 10;
   const required = () => local.required ?? false;
   const disabledProp = () => local.disabled ?? false;
-  const readonly = () => local.readonly ?? false;
+  const readOnly = () => local.readOnly ?? false;
   const allowWheelScrub = () => local.allowWheelScrub ?? false;
   const snapOnStep = () => local.snapOnStep ?? false;
 
@@ -322,7 +322,7 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
   // The `onWheel` prop can't be prevented, so we need to use a global event listener.
   createTrackedEffect(function registerElementWheelListener() {
     const element = refs.inputRef;
-    if (disabled() || readonly() || !allowWheelScrub() || !element) {
+    if (disabled() || readOnly() || !allowWheelScrub() || !element) {
       return;
     }
 
@@ -354,8 +354,8 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
     get disabled() {
       return disabled();
     },
-    get readonly() {
-      return readonly();
+    get readOnly() {
+      return readOnly();
     },
     get required() {
       return required();
@@ -380,7 +380,7 @@ export function NumberFieldRoot(componentProps: NumberFieldRoot.Props) {
     minWithDefault,
     maxWithDefault,
     disabled,
-    readonly,
+    readOnly,
     id,
     setValue,
     incrementValue,
@@ -478,7 +478,7 @@ export namespace NumberFieldRoot {
      * Whether the user should be unable to change the field value.
      * @default false
      */
-    readonly?: boolean;
+    readOnly?: boolean;
     /**
      * Identifies the field when a form is submitted.
      */
@@ -547,7 +547,7 @@ export namespace NumberFieldRoot {
     /**
      * Whether the user should be unable to change the field value.
      */
-    readonly: boolean;
+    readOnly: boolean;
     /**
      * Whether the user is currently scrubbing the field.
      */

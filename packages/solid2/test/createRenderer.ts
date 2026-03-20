@@ -1,7 +1,7 @@
 import { queries, render as testingLibraryRender } from '@solidjs/testing-library';
 import { userEvent } from '@testing-library/user-event';
-import { type Component } from 'solid-js';
-import { createDynamic } from '@solidjs/web';
+import { createComponent, type Component } from 'solid-js';
+import { Dynamic } from '@solidjs/web';
 import { createClock, type Clock, type ClockConfig } from './createClock';
 import { customQueries, type MuiRenderResult, type RenderOptions } from './describeConformance';
 
@@ -46,10 +46,13 @@ export function createRenderer(globalOptions: CreateRendererOptions = {}): BaseU
     clock: createClock(clock, clockConfig, clockOptions, vi),
     render(element, elementProps = {}, options = {}) {
       return {
-        ...(testingLibraryRender(() => createDynamic(() => element, elementProps), {
+        ...(testingLibraryRender(
+          () => createComponent(Dynamic as any, { component: element, ...elementProps }),
+          {
           ...options,
           queries: { ...queries, ...customQueries },
-        }) as any),
+          },
+        ) as any),
         user: userEvent.setup(),
       };
     },

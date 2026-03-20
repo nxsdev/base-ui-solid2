@@ -1,4 +1,4 @@
-import { createMemo, createTrackedEffect, onCleanup, type JSX } from 'solid-js';
+import { createMemo, createTrackedEffect, type JSX } from 'solid-js';
 import {
   IndexGuessBehavior,
   useCompositeListItem,
@@ -71,9 +71,9 @@ export function SelectItem(componentProps: SelectItem.Props) {
     const idx = listItem.index();
     values[idx] = value();
 
-    onCleanup(() => {
+    return () => {
       delete values[idx];
-    });
+    };
   });
 
   createTrackedEffect(() => {

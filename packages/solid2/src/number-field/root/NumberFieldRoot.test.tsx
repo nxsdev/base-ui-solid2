@@ -146,9 +146,9 @@ describe('<NumberField />', () => {
     });
   });
 
-  describe('prop: readonly', () => {
-    it('should mark the input as readonly', async () => {
-      render(() => <NumberField readonly />);
+  describe('prop: readOnly', () => {
+    it('should mark the input as readOnly', async () => {
+      render(() => <NumberField readOnly />);
       const input = screen.getByRole('textbox');
       expect(input).to.have.attribute('readonly');
     });

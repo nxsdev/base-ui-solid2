@@ -33,7 +33,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
     isScrubbing,
     setIsScrubbing,
     disabled,
-    readonly,
+    readOnly,
     incrementValue,
     getStepAmount,
     refs: numberFieldRootRefs,
@@ -121,7 +121,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
   };
 
   createTrackedEffect(function registerGlobalScrubbingEventListeners() {
-    if (!numberFieldRootRefs.inputRef || disabled() || readonly()) {
+    if (!numberFieldRootRefs.inputRef || disabled() || readOnly()) {
       return;
     }
 
@@ -174,7 +174,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
   // Prevent scrolling using touch input when scrubbing.
   createTrackedEffect(function registerScrubberTouchPreventListener() {
     const element = refs.scrubAreaRef;
-    if (!element || disabled() || readonly()) {
+    if (!element || disabled() || readOnly()) {
       return;
     }
 
@@ -200,7 +200,7 @@ export function NumberFieldScrubArea(componentProps: NumberFieldScrubArea.Props)
     },
     async onPointerDown(event) {
       const isMainButton = !event.button || event.button === 0;
-      if (event.defaultPrevented || readonly() || !isMainButton || disabled()) {
+      if (event.defaultPrevented || readOnly() || !isMainButton || disabled()) {
         return;
       }
 

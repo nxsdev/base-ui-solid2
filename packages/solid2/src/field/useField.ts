@@ -60,13 +60,13 @@ export function useField(params: useField.Parameters) {
 
   createTrackedEffect(() => {
     const idValue = id();
-    onCleanup(() => {
+    return () => {
       if (idValue) {
         setFormRef((formRef) => {
           delete formRef.fields[idValue];
         });
       }
-    });
+    };
   });
 }
 

@@ -264,7 +264,7 @@ export function useCollapsiblePanel<T extends HTMLElement>(
     const frame = AnimationFrame.request(() => {
       shouldCancelInitialOpenAnimationRef = false;
     });
-    onCleanup(() => AnimationFrame.cancel(frame));
+    return () => AnimationFrame.cancel(frame);
   });
 
   createTrackedEffect(() => {
@@ -334,9 +334,9 @@ export function useCollapsiblePanel<T extends HTMLElement>(
     }
 
     panel.addEventListener('beforematch', handleBeforeMatch);
-    onCleanup(() => {
+    return () => {
       panel.removeEventListener('beforematch', handleBeforeMatch);
-    });
+    };
   });
 
   onSettled(() => {

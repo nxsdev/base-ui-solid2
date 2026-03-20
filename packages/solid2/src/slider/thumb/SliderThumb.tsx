@@ -87,7 +87,7 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
     'onBlur',
     'onFocus',
     'onKeyDown',
-    'tabindex',
+    'tabIndex',
   ]);
   const disabledProp = () => local.disabled ?? false;
 
@@ -110,13 +110,13 @@ export function SliderThumb(componentProps: SliderThumb.Props) {
     setActive,
     state,
     step,
-    tabindex: contextTabIndex,
+    tabIndex: contextTabIndex,
     values: sliderValues,
   } = useSliderRootContext();
 
   const disabled = () => disabledProp() || contextDisabled();
 
-  const externalTabIndex = () => local.tabindex ?? contextTabIndex();
+  const externalTabIndex = () => local.tabIndex ?? contextTabIndex();
 
   const direction = useDirection();
   const { setTouched, setFocused, validationMode } = useFieldRootContext();
@@ -424,6 +424,10 @@ export namespace SliderThumb {
      * @default false
      */
     disabled?: boolean;
+    /**
+     * The tab order of the thumb.
+     */
+    tabIndex?: number;
     /**
      * Accepts a function which returns a string value that provides a user-friendly name for the input associated with the thumb
      * @param {number} index The index of the input

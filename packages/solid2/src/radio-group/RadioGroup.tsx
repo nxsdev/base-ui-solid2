@@ -33,7 +33,7 @@ const MODIFIER_KEYS = [SHIFT];
 export function RadioGroup(componentProps: RadioGroup.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, [
     'disabled',
-    'readonly',
+    'readOnly',
     'required',
     'onValueChange',
     'value',
@@ -141,7 +141,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         id: id(),
         name: name(),
         disabled: disabled(),
-        readonly: local.readonly,
+        readonly: local.readOnly,
         required: local.required,
         'aria-hidden': 'true',
         tabindex: -1,
@@ -167,8 +167,8 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
     get required() {
       return local.required ?? false;
     },
-    get readonly() {
-      return local.readonly ?? false;
+    get readOnly() {
+      return local.readOnly ?? false;
     },
   });
 
@@ -185,7 +185,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
           return disabled() ? 'true' : undefined;
         },
         get 'aria-readonly'() {
-          return local.readonly ? 'true' : undefined;
+          return local.readOnly ? 'true' : undefined;
         },
         get 'aria-labelledby'() {
           return labelId();
@@ -208,7 +208,7 @@ export function RadioGroup(componentProps: RadioGroup.Props) {
         disabled,
         name,
         onValueChange: (...args) => local.onValueChange?.(...args),
-        readonly: () => local.readonly,
+        readOnly: () => local.readOnly,
         required: () => local.required,
         registerControlRef,
         setCheckedValue,
@@ -232,7 +232,7 @@ export namespace RadioGroup {
     /**
      * Whether the user should be unable to select a different radio button in the group.
      */
-    readonly: boolean | undefined;
+    readOnly: boolean | undefined;
   }
 
   export interface Props extends Omit<BaseUIComponentProps<'div', State>, 'value'> {
@@ -245,7 +245,7 @@ export namespace RadioGroup {
      * Whether the user should be unable to select a different radio button in the group.
      * @default false
      */
-    readonly?: boolean;
+    readOnly?: boolean;
     /**
      * Whether the user must choose a value before submitting a form.
      * @default false

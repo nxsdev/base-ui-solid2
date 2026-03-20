@@ -43,7 +43,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
     'name',
     'onCheckedChange',
     'parent',
-    'readonly',
+    'readOnly',
     'render',
     'required',
     'value',
@@ -54,7 +54,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   const disabledProp = () => Boolean(local.disabled);
   const indeterminate = () => Boolean(local.indeterminate);
   const parent = () => Boolean(local.parent);
-  const readonly = () => Boolean(local.readonly);
+  const readOnly = () => Boolean(local.readOnly);
   const required = () => Boolean(local.required);
   const nativeButton = () => local.nativeButton ?? true;
 
@@ -194,7 +194,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
   };
 
   const onClick = (event: Event) => {
-    if (event.defaultPrevented || readonly()) {
+    if (event.defaultPrevented || readOnly()) {
       return;
     }
 
@@ -313,8 +313,8 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
     get checked() {
       return computedChecked();
     },
-    get readonly() {
-      return readonly();
+    get readOnly() {
+      return readOnly();
     },
     get required() {
       return required();
@@ -347,7 +347,7 @@ export function CheckboxRoot(componentProps: CheckboxRoot.Props) {
           return groupProps().local.indeterminate ? 'mixed' : checked() ? 'true' : 'false';
         },
         get 'aria-readonly'() {
-          return readonly() ? 'true' : undefined;
+          return readOnly() ? 'true' : undefined;
         },
         get 'aria-required'() {
           return required() ? 'true' : undefined;
@@ -393,7 +393,7 @@ export namespace CheckboxRoot {
     /**
      * Whether the user should be unable to tick or untick the checkbox.
      */
-    readonly: boolean;
+    readOnly: boolean;
     /**
      * Whether the user must tick the checkbox before submitting a form.
      */
@@ -430,7 +430,7 @@ export namespace CheckboxRoot {
      * Whether the user should be unable to tick or untick the checkbox.
      * @default false
      */
-    readonly?: boolean;
+    readOnly?: boolean;
     /**
      * Whether the user must tick the checkbox before submitting a form.
      * @default false

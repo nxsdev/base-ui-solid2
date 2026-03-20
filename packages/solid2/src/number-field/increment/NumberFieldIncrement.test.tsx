@@ -232,9 +232,9 @@ describe('<NumberField.Increment />', () => {
     });
   });
 
-  it('should not increment when readonly', async () => {
+  it('should not increment when readOnly', async () => {
     render(() => (
-      <NumberField.Root readonly>
+      <NumberField.Root readOnly>
         <NumberField.Increment />
         <NumberField.Input />
       </NumberField.Root>

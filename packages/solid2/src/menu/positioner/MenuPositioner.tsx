@@ -169,9 +169,9 @@ export function MenuPositioner(componentProps: MenuPositioner.Props) {
 
   onSettled(() => {
     menuEvents.on('openchange', onMenuOpenChange);
-    onCleanup(() => {
+    return () => {
       menuEvents.off('openchange', onMenuOpenChange);
-    });
+    };
   });
 
   createTrackedEffect(() => {

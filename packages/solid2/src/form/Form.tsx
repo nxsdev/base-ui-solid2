@@ -16,6 +16,7 @@ const EMPTY = {};
 export function Form(componentProps: Form.Props) {
   const [, local, elementProps] = splitComponentProps(componentProps, [
     'errors',
+    'noValidate',
     'onClearErrors',
     'onSubmit',
   ]);
@@ -67,7 +68,7 @@ export function Form(componentProps: Form.Props) {
     state: EMPTY,
     props: [
       {
-        novalidate: true,
+        novalidate: local.noValidate ?? true,
         onSubmit(event) {
           // Async validation isn't supported to stop the submit event.
           Object.values(formRef.fields).forEach((field) => field.validate());
@@ -96,6 +97,11 @@ export namespace Form {
      * and the values correspond to the error(s) related to that field.
      */
     errors?: ReturnType<FormContext['errors']>;
+    /**
+     * Whether native form validation should be disabled.
+     * @default true
+     */
+    noValidate?: boolean;
     /**
      * Event handler called when the `errors` object is cleared.
      */

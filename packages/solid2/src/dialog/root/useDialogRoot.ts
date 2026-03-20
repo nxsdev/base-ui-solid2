@@ -146,11 +146,11 @@ export function useDialogRoot(params: useDialogRoot.Parameters): useDialogRoot.R
       params.onNestedDialogClose();
     }
 
-    onCleanup(() => {
+    return () => {
       if (params.onNestedDialogClose && open()) {
         params.onNestedDialogClose();
       }
-    });
+    };
   });
 
   const handleNestedDialogOpen = (ownChildrenCount: number) => {
